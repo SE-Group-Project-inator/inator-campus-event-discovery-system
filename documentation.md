@@ -4,8 +4,8 @@
 - [Team Information](#team-information)
 
 - [Meetings](#meeting-minutes)
-  - [Meeting – Feb 24, 2026](#meeting-1---feb-24-2026)
-  - [Meeting – TBD](#meeting--tbd)
+  - [Meeting 1 – Feb 24, 2026](#meeting-1---feb-24-2026)
+  - [Meeting 2 – TBD](#meeting--tbd)
 
 - [UML Diagrams](#uml-diagrams)
 
@@ -51,8 +51,6 @@ Tuesday, February 24, 2026
 - Areeba Fatima
 - Umer Khalid 
 
----
-
 #### Prepared Questions & Decisions
 
 **Issue #1**
@@ -64,9 +62,21 @@ Tuesday, February 24, 2026
   
 ---
 
-### Meeting – TBD
-_Content to be added._
+### Meeting 2 – Feb 26, 2026
 
+#### Meeting Minutes 
+tbd
+
+#### Date
+Thursday, February 26, 2026
+
+#### Attendance
+- tbd
+
+#### Prepared Questions & Decisions
+
+**Issue #1**
+- tbd 
 ---
 
 ## Product Backlog
