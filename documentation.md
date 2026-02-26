@@ -3,9 +3,9 @@
 ## Table of Contents
 - [Team Information](#team-information)
 
-- [Meetings](#meeting-minutes)
-  - [Meeting 1 – Feb 24, 2026](#meeting-1---feb-24-2026)
-  - [Meeting 2 – TBD](#meeting--tbd)
+- [Meetings](#meetings)
+  - [Meeting 1 – Feb 24, 2026](#meeting-1--feb-24-2026)
+  - [Meeting 2 – Feb 26, 2026](#meeting-2--feb-26-2026)
 
 - [UML Diagrams](#uml-diagrams)
 
