@@ -4,8 +4,10 @@
 - [Team Information](#team-information)
 
 - [Meetings](#meetings)
-  - [Meeting 1 – Feb 24, 2026](#meeting-1--feb-24-2026)
-  - [Meeting 2 – Feb 26, 2026](#meeting-2--feb-26-2026)
+  - [Meeting 1 – Feb 21, 2026](#meeting-1--feb-21-2026)
+  - [Meeting 2 – Feb 24, 2026](#meeting-2--feb-24-2026)
+  - [Meeting 3 – Feb 28, 2026](#meeting-3--feb-28-2026)
+  - [Meeting 4 – Feb 29, 2026](#meeting-4--feb-29-2026) 
 
 - [UML Diagrams](#uml-diagrams)
 
@@ -36,7 +38,30 @@
 # Meetings
 
 
-### Meeting 1 – Feb 24, 2026
+### Meeting 1 – Feb 21, 2026
+
+#### Meeting Minutes 
+10 minutes
+
+#### Date
+Saturday, February 21, 2026
+
+#### Attendance
+- Abeer Zahid Bhatti
+- Salsabeel Fatima 
+- Maryam Ayub  
+- Areeba Fatima
+- Umer Khalid 
+
+#### Prepared Questions & Decisions
+
+**Issue #1**
+- Made project repository -> Yes
+- Setup repository markdown / documentation file
+
+--- 
+
+### Meeting 2 – Feb 24, 2026
 
 #### Meeting Minutes 
 23 minutes
@@ -62,21 +87,46 @@ Tuesday, February 24, 2026
   
 ---
 
-### Meeting 2 – Feb 26, 2026
+### Meeting 3 – Feb 28, 2026
 
 #### Meeting Minutes 
-tbd
+30 minutes
 
 #### Date
-Thursday, February 26, 2026
+Saturday, February 28, 2026
 
 #### Attendance
-- tbd
+- Abeer Zahid Bhatti
+- Salsabeel Fatima 
+- Maryam Ayub  
+- Areeba Fatima
+- Umer Khalid 
 
 #### Prepared Questions & Decisions
 
 **Issue #1**
-- tbd 
+- Collected all user stories → Yes
+- Agreed to standardize user story structure → Yes
+- Decision: Fix and finalize user story formatting before next meeting
+  
+---
+
+### Meeting 4 – Feb 29, 2026
+
+#### Meeting Minutes 
+
+
+#### Date
+
+
+#### Attendance
+
+
+#### Prepared Questions & Decisions
+
+**Issue #1**
+
+
 ---
 
 ## Product Backlog
