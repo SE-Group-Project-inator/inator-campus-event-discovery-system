@@ -7,7 +7,8 @@
   - [Meeting 1 – Feb 21, 2026](#meeting-1--feb-21-2026)
   - [Meeting 2 – Feb 24, 2026](#meeting-2--feb-24-2026)
   - [Meeting 3 – Feb 28, 2026](#meeting-3--feb-28-2026)
-  - [Meeting 4 – Feb 29, 2026](#meeting-4--feb-29-2026) 
+  - [Meeting 4 – Feb 29, 2026](#meeting-4--feb-29-2026)
+  - [Meeting 5 – March 3, 2026](#meeting-5--march-3-2026)
 
 - [UML Diagrams](#uml-diagrams)
 
@@ -47,6 +48,7 @@
 Saturday, February 21, 2026
 
 #### Attendance
+- Basit TA
 - Abeer Zahid Bhatti
 - Salsabeel Fatima 
 - Maryam Ayub  
@@ -107,6 +109,7 @@ Saturday, February 28, 2026
 **Issue #1**
 - Collected all user stories → Yes
 - Agreed to standardize user story structure → Yes
+- Make kanban board -> Yes
 - Decision: Fix and finalize user story formatting before next meeting
   
 ---
@@ -114,18 +117,44 @@ Saturday, February 28, 2026
 ### Meeting 4 – Feb 29, 2026
 
 #### Meeting Minutes 
-
+5 minutes
 
 #### Date
-
+Sunday, February 29, 2026
 
 #### Attendance
-
+- Basit TA
+- Abeer Zahid Bhatti
+- Salsabeel Fatima 
+- Maryam Ayub  
+- Areeba Fatima
+- Umer Khalid 
 
 #### Prepared Questions & Decisions
 
 **Issue #1**
+- rename documentation file to readme.md -> Yes
 
+---
+
+### Meeting 5 – March 3, 2026
+
+#### Meeting Minutes 
+ minutes
+
+#### Date
+Tuesday, March 3, 2026
+
+#### Attendance
+- Abeer Zahid Bhatti
+- Salsabeel Fatima 
+- Maryam Ayub  
+- Areeba Fatima
+- Umer Khalid 
+
+#### Prepared Questions & Decisions
+
+**Issue #1**
 
 ---
 
