@@ -156,7 +156,7 @@ Wednesday, March 4, 2026
 #### Prepared Questions & Decisions
 
 **Issue #1**
-- Select,  and fix the format of User stories -> Yes
+- Select, remove and fix User stories -> Yes
 - Dividing User Story UI mockups -> Yes
 - Decision: catering to people outside LUMS -> No
 - Decision: Each member will make Figma UI mockups for each user story allocated to them and join them in the next meeting
