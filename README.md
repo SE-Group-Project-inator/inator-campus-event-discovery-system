@@ -8,7 +8,8 @@
   - [Meeting 2 – Feb 24, 2026](#meeting-2--feb-24-2026)
   - [Meeting 3 – Feb 28, 2026](#meeting-3--feb-28-2026)
   - [Meeting 4 – Feb 29, 2026](#meeting-4--feb-29-2026)
-  - [Meeting 5 – March 3, 2026](#meeting-5--march-3-2026)
+  - [Meeting 5 – March 4, 2026](#meeting-5--march-4-2026)
+  - [Meeting 6 – March 6, 2026](#meeting-6--march-6-2026)
 
 - [UML Diagrams](#uml-diagrams)
 
@@ -137,13 +138,13 @@ Sunday, February 29, 2026
 
 ---
 
-### Meeting 5 – March 3, 2026
+### Meeting 5 – March 4, 2026
 
 #### Meeting Minutes 
- minutes
+1 hour 7 minutes
 
 #### Date
-Tuesday, March 3, 2026
+Wednesday, March 4, 2026
 
 #### Attendance
 - Abeer Zahid Bhatti
@@ -151,6 +152,26 @@ Tuesday, March 3, 2026
 - Maryam Ayub  
 - Areeba Fatima
 - Umer Khalid 
+
+#### Prepared Questions & Decisions
+
+**Issue #1**
+- Select,  and fix the format of User stories -> Yes
+- Dividing User Story UI mockups -> Yes
+- Decision: catering to people outside LUMS -> No
+- Decision: Each member will make Figma UI mockups for each user story allocated to them and join them in the next meeting
+
+---
+
+### Meeting 6 – March 6, 2026
+
+#### Meeting Minutes 
+minutes
+
+#### Date
+Friday, March 6, 2026
+
+#### Attendance
 
 #### Prepared Questions & Decisions
 
