@@ -9,7 +9,8 @@
   - [Meeting 3 – Feb 28, 2026](#meeting-3--feb-28-2026)
   - [Meeting 4 – Feb 29, 2026](#meeting-4--feb-29-2026)
   - [Meeting 5 – March 4, 2026](#meeting-5--march-4-2026)
-  - [Meeting 6 – March 6, 2026](#meeting-6--march-6-2026)
+  - [Meeting 6 – March 8, 2026](#meeting-6--march-8-2026)
+  - [Meeting 7 – TBD](#meeting-6--tbd)
 
 - [UML Diagrams](#uml-diagrams)
 
@@ -163,13 +164,34 @@ Wednesday, March 4, 2026
 
 ---
 
-### Meeting 6 – March 6, 2026
+### Meeting 6 – March 8, 2026
 
 #### Meeting Minutes 
 minutes
 
 #### Date
-Friday, March 6, 2026
+Sunday, March 8, 2026
+
+#### Attendance
+- Abeer Zahid Bhatti
+- Salsabeel Fatima 
+- Maryam Ayub  
+- Areeba Fatima
+- Umer Khalid 
+
+#### Prepared Questions & Decisions
+
+**Issue #1**
+
+---
+
+### Meeting 7 – TBD
+
+#### Meeting Minutes 
+minutes
+
+#### Date
+Monday, March 9, 2026
 
 #### Attendance
 
