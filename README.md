@@ -182,6 +182,13 @@ Sunday, March 8, 2026
 #### Prepared Questions & Decisions
 
 **Issue #1**
+- Completing the first draft for the UI mockup
+- fixed and finalized the UI mockup screens
+- complete the story board
+- complete the CRC cards
+- complete the document
+
+- removing the QR code 
 
 ---
 
