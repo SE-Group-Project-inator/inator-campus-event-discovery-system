@@ -10,7 +10,7 @@
   - [Meeting 4 – Feb 29, 2026](#meeting-4--feb-29-2026)
   - [Meeting 5 – March 4, 2026](#meeting-5--march-4-2026)
   - [Meeting 6 – March 8, 2026](#meeting-6--march-8-2026)
-  - [Meeting 7 – TBD](#meeting-6--tbd)
+  - [Meeting 7 – TBD](#meeting-7--tbd)
 
 - [Project - Phase 2](#project--phase-2)
   
