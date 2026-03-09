@@ -182,13 +182,11 @@ Sunday, March 8, 2026
 #### Prepared Questions & Decisions
 
 **Issue #1**
-- Completing the first draft for the UI mockup
-- fixed and finalized the UI mockup screens
-- complete the story board
-- complete the CRC cards
-- complete the document
-
-- removing the QR code 
+- Completed the first draft for the UI mockup -> Yes
+- Fixed and finalized the UI mockup screens -> Yes
+- Desicion: complete the story board
+- Decision: complete the CRC cards
+- Decision: complete the document
 
 ---
 
@@ -208,29 +206,4 @@ Monday, March 9, 2026
 
 ---
 
-## Product Backlog
-
-### Product Backlog – Project Part 1
-| ID | User Story | Priority | Status |
-|----|------------|----------|--------|
-
-### Product Backlog – Project Part 2
-| ID | User Story | Priority | Status |
-|----|------------|----------|--------|
-
-### Product Backlog – Project Part 3
-| ID | User Story | Priority | Status |
-|----|------------|----------|--------|
-
----
-
-## Wireframes
-
-### Wireframes – Project Part 1
-_Add screenshots or links to wireframe images._
-
-### Wireframes – Project Part 2
-_Add screenshots or links to wireframe images._
-
-### Wireframes – Project Part 3
-_Add screenshots or links to wireframe images._
+## Project - Phase 2
