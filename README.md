@@ -12,18 +12,8 @@
   - [Meeting 6 – March 8, 2026](#meeting-6--march-8-2026)
   - [Meeting 7 – TBD](#meeting-6--tbd)
 
-- [UML Diagrams](#uml-diagrams)
-
-- [Product Backlog](#product-backlog)
-  - [Product Backlog – Project Part 1](#product-backlog--project-part-1)
-  - [Product Backlog – Project Part 2](#product-backlog--project-part-2)
-  - [Product Backlog – Project Part 3](#product-backlog--project-part-3)
-
-- [Wireframes](#wireframes)
-  - [Wireframes – Project Part 1](#wireframes--project-part-1)
-  - [Wireframes – Project Part 2](#wireframes--project-part-2)
-  - [Wireframes – Project Part 3](#wireframes--project-part-3)
-
+- [Project - Phase 2](#project--phase-2)
+  
 ---
 
 ## Team Information
