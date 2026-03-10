@@ -249,3 +249,44 @@ We surveyed 16 LUMS students (6–7 March 2026) to validate our assumptions.
 | 75% want personalised recommendations        | Confirmed US-22 as high priority             |
 | 81% find seat availability indicators useful | Confirmed US-09                              |
 | Open responses requested "who's attending"   | Led to adding US-25                          |
+
+### Final Backlog Summary
+
+34 user stories across 3 roles 
+
+| #     | Title | Role | SP | Risk | Release |
+|-------|---|---|---|---|---|
+| US-01 | SSO University Login | Student | 8 | High | Halfway |
+| US-02 | Create & Publish Event | Event Mgr | 8 | High | Halfway |
+| US-03 | Set Event Capacity | Event Mgr | 2 | Low | Halfway |
+| US-04 | Auto-Close Registrations | Event Mgr | 3 | Low | Halfway |
+| US-05 | Admin Event Request Review | Admin | 3 | Low | Halfway |
+| US-06 | Admin Identity Verification | Admin | 5 | Med | Halfway |
+| US-07 | Homepage Trending & Upcoming | Student | 5 | Low | Halfway |
+| US-08 | Event Search & Filter | Student | 8 | Med | Halfway |
+| US-09 | Real-Time Seat Availability | Student | 5 | Med | Halfway |
+| US-10 | Trending Events Ranking | Student | 5 | Med | Halfway |
+| US-11 | Event RSVP | Student | 3 | Low | Halfway |
+| US-12 | RSVP Cancellation | Student | 2 | Low | Halfway |
+| US-13 | Pre-Event Reminders | Student | 3 | Low | Halfway |
+| US-14 | Event Change Notification | Student | 5 | Med | Halfway |
+| US-15 | Society Follow & Alerts | Student | 5 | Med | Final |
+| US-16 | QR Code Digital Check-In | Student | 5 | Med | Final |
+| US-17 | Update Event Details | Event Mgr | 3 | Low | Halfway |
+| US-18 | Event Manager Analytics | Event Mgr | 8 | Med | Final |
+| US-19 | Venue Double-Booking Alert | Event Mgr | 8 | High | Final |
+| US-20 | Student Attendance History | Student | 3 | Low | Halfway |
+| US-21 | Export Event to Calendar | Student | 3 | Low | Halfway |
+| US-22 | Personalised Recommendations | Student | 8 | High | Final |
+| US-23 | Venue Suggestion | Event Mgr | 8 | High | Final |
+| US-24 | Post-Event Recap | Student | 5 | Med | Final |
+| US-25 | Who's Going / Attendee Preview | Student | 3 | Low | Final |
+| US-26 | Waitlist for Full Events | Student | 5 | Med | Final |
+| US-27 | Event Manager Attendee List | Event Mgr | 3 | Low | Final |
+| US-28 | Campus AI Assistant | Student | 8 | High | Final |
+| US-29 | Privacy Consent Toggles | Student | 3 | Low | Halfway |
+| US-30 | Overlapping Event Warning | Student | 5 | Low | Halfway |
+| US-31 | Event Deletion & Notification | Event Mgr | 3 | Low | Halfway |
+| US-32 | Seat Assignment Confirmation | Event Mgr | 3 | Low | Halfway |
+| US-33 | Student Profile | Student | 2 | Low | Halfway |
+| US-34 | Edit Event Manager Profile | Event Mgr | 2 | Low | Halfway |
