@@ -250,6 +250,8 @@ We surveyed 16 LUMS students (6–7 March 2026) to validate our assumptions.
 | 81% find seat availability indicators useful | Confirmed US-09                              |
 | Open responses requested "who's attending"   | Led to adding US-25                          |
 
+--- 
+
 ### Final Backlog Summary
 
 34 user stories across 3 roles 
