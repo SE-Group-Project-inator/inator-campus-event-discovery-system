@@ -196,7 +196,7 @@ Monday, March 9, 2026
 
 ---
 
-## Project Part 2 - Preparation
+# Project Part 2 - Preparation
 
 ### Figma Link
 https://www.figma.com/design/fPqTrcr24WudWrgv79GcIx/Screens---Storyboards?node-id=0-1&p=f&t=Nw8bHWLi1iI1X4xs-0
@@ -211,4 +211,41 @@ https://www.figma.com/design/fPqTrcr24WudWrgv79GcIx/Screens---Storyboards?node-i
 
 <img width="692" height="708" alt="image" src="https://github.com/user-attachments/assets/f2ec861e-110a-4726-ab88-0acf6f0a7d69" />
 
-### 
+### Requirements Elicitation
+
+Our team identified and validated user stories through two methods: structured group 
+brainstorming sessions and a student survey conducted across LUMS.
+
+**User Roles Identified:**
+- **Student** — browses, RSVPs to, and attends events
+- **Event Manager** — creates and manages events on behalf of societies
+- **Admin** — approves event requests and verifies user identities
+
+**Story Point Scale (Fibonacci-based):**
+
+| Points | Complexity                            |
+|--------|---------------------------------------|
+| 2      | Small — simple, well-understood task  |
+| 3      | Easy — straightforward implementation |
+| 5      | Medium — moderate complexity          |
+| 8      | Large — multiple components or risks  |
+
+**Release Milestones:**
+- **Halfway Checkpoint** — core infrastructure, event discovery, RSVP, notifications
+- **Final Checkpoint** — QR check-in, analytics, recommendations, bonus features
+
+---
+
+### Student Survey
+
+We surveyed 16 LUMS students (6–7 March 2026) to validate our assumptions.
+
+**Key Findings:**
+
+| Finding                                      | Impact on Backlog                            |
+|----------------------------------------------|----------------------------------------------|
+| 100% missed events due to late notification  | Prioritised US-13, US-14 to Halfway          |
+| 94% frustrated by Outlook email overload     | Core justification for building the platform |
+| 75% want personalised recommendations        | Confirmed US-22 as high priority             |
+| 81% find seat availability indicators useful | Confirmed US-09                              |
+| Open responses requested "who's attending"   | Led to adding US-25                          |
