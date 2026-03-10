@@ -7,12 +7,12 @@
   - [Meeting 1 – Feb 21, 2026](#meeting-1--feb-21-2026)
   - [Meeting 2 – Feb 24, 2026](#meeting-2--feb-24-2026)
   - [Meeting 3 – Feb 28, 2026](#meeting-3--feb-28-2026)
-  - [Meeting 4 – Feb 29, 2026](#meeting-4--feb-29-2026)
+  - [Meeting 4 – March 1, 2026](#meeting-4--march-1-2026)
   - [Meeting 5 – March 4, 2026](#meeting-5--march-4-2026)
   - [Meeting 6 – March 8, 2026](#meeting-6--march-8-2026)
   - [Meeting 7 – TBD](#meeting-7--tbd)
 
-- [Project Part 2 - Preparation](#project-part-2--preparation)
+- [Project Part 2 - Preparation](#project-part-2---preparation)
   
 ---
 
@@ -106,13 +106,13 @@ Saturday, February 28, 2026
   
 ---
 
-### Meeting 4 – Feb 29, 2026
+### Meeting 4 – March 1, 2026
 
 #### Meeting Minutes 
 5 minutes
 
 #### Date
-Sunday, February 29, 2026
+Sunday, March 1, 2026
 
 #### Attendance
 - Basit TA
@@ -157,7 +157,7 @@ Wednesday, March 4, 2026
 ### Meeting 6 – March 8, 2026
 
 #### Meeting Minutes 
-minutes
+1 hour 30 minutes
 
 #### Date
 Sunday, March 8, 2026
