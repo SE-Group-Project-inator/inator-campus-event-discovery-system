@@ -10,7 +10,7 @@
   - [Meeting 4 – March 1, 2026](#meeting-4--march-1-2026)
   - [Meeting 5 – March 4, 2026](#meeting-5--march-4-2026)
   - [Meeting 6 – March 8, 2026](#meeting-6--march-8-2026)
-  - [Meeting 7 – TBD](#meeting-7--tbd)
+  - [Meeting 7 – March 10, 2026](#meeting-7--march-10-2026)
 
 - [Project Part 2 - Preparation](#project-part-2---preparation)
   
@@ -49,7 +49,6 @@ Saturday, February 21, 2026
 
 #### Prepared Questions & Decisions
 
-**Issue #1**
 - Made project repository -> Yes
 - Setup repository markdown / documentation file
 
@@ -72,7 +71,6 @@ Tuesday, February 24, 2026
 
 #### Prepared Questions & Decisions
 
-**Issue #1**
 - Conduct 5 user interviews per team member → Yes  
 - Record interviews (audio/video) → Yes, with participant consent  
 - Create and distribute survey form → Yes  
@@ -98,7 +96,6 @@ Saturday, February 28, 2026
 
 #### Prepared Questions & Decisions
 
-**Issue #1**
 - Collected all user stories → Yes
 - Agreed to standardize user story structure → Yes
 - Make kanban board -> Yes
@@ -124,7 +121,6 @@ Sunday, March 1, 2026
 
 #### Prepared Questions & Decisions
 
-**Issue #1**
 - rename documentation file to readme.md -> Yes
 
 ---
@@ -146,7 +142,6 @@ Wednesday, March 4, 2026
 
 #### Prepared Questions & Decisions
 
-**Issue #1**
 - Select, remove and fix User stories -> Yes
 - Divide the User Story UI mockups -> Yes
 - Decision: catering to people outside LUMS -> No
@@ -171,7 +166,6 @@ Sunday, March 8, 2026
 
 #### Prepared Questions & Decisions
 
-**Issue #1**
 - Completed the first draft for the UI mockup -> Yes
 - Fixed and finalized the UI mockup screens -> Yes
 - Desicion: complete the story board
@@ -180,20 +174,25 @@ Sunday, March 8, 2026
 
 ---
 
-### Meeting 7 – TBD
+### Meeting 7 – March 10, 2026
 
 #### Meeting Minutes 
-minutes
+15 minutes
 
 #### Date
-Monday, March 9, 2026
+Tuesday, March 10, 2026
 
 #### Attendance
-
+- Abeer Zahid Bhatti
+- Salsabeel Fatima 
+- Maryam Ayub  
+- Areeba Fatima
+- Umer Khalid
+  
 #### Prepared Questions & Decisions
 
-**Issue #1**
-
+- Checked and okayed all the components to be submitted -> Yes
+  
 ---
 
 # Project Part 2 - Preparation
