@@ -11,6 +11,7 @@
   - [Meeting 5 – March 4, 2026](#meeting-5--march-4-2026)
   - [Meeting 6 – March 8, 2026](#meeting-6--march-8-2026)
   - [Meeting 7 – March 10, 2026](#meeting-7--march-10-2026)
+  - [Meeting 8 – March 18, 2026](#meeting-8--march-18-2026)
 
 - [Project Part 2 - Preparation](#project-part-2---preparation)
   
@@ -192,6 +193,27 @@ Tuesday, March 10, 2026
 #### Prepared Questions & Decisions
 
 - Checked and okayed all the components to be submitted -> Yes
+  
+---
+
+### Meeting 8 – March 18, 2026
+
+#### Meeting Minutes 
+40 minutes
+
+#### Date
+Wednesday, March 19, 2026
+
+#### Attendance
+- Abeer Zahid Bhatti
+- Salsabeel Fatima  
+- Areeba Fatima
+  
+#### Prepared Questions & Decisions
+
+- Discussed all deliverables in phase 3
+- Decision: Divide the classes / User stories among the members
+- Question: Where will the database come from?
   
 ---
 
