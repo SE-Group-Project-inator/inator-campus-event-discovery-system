@@ -216,7 +216,31 @@ Wednesday, March 19, 2026
 - Question: Where will the database come from?
   
 ---
+### Meeting 09 – March 20, 2026
 
+#### Meeting Minutes  
+20 minutes
+
+#### Date  
+Friday, March 20, 2026
+
+#### Attendance  
+- Abeer Zahid Bhatti  
+- Maryam Ayub  
+- Areeba Fatima  
+- Umer Khalid  
+- Teaching Assistant (TA)
+
+#### Description  
+- The Teaching Assistant (TA) went over Phase 02 of the project  
+- Provided an overview of key components  
+- Reviewed CRC cards, prototype, and user stories  
+- Gave feedback to ensure alignment with project requirements  
+
+#### Prepared Questions & Decisions  
+- Checked and reviewed all Phase 02 components → Yes  
+- TA feedback incorporated for improvements → In progress
+-----
 # Project Part 2 - Preparation
 
 ### Figma Link
