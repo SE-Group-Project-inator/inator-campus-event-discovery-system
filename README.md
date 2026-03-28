@@ -13,6 +13,7 @@
   - [Meeting 7 – March 10, 2026](#meeting-7--march-10-2026)
   - [Meeting 8 – March 18, 2026](#meeting-8--march-18-2026)
   - [Meeting 9 – March 20, 2026](#meeting-9--march-20-2026)
+  - [Meeting 10 – March 25, 2026](#meeting-10--march-25-2026)
 
 - [Project Part 2 - Preparation](#project-part-2---preparation)
   
@@ -50,7 +51,6 @@ Saturday, February 21, 2026
 - Umer Khalid 
 
 #### Prepared Questions & Decisions
-
 - Made project repository -> Yes
 - Setup repository markdown / documentation file
 
@@ -72,7 +72,6 @@ Tuesday, February 24, 2026
 - Umer Khalid 
 
 #### Prepared Questions & Decisions
-
 - Conduct 5 user interviews per team member → Yes  
 - Record interviews (audio/video) → Yes, with participant consent  
 - Create and distribute survey form → Yes  
@@ -97,7 +96,6 @@ Saturday, February 28, 2026
 - Umer Khalid 
 
 #### Prepared Questions & Decisions
-
 - Collected all user stories → Yes
 - Agreed to standardize user story structure → Yes
 - Make kanban board -> Yes
@@ -122,7 +120,6 @@ Sunday, March 1, 2026
 - Umer Khalid 
 
 #### Prepared Questions & Decisions
-
 - rename documentation file to readme.md -> Yes
 
 ---
@@ -143,7 +140,6 @@ Wednesday, March 4, 2026
 - Umer Khalid 
 
 #### Prepared Questions & Decisions
-
 - Select, remove and fix User stories -> Yes
 - Divide the User Story UI mockups -> Yes
 - Decision: catering to people outside LUMS -> No
@@ -167,7 +163,6 @@ Sunday, March 8, 2026
 - Umer Khalid 
 
 #### Prepared Questions & Decisions
-
 - Completed the first draft for the UI mockup -> Yes
 - Fixed and finalized the UI mockup screens -> Yes
 - Desicion: complete the story board
@@ -192,7 +187,6 @@ Tuesday, March 10, 2026
 - Umer Khalid
   
 #### Prepared Questions & Decisions
-
 - Checked and okayed all the components to be submitted -> Yes
   
 ---
@@ -211,7 +205,6 @@ Wednesday, March 19, 2026
 - Areeba Fatima
   
 #### Prepared Questions & Decisions
-
 - Discussed all deliverables in phase 3
 - Decision: Divide the classes / User stories among the members
 - Question: Where will the database come from?
@@ -241,7 +234,33 @@ Friday, March 20, 2026
 #### Prepared Questions & Decisions  
 - Checked and reviewed all Phase 02 components → Yes  
 - TA feedback incorporated for improvements → In progress
------
+  
+---
+
+### Meeting 10 – March 25, 2026
+
+#### Meeting Minutes  
+50 minutes
+
+#### Date  
+Wednesday, March 25, 2026
+
+#### Attendance  
+- Abeer Zahid Bhatti  
+- Maryam Ayub  
+- Areeba Fatima  
+- Umer Khalid 
+
+#### Description  
+- We revised how to split the work
+- A database on firebase was made for the data of the project
+
+#### Prepared Questions & Decisions  
+- Decision: divide work based on class instead of user stories -> Yes
+- Decision: find database online for project -> Yes
+
+---
+
 # Project Part 2 - Preparation
 
 ### Figma Link
