@@ -12,6 +12,7 @@
   - [Meeting 6 – March 8, 2026](#meeting-6--march-8-2026)
   - [Meeting 7 – March 10, 2026](#meeting-7--march-10-2026)
   - [Meeting 8 – March 18, 2026](#meeting-8--march-18-2026)
+  - [Meeting 9 – March 20, 2026](#meeting-9--march-20-2026)
 
 - [Project Part 2 - Preparation](#project-part-2---preparation)
   
@@ -41,7 +42,7 @@
 Saturday, February 21, 2026
 
 #### Attendance
-- Basit TA
+- Basit Teaching Assistant (TA)
 - Abeer Zahid Bhatti
 - Salsabeel Fatima 
 - Maryam Ayub  
@@ -113,7 +114,7 @@ Saturday, February 28, 2026
 Sunday, March 1, 2026
 
 #### Attendance
-- Basit TA
+- Basit Teaching Assistant (TA)
 - Abeer Zahid Bhatti
 - Salsabeel Fatima 
 - Maryam Ayub  
@@ -216,7 +217,7 @@ Wednesday, March 19, 2026
 - Question: Where will the database come from?
   
 ---
-### Meeting 09 – March 20, 2026
+### Meeting 9 – March 20, 2026
 
 #### Meeting Minutes  
 20 minutes
@@ -229,7 +230,7 @@ Friday, March 20, 2026
 - Maryam Ayub  
 - Areeba Fatima  
 - Umer Khalid  
-- Teaching Assistant (TA)
+- Basit Teaching Assistant (TA)
 
 #### Description  
 - The Teaching Assistant (TA) went over Phase 02 of the project  
