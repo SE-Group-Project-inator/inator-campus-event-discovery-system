@@ -66,8 +66,13 @@ public class AdminDashboardActivity extends AppCompatActivity {
         });
 
         // See all
+        // See all → Events List
         findViewById(R.id.tvSeeAll).setOnClickListener(v ->
-                Toast.makeText(this, "Coming soon!", Toast.LENGTH_SHORT).show());
+                startActivity(new Intent(this, EventsListActivity.class)));
+
+// Events nav button
+        findViewById(R.id.navEvents).setOnClickListener(v ->
+                startActivity(new Intent(this, EventsListActivity.class)));
     }
     private void setupFilters() {
         com.google.android.material.chip.Chip chipAll = findViewById(R.id.chipAll);
