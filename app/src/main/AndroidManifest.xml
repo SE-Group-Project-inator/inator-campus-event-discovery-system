@@ -15,13 +15,22 @@
 
         <!-- First screen when app opens -->
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.RoleSelectActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <!-- Keep MainActivity so teammates don't lose their work -->
+        <activity android:name=".MainActivity"/>
+
+        <!-- Login — needed before we build it so app doesn't crash -->
+        <activity android:name=".activities.LoginActivity"/>
+        <activity android:name=".activities.AdminDashboardActivity"/>
+        <activity android:name=".activities.EventsListActivity"/>
+        <activity android:name=".activities.PrivacySettingsActivity"/>
 
     </application>
 </manifest>

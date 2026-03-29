@@ -2,13 +2,23 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="bg_beige">#F5EFE6</color>
+    <color name="bg_beige">#EDE4D8</color>
     <color name="card_tan">#D4B896</color>
-    <color name="btn_student">#2C5F6E</color>
-    <color name="btn_eventmgr">#6B4F8E</color>
-    <color name="btn_admin">#8B3A2A</color>
     <color name="text_dark">#2C1A0E</color>
     <color name="text_link">#2C5F6E</color>
     <color name="green_accept">#4CAF50</color>
     <color name="red_decline">#E53935</color>
+    <color name="btn_student">#3B6F8F</color>
+    <color name="btn_eventmgr">#5A4BB7</color>
+    <color name="btn_admin">#6A1B0F</color>
+    <color name="bg_student">#F3F7FA</color>
+    <color name="bg_event">#F0EDFB</color>
+    <color name="bg_admin">#F8ECE9</color>
+    <color name="card_event">#C4B8F0</color>
+    <color name="card_student">#E3EDF5</color>
+
+
+
+
+
 </resources>
