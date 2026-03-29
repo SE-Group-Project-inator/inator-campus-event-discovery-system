@@ -28,6 +28,7 @@
 
         <!-- Login — needed before we build it so app doesn't crash -->
         <activity android:name=".activities.LoginActivity"/>
+        <activity android:name=".activities.AdminDashboardActivity"/>
 
     </application>
 </manifest>

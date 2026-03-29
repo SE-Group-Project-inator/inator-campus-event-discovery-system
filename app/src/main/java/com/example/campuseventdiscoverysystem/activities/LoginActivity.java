@@ -54,6 +54,7 @@ public class LoginActivity extends AppCompatActivity {
                 tvSubtitle.setText("Monitor and approve campus events.");
                 tvSignIn.setText("Sign in with your admin account");
                 btnLogin.setBackgroundTintList(getColorStateList(R.color.btn_admin));
+
                 break;
             case "event_manager":
                 topBar.setBackgroundColor(getColor(R.color.btn_eventmgr));
@@ -119,9 +120,68 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    //
+//    private void verifyRoleAndNavigate(String uid, Button btnLogin) {
+//        db.collection("users").document(uid).get()
+//                .addOnSuccessListener(doc -> {
+//                    if (!doc.exists()) {
+//                        Toast.makeText(this,
+//                                "Account not found. Contact admin.",
+//                                Toast.LENGTH_LONG).show();
+//                        mAuth.signOut();
+//                        btnLogin.setEnabled(true);
+//                        btnLogin.setText("Login");
+//                        return;
+//                    }
+//
+//                    String dbRole = doc.getString("role");
+//
+//                    if (dbRole == null || !dbRole.equals(selectedRole)) {
+//                        Toast.makeText(this,
+//                                "Wrong role! You are registered as: " + dbRole,
+//                                Toast.LENGTH_LONG).show();
+//                        mAuth.signOut();
+//                        btnLogin.setEnabled(true);
+//                        btnLogin.setText("Login");
+//                        return;
+//                    }
+//
+//                    // Navigate based on role — teammates will replace these
+//                    // with their own activities as they build them
+//                    // Navigate based on role
+//                    Intent intent;
+//                    switch (dbRole) {
+//                        case "admin":
+//                            intent = new Intent(this, AdminDashboardActivity.class);
+//                            break;
+//                        default:
+//                            // Teammates will replace with their own activities
+//                            Toast.makeText(this,
+//                                    "Welcome! Logged in as " + dbRole,
+//                                    Toast.LENGTH_SHORT).show();
+//                            btnLogin.setEnabled(true);
+//                            btnLogin.setText("Login");
+//                            return;
+//                    }
+//                    startActivity(intent);
+//                    finish();
+//                })
+//                .addOnFailureListener(e -> {
+//                    Toast.makeText(this,
+//                            "Error: " + e.getMessage(),
+//                            Toast.LENGTH_SHORT).show();
+//                    btnLogin.setEnabled(true);
+//                    btnLogin.setText("Login");
+//                });
+//    }
     private void verifyRoleAndNavigate(String uid, Button btnLogin) {
+        android.util.Log.d("LOGIN", "Checking UID: " + uid);
+        android.util.Log.d("LOGIN", "Selected role: " + selectedRole);
+
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(doc -> {
+                    android.util.Log.d("LOGIN", "Doc exists: " + doc.exists());
+
                     if (!doc.exists()) {
                         Toast.makeText(this,
                                 "Account not found. Contact admin.",
@@ -133,6 +193,8 @@ public class LoginActivity extends AppCompatActivity {
                     }
 
                     String dbRole = doc.getString("role");
+                    android.util.Log.d("LOGIN", "DB role: " + dbRole);
+                    android.util.Log.d("LOGIN", "Selected role: " + selectedRole);
 
                     if (dbRole == null || !dbRole.equals(selectedRole)) {
                         Toast.makeText(this,
@@ -144,13 +206,24 @@ public class LoginActivity extends AppCompatActivity {
                         return;
                     }
 
-                    // Navigate based on role — teammates will replace these
-                    // with their own activities as they build them
-                    Toast.makeText(this,
-                            "Welcome! Logged in as " + dbRole,
-                            Toast.LENGTH_SHORT).show();
+                    Intent intent;
+                    switch (dbRole) {
+                        case "admin":
+                            intent = new Intent(this, AdminDashboardActivity.class);
+                            break;
+                        default:
+                            Toast.makeText(this,
+                                    "Welcome! Logged in as " + dbRole,
+                                    Toast.LENGTH_SHORT).show();
+                            btnLogin.setEnabled(true);
+                            btnLogin.setText("Login");
+                            return;
+                    }
+                    startActivity(intent);
+                    finish();
                 })
                 .addOnFailureListener(e -> {
+                    android.util.Log.e("LOGIN", "Error: " + e.getMessage());
                     Toast.makeText(this,
                             "Error: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
