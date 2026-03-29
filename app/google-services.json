@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "152691863787",
+    "project_id": "campus-event-discovery-system",
+    "storage_bucket": "campus-event-discovery-system.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:152691863787:android:cb6ff3105fb4558d260eae",
+        "android_client_info": {
+          "package_name": "com.example.campuseventdiscoverysystem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDF-MjzJ20yczK5WlvHk2RXsEo2hXF7Ls0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
