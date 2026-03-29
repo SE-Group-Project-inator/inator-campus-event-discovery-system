@@ -30,6 +30,7 @@
         <activity android:name=".activities.LoginActivity"/>
         <activity android:name=".activities.AdminDashboardActivity"/>
         <activity android:name=".activities.EventsListActivity"/>
+        <activity android:name=".activities.PrivacySettingsActivity"/>
 
     </application>
 </manifest>
