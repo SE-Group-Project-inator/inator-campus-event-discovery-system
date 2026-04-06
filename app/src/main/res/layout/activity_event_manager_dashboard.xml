@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/bg_event">
 
+    <!-- Top Bar -->
     <RelativeLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
@@ -36,6 +37,7 @@
             android:textStyle="bold" />
     </RelativeLayout>
 
+    <!-- Scrollable Content -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -64,6 +66,20 @@
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false" />
 
+            <!-- Empty state -->
+            <TextView
+                android:id="@+id/tvEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="No events yet.\nEvents you create will appear here."
+                android:textAlignment="center"
+                android:textColor="@color/text_dark"
+                android:alpha="0.5"
+                android:textSize="13sp"
+                android:paddingTop="32dp"
+                android:visibility="gone" />
+
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="80dp" />
@@ -71,6 +87,7 @@
         </LinearLayout>
     </ScrollView>
 
+    <!-- FAB: Create Event -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabCreate"
         android:layout_width="wrap_content"
@@ -84,6 +101,7 @@
         app:backgroundTint="@color/btn_eventmgr"
         app:tint="@color/white" />
 
+    <!-- Bottom Navigation -->
     <LinearLayout
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
@@ -101,21 +119,20 @@
             android:background="?attr/selectableItemBackground"
             android:gravity="center"
             android:orientation="vertical">
-
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:src="@android:drawable/ic_menu_compass"
+                android:contentDescription="Home"
                 app:tint="@color/btn_eventmgr" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
                 android:text="Home"
-                android:textColor="@color/btn_eventmgr"
                 android:textSize="10sp"
-                android:textStyle="bold" />
+                android:textColor="@color/btn_eventmgr"
+                android:textStyle="bold"
+                android:layout_marginTop="2dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -126,20 +143,19 @@
             android:background="?attr/selectableItemBackground"
             android:gravity="center"
             android:orientation="vertical">
-
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:src="@android:drawable/ic_menu_agenda"
+                android:contentDescription="Events"
                 app:tint="@color/text_dark" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
                 android:text="Events"
+                android:textSize="10sp"
                 android:textColor="@color/text_dark"
-                android:textSize="10sp" />
+                android:layout_marginTop="2dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -150,20 +166,19 @@
             android:background="?attr/selectableItemBackground"
             android:gravity="center"
             android:orientation="vertical">
-
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@android:drawable/ic_menu_myplaces"
+                android:src="@android:drawable/ic_menu_my_calendar"
+                android:contentDescription="Profile"
                 app:tint="@color/text_dark" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
                 android:text="Profile"
+                android:textSize="10sp"
                 android:textColor="@color/text_dark"
-                android:textSize="10sp" />
+                android:layout_marginTop="2dp" />
         </LinearLayout>
 
     </LinearLayout>

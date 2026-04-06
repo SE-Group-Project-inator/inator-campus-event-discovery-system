@@ -41,5 +41,12 @@
         <activity android:name=".activities.StudentHomeActivity"/>
         <activity android:name=".activities.SearchActivity"/>
 
+        <!-- US-10: Trending Events (Student home) -->
+        <activity android:name=".activities.TrendingEventsActivity"/>
+        <!-- US-21: Event Detail + Calendar Export -->
+        <activity android:name=".activities.EventDetailActivity"/>
+        <!-- US-27 / US-32: Attendee List + Seat Confirmation -->
+        <activity android:name=".activities.AttendeeListActivity"/>
+
     </application>
 </manifest>
