@@ -1,5 +1,41 @@
 <resources>
     <string name="app_name">CampusEventDiscoverySystem</string>
+    <string name="cancel_rsvp">Cancel RSVP</string>
+    <string name="eventDate">Tuesday, 17 March 2025</string>
+    <string name="eventTime">10:00 AM - 4:00 PM</string>
+    <string name="eventVenue">HSS Room A8, LUMS</string>
+    <string name="cancellationDeadline">Cancellation deadline: 16th November 2025</string>
+    <string name="rsvp_cancelled_successfully">RSVP Cancelled Successfully!</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="do_you_wish_to_continue_with_this_rsvp">Do you wish to continue with this RSVP?</string>
+    <string name="spades_gala_2026_n2_00pm_6_00pm">SPADES Gala 2026\n2:00pm-6:00pm</string>
+    <string name="you_have_another_event_scheduled_at_this_time">You have another event scheduled at this time:</string>
+    <string name="overlapping_events">Overlapping Events</string>
+    <string name="mar">MAR</string>
+    <string name="_17">17</string>
+    <string name="tech_fest_2025">Tech Fest 2025</string>
+    <string name="my_event_history">My Event History</string>
+    <string name="events_attended">Events attended</string>
+    <string name="recent_history">RECENT HISTORY</string>
+    <string name="rsvp_confirmation">← RSVP Confirmation</string>
+    <string name="tuesday_17_march_2025">📅 Tuesday, 17 March 2025</string>
+    <string name="hss_room_a8_lums">📍 HSS Room A8, LUMS</string>
+    <string name="your_registration">YOUR REGISTRATION</string>
+    <string name="date">Date</string>
+    <string name="venue">Venue</string>
+    <string name="time">Time</string>
+    <string name="i_consent_to">I consent to...</string>
+    <string name="my_name_being_visible_to_other_participants">my name being visible to other participants.</string>
+    <string name="my_roll_number_being_visible_to_other_participants">my roll number being visible to other participants.</string>
+    <string name="add_me_to_the_waitlist_if_slots_are_full">Add me to the waitlist if slots are full</string>
+    <string name="confirm_rsvp">✓ Confirm RSVP</string>
+    <string name="you_are_registered">You are registered!</string>
+    <string name="_10_00_am_4_00_pm">10:00 AM - 4:00 PM</string>
+    <string name="done">✓ Done</string>
+    <string name="event_reminder">Event Reminder</string>
+    <string name="tech_fest_starts_in_1_hour_n10_30_am">Tech fest starts in 1 hour!\n10:30 am</string>
+    <string name="notifications">Notifications</string>
 
     <string-array name="venue_array">
         <item>SSE 9B2</item>
