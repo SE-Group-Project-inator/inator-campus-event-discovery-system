@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Firebase needs internet -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -13,14 +13,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CampusEventDiscoverySystem">
 
-        <!-- First screen when app opens -->
         <activity
             android:name=".activities.RoleSelectActivity"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN"/>-->
+<!--                <category android:name="android.intent.category.LAUNCHER"/>-->
+<!--            </intent-filter>-->
         </activity>
 
         <!-- Keep MainActivity so teammates don't lose their work -->
@@ -31,6 +30,11 @@
         <activity android:name=".activities.AdminDashboardActivity"/>
         <activity android:name=".activities.EventsListActivity"/>
         <activity android:name=".activities.PrivacySettingsActivity"/>
+        <activity android:name=".activities.RsvpActivity"
+            android:exported="true"/>
+        <activity android:name=".activities.NotificationsActivity"/>
+        <activity android:name=".activities.EventHistoryActivity"
+            android:screenOrientation="portrait"/>
 
     </application>
 </manifest>
