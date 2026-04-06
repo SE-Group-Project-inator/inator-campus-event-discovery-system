@@ -41,7 +41,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:background="@color/bg_student"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
@@ -105,7 +104,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <!-- All (active) -->
             <TextView
                 android:id="@+id/chipAll"
                 android:layout_width="wrap_content"
@@ -120,7 +118,6 @@
                 android:gravity="center"
                 android:layout_marginEnd="8dp" />
 
-            <!-- Sports -->
             <TextView
                 android:id="@+id/chipSports"
                 android:layout_width="wrap_content"
@@ -134,7 +131,6 @@
                 android:gravity="center"
                 android:layout_marginEnd="8dp" />
 
-            <!-- Academic -->
             <TextView
                 android:id="@+id/chipAcademic"
                 android:layout_width="wrap_content"
@@ -148,7 +144,6 @@
                 android:gravity="center"
                 android:layout_marginEnd="8dp" />
 
-            <!-- Cultural -->
             <TextView
                 android:id="@+id/chipCultural"
                 android:layout_width="wrap_content"
@@ -165,6 +160,186 @@
         </LinearLayout>
 
     </HorizontalScrollView>
+
+    <!-- Date Range + Price Range filters -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp">
+
+        <!-- Date Range Row -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/btnDateRange"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginBottom="8dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="2dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp">
+
+                <!-- Left: icon + label -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_centerVertical="true">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔔 📅"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Select date range"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_dark"
+                        android:textStyle="bold"
+                        android:layout_marginStart="8dp" />
+
+                </LinearLayout>
+
+                <!-- Right: value + arrow -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="wrap_content"
+                        android:layout_height="26dp"
+                        app:cardBackgroundColor="@color/bg_student"
+                        app:cardCornerRadius="6dp"
+                        app:cardElevation="0dp">
+
+                        <TextView
+                            android:id="@+id/tvDateValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="Any date"
+                            android:textSize="12sp"
+                            android:textColor="@color/btn_student"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:paddingStart="10dp"
+                            android:paddingEnd="10dp" />
+
+                    </androidx.cardview.widget.CardView>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" ›"
+                        android:textSize="16sp"
+                        android:textColor="@color/text_dark"
+                        android:layout_marginStart="4dp" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Price Range Row -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/btnPriceRange"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="2dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp">
+
+                <!-- Left: icon + label -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_centerVertical="true">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚠️ 💰"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Price range"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_dark"
+                        android:textStyle="bold"
+                        android:layout_marginStart="8dp" />
+
+                </LinearLayout>
+
+                <!-- Right: value + arrow -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="wrap_content"
+                        android:layout_height="26dp"
+                        app:cardBackgroundColor="@color/bg_student"
+                        app:cardCornerRadius="6dp"
+                        app:cardElevation="0dp">
+
+                        <TextView
+                            android:id="@+id/tvPriceValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="Free – Rs.500"
+                            android:textSize="12sp"
+                            android:textColor="@color/btn_student"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:paddingStart="10dp"
+                            android:paddingEnd="10dp" />
+
+                    </androidx.cardview.widget.CardView>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" ›"
+                        android:textSize="16sp"
+                        android:textColor="@color/text_dark"
+                        android:layout_marginStart="4dp" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
 
     <!-- Results count + sort row -->
     <RelativeLayout
@@ -184,15 +359,29 @@
             android:textStyle="bold"
             android:layout_centerVertical="true" />
 
-        <TextView
-            android:id="@+id/tvSort"
+        <!-- Sort button with box -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/btnSort"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="⬇ Sort: Latest"
-            android:textSize="12sp"
-            android:textColor="@color/text_dark"
+            android:layout_height="30dp"
             android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true" />
+            android:layout_centerVertical="true"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp">
+
+            <TextView
+                android:id="@+id/tvSort"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="⬇ Sort: Latest"
+                android:textSize="12sp"
+                android:textColor="@color/text_dark"
+                android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp" />
+
+        </androidx.cardview.widget.CardView>
 
     </RelativeLayout>
 
@@ -213,22 +402,25 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
         android:clipToPadding="false">
 
         <LinearLayout
-            android:id="@+id/searchResultsList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="4dp"
-            android:paddingBottom="8dp">
+            android:padding="16dp">
+
+            <LinearLayout
+                android:id="@+id/searchResultsList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            </LinearLayout>
 
         </LinearLayout>
 
     </ScrollView>
-
     <!-- Bottom Navigation -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -237,7 +429,6 @@
         android:background="@color/white"
         android:elevation="8dp">
 
-        <!-- Home -->
         <LinearLayout
             android:id="@+id/navHome"
             android:layout_width="0dp"
@@ -263,7 +454,6 @@
 
         </LinearLayout>
 
-        <!-- Search (active) -->
         <LinearLayout
             android:id="@+id/navSearch"
             android:layout_width="0dp"
@@ -290,7 +480,6 @@
 
         </LinearLayout>
 
-        <!-- Tickets -->
         <LinearLayout
             android:id="@+id/navTickets"
             android:layout_width="0dp"
@@ -316,7 +505,6 @@
 
         </LinearLayout>
 
-        <!-- Profile -->
         <LinearLayout
             android:id="@+id/navProfile"
             android:layout_width="0dp"

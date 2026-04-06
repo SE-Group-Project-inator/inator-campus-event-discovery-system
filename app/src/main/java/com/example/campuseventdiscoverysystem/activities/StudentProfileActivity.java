@@ -69,22 +69,22 @@ public class StudentProfileActivity extends AppCompatActivity {
                 Toast.makeText(this, "Notifications coming soon!", Toast.LENGTH_SHORT).show()
         );
 
-        // Attendance History → Maryam's activity
-        btnAttendanceHistory.setOnClickListener(v ->
-                startActivity(new Intent(this, AttendanceHistoryActivity.class))
-        );
+        // Attendance History
+//        btnAttendanceHistory.setOnClickListener(v ->
+//                startActivity(new Intent(this, AttendanceHistoryActivity.class))
+//        );
 
-        // My Societies → Maryam's activity
-        btnMySocieties.setOnClickListener(v ->
-                startActivity(new Intent(this, SocietiesActivity.class))
-        );
+        // My Societies
+//        btnMySocieties.setOnClickListener(v ->
+//                startActivity(new Intent(this, SocietiesActivity.class))
+//        );
 
-        // QR Check In → Maryam's activity
-        btnQRCheckIn.setOnClickListener(v ->
-                startActivity(new Intent(this, QRActivity.class))
-        );
+        // QR Check In
+//        btnQRCheckIn.setOnClickListener(v ->
+//                startActivity(new Intent(this, QRActivity.class))
+//        );
 
-        // Privacy Settings → Areeba's activity (already built)
+        // Privacy Settings
         btnPrivacySettings.setOnClickListener(v ->
                 startActivity(new Intent(this, PrivacySettingsActivity.class))
         );
@@ -136,7 +136,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                 );
     }
 
-    // ── Count all confirmed RSVPs from /rsvps ──
+
     // Fields used: userId, status
     private void loadAttendedCount() {
         FirebaseUser user = mAuth.getCurrentUser();
@@ -154,7 +154,7 @@ public class StudentProfileActivity extends AppCompatActivity {
                 );
     }
 
-    // ── Count confirmed RSVPs this month from /rsvps ──
+
     // Fields used: userId, status, createdAt
     private void loadThisMonthCount() {
         FirebaseUser user = mAuth.getCurrentUser();

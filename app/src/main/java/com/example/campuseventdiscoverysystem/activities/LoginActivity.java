@@ -211,6 +211,9 @@ public class LoginActivity extends AppCompatActivity {
                         case "admin":
                             intent = new Intent(this, AdminDashboardActivity.class);
                             break;
+                        case "student":
+                            intent = new Intent(this, StudentHomeActivity.class);
+                            break;
                         default:
                             Toast.makeText(this,
                                     "Welcome! Logged in as " + dbRole,
