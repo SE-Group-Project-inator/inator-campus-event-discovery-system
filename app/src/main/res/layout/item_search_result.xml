@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <!-- Date Box -->
+        <LinearLayout
+            android:id="@+id/dateBox"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/card_rounded"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true">
+
+            <TextView
+                android:id="@+id/tvDateMonth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MAR"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/btn_student" />
+
+            <TextView
+                android:id="@+id/tvDateDay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="15"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/btn_student" />
+
+        </LinearLayout>
+
+        <!-- Event Info -->
+        <LinearLayout
+            android:id="@+id/eventInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_toEndOf="@id/dateBox"
+            android:layout_toStartOf="@id/btnArrow"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="12dp">
+
+            <!-- Event Title -->
+            <TextView
+                android:id="@+id/tvEventTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Entrepreneurship Workshop"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark" />
+
+            <!-- Venue -->
+            <TextView
+                android:id="@+id/tvEventVenue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📍 SDSB Room 101"
+                android:textSize="12sp"
+                android:textColor="@color/text_dark"
+                android:alpha="0.7"
+                android:layout_marginTop="2dp" />
+
+            <!-- Availability Badge -->
+            <TextView
+                android:id="@+id/tvAvailability"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Available"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="@color/green_accept"
+                android:background="@drawable/badge_available"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:layout_marginTop="6dp" />
+
+        </LinearLayout>
+
+        <!-- Arrow Button -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/btnArrow"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            app:cardBackgroundColor="@color/btn_student"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="2dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_arrow_forward"
+                app:tint="@color/white" />
+
+        </androidx.cardview.widget.CardView>
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

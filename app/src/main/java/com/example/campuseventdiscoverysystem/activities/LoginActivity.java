@@ -212,7 +212,7 @@ public class LoginActivity extends AppCompatActivity {
                             intent = new Intent(this, AdminDashboardActivity.class);
                             break;
                         case "student":
-                            intent = new Intent(this, TrendingEventsActivity.class);
+                            intent = new Intent(this, StudentHomeActivity.class);
                             break;
                         case "event_manager":
                             intent = new Intent(this, EventManagerDashboardActivity.class);

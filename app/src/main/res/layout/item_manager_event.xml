@@ -4,129 +4,58 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
     android:layout_marginBottom="12dp"
-    app:cardBackgroundColor="@color/card_event"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="4dp">
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="14dp">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <!-- Date Badge -->
+        <!-- Title + Status row -->
         <LinearLayout
-            android:layout_width="52dp"
-            android:layout_height="62dp"
-            android:layout_marginEnd="12dp"
-            android:background="@color/white"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tvDay"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="15"
-                android:textColor="@color/text_dark"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvMonth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:alpha="0.7"
-                android:text="MAR"
-                android:textColor="@color/text_dark"
-                android:textSize="11sp" />
-        </LinearLayout>
-
-        <!-- Event Info -->
-        <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/tvEventTitle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:maxLines="2"
+                android:layout_weight="1"
+                android:layout_marginEnd="12dp"
                 android:text="Event Title"
                 android:textColor="@color/text_dark"
-                android:textSize="13sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <LinearLayout
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tvEventStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="📍 "
-                    android:textSize="11sp" />
-
-                <TextView
-                    android:id="@+id/tvVenue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:alpha="0.7"
-                    android:text="Venue"
-                    android:textColor="@color/text_dark"
-                    android:textSize="11sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/tvStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="8dp"
-                    android:paddingRight="8dp"
-                    android:paddingTop="2dp"
-                    android:paddingBottom="2dp"
-                    android:background="@color/white"
-                    android:text="Pending"
-                    android:textColor="@color/text_dark"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvRegisteredCount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="0 registered"
-                    android:textColor="@color/btn_eventmgr"
-                    android:textSize="11sp" />
-            </LinearLayout>
-
+                android:text="Pending"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:backgroundTint="#FFB300"
+                app:cornerRadius="16dp" />
         </LinearLayout>
 
-        <!-- View Attendees Button -->
+        <!-- View Attendees button — US-27 -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnViewAttendees"
             android:layout_width="wrap_content"
-            android:layout_height="34dp"
-            android:layout_marginStart="8dp"
-            android:backgroundTint="@color/btn_eventmgr"
-            android:text="Attendees"
+            android:layout_height="32dp"
+            android:layout_marginTop="10dp"
+            android:text="View Attendees"
             android:textColor="@color/white"
-            android:textSize="10sp"
+            android:textSize="11sp"
+            android:backgroundTint="@color/btn_eventmgr"
             app:cornerRadius="8dp" />
 
     </LinearLayout>
