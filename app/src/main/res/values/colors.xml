@@ -18,6 +18,14 @@
     <color name="card_student">#E3EDF5</color>
     <color name="bg_light_blue">#C4E0F5</color>
 
+    <color name="primary_purple">#4F378A</color>
+    <color name="student_blue_dark">#153E52</color>
+    <color name="background_light">#FEF7FF</color>
+    <color name="bg_success_light">#D1FAE5</color>
+    <color name="text_grey">#6B7280</color>
+    <color name="cancel_button_background">#DCE5EA</color>
+    <color name="attended_event">#065F46</color>
+    <color name="event_attended_card_color">#CED8DF</color>
 
 
 
