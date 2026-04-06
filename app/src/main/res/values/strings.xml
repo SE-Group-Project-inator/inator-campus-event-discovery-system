@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">CampusEventDiscoverySystem</string>
+
+    <string-array name="venue_array">
+        <item>SSE 9B2</item>
+        <item>HSS Room A8</item>
+        <item>SDSB B3</item>
+        <item>EDH Lawn</item>
+        <item>Sports Complex</item>
+    </string-array>
+
+    <string-array name="category_array">
+        <item>Academic</item>
+        <item>Sports</item>
+        <item>Arts</item>
+        <item>Technology</item>
+        <item>Social</item>
+    </string-array>
+
 </resources>
