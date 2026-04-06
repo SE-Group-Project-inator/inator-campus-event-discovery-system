@@ -36,4 +36,21 @@
     <string name="event_reminder">Event Reminder</string>
     <string name="tech_fest_starts_in_1_hour_n10_30_am">Tech fest starts in 1 hour!\n10:30 am</string>
     <string name="notifications">Notifications</string>
+
+    <string-array name="venue_array">
+        <item>SSE 9B2</item>
+        <item>HSS Room A8</item>
+        <item>SDSB B3</item>
+        <item>EDH Lawn</item>
+        <item>Sports Complex</item>
+    </string-array>
+
+    <string-array name="category_array">
+        <item>Academic</item>
+        <item>Sports</item>
+        <item>Arts</item>
+        <item>Technology</item>
+        <item>Social</item>
+    </string-array>
+
 </resources>
