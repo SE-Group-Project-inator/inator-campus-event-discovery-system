@@ -3,6 +3,7 @@ package com.example.campuseventdiscoverysystem.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -34,6 +35,8 @@ public class LoginActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         selectedRole = getIntent().getStringExtra("role");
 
+        Log.d("LOGIN_DEBUG", "Activity started. Selected role: " + selectedRole);
+
         applyRoleTheme();
         setupClickListeners();
     }
@@ -59,7 +62,6 @@ public class LoginActivity extends AppCompatActivity {
                 tvSubtitle.setText("Monitor and approve campus events.");
                 tvSignIn.setText("Sign in with your admin account");
                 btnLogin.setBackgroundTintList(getColorStateList(R.color.btn_admin));
-
                 break;
             case "event_manager":
                 topBar.setBackgroundColor(getColor(R.color.btn_eventmgr));
@@ -90,14 +92,14 @@ public class LoginActivity extends AppCompatActivity {
         EditText etPassword = findViewById(R.id.etPassword);
         ImageButton btnBack = findViewById(R.id.btnBack);
         TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
-        TextView tvSignUp = findViewById(R.id.tvSignUp); // Add this TextView to your layout
+        TextView tvSignUp = findViewById(R.id.tvSignUp);
 
         btnBack.setOnClickListener(v -> finish());
 
-        // ── FIX 1: Forgot Password ──
+        // Forgot Password
         tvForgotPassword.setOnClickListener(v -> showForgotPasswordDialog());
 
-        // ── FIX 2: Sign Up navigation ──
+        // Sign Up navigation
         if (tvSignUp != null) {
             tvSignUp.setOnClickListener(v -> {
                 Intent intent = new Intent(this, SignupActivity.class);
@@ -106,7 +108,6 @@ public class LoginActivity extends AppCompatActivity {
             });
         }
 
-        // ── FIX 3: Login button (was missing signup/student/event_manager routing) ──
         btnLogin.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
@@ -124,17 +125,19 @@ public class LoginActivity extends AppCompatActivity {
 
             btnLogin.setEnabled(false);
             btnLogin.setText("Signing in...");
+            Log.d("LOGIN_DEBUG", "Attempting login for: " + email);
 
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnSuccessListener(authResult -> {
                         String uid = authResult.getUser().getUid();
+                        Log.d("LOGIN_DEBUG", "Auth success. UID: " + uid);
                         verifyRoleAndNavigate(uid, btnLogin);
                     })
                     .addOnFailureListener(e -> {
                         btnLogin.setEnabled(true);
                         btnLogin.setText("Login");
-                        // Show friendlier error messages
                         String msg = e.getMessage();
+                        Log.e("LOGIN_DEBUG", "Auth failed: " + msg);
                         if (msg != null && msg.contains("no user record")) {
                             msg = "No account found with this email.";
                         } else if (msg != null && msg.contains("password is invalid")) {
@@ -145,7 +148,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // ── FIX 1: Forgot Password dialog ──
     private void showForgotPasswordDialog() {
         EditText emailInput = new EditText(this);
         emailInput.setHint("Enter your email address");
@@ -167,7 +169,7 @@ public class LoginActivity extends AppCompatActivity {
                             .addOnSuccessListener(unused ->
                                     new AlertDialog.Builder(this)
                                             .setTitle("Email Sent!")
-                                            .setMessage("A password reset link has been sent to " + email + ".\n\nOpen the link in your email, set a new password, then come back and log in.")
+                                            .setMessage("A password reset link has been sent to " + email + ".")
                                             .setPositiveButton("Got it", null)
                                             .show()
                             )
@@ -179,11 +181,12 @@ public class LoginActivity extends AppCompatActivity {
                 .show();
     }
 
-    // ── FIX 3: Complete role routing ──
     private void verifyRoleAndNavigate(String uid, Button btnLogin) {
+        Log.d("LOGIN_DEBUG", "Verifying role for UID: " + uid);
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(doc -> {
                     if (!doc.exists()) {
+                        Log.e("LOGIN_DEBUG", "No Firestore document for UID: " + uid);
                         Toast.makeText(this,
                                 "Account not found in database. Please sign up first.",
                                 Toast.LENGTH_LONG).show();
@@ -194,6 +197,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
 
                     String dbRole = doc.getString("role");
+                    Log.d("LOGIN_DEBUG", "Found role in DB: " + dbRole + ". Expected: " + selectedRole);
 
                     if (dbRole == null || !dbRole.equals(selectedRole)) {
                         Toast.makeText(this,
@@ -210,17 +214,14 @@ public class LoginActivity extends AppCompatActivity {
                         case "admin":
                             intent = new Intent(this, AdminDashboardActivity.class);
                             break;
-                        case "event_manager":
-                            // TODO: Replace with EventManagerDashboardActivity when your teammate builds it
-                            intent = new Intent(this, EventsListActivity.class);
-                            intent.putExtra("role", "event_manager");
-                            break;
                         case "student":
-                            // TODO: Replace with StudentDashboardActivity when your teammate builds it
-                            intent = new Intent(this, EventsListActivity.class);
-                            intent.putExtra("role", "student");
+                            intent = new Intent(this, StudentHomeActivity.class);
+                            break;
+                        case "event_manager":
+                            intent = new Intent(this, EventManagerDashboardActivity.class);
                             break;
                         default:
+                            Log.e("LOGIN_DEBUG", "Unknown role string: " + dbRole);
                             Toast.makeText(this, "Unknown role. Contact admin.", Toast.LENGTH_SHORT).show();
                             mAuth.signOut();
                             btnLogin.setEnabled(true);
@@ -228,10 +229,12 @@ public class LoginActivity extends AppCompatActivity {
                             return;
                     }
 
+                    Log.d("LOGIN_DEBUG", "Navigating to: " + intent.getComponent().getClassName());
                     startActivity(intent);
                     finish();
                 })
                 .addOnFailureListener(e -> {
+                    Log.e("LOGIN_DEBUG", "Firestore error: " + e.getMessage());
                     Toast.makeText(this, "Database error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     btnLogin.setEnabled(true);
                     btnLogin.setText("Login");
