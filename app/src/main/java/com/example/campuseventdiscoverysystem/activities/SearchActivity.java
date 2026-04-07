@@ -34,7 +34,6 @@ public class SearchActivity extends AppCompatActivity {
 
     private EditText etSearch;
     private ImageView btnSearch;
-    private ImageButton btnBack;
     private LinearLayout searchResultsList;
     private TextView tvResultCount, tvSort, tvDateValue, tvPriceValue;
     private TextView chipAll, chipSports, chipAcademic, chipCultural;
@@ -59,7 +58,6 @@ public class SearchActivity extends AppCompatActivity {
 
         etSearch        = findViewById(R.id.etSearch);
         btnSearch       = findViewById(R.id.btnSearch);
-        btnBack         = findViewById(R.id.btnBack);
         searchResultsList = findViewById(R.id.searchResultsList);
         tvResultCount   = findViewById(R.id.tvResultCount);
         tvSort          = findViewById(R.id.tvSort);
@@ -90,8 +88,6 @@ public class SearchActivity extends AppCompatActivity {
         btnSearch.setOnClickListener(v ->
                 filterAndDisplay(etSearch.getText().toString().trim())
         );
-
-        btnBack.setOnClickListener(v -> finish());
 
         chipAll.setOnClickListener(v -> {
             selectedCategory = "All";
