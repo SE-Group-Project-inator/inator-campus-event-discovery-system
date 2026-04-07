@@ -181,10 +181,10 @@ public class EventManagerProfileActivity extends AppCompatActivity {
             startActivity(new Intent(this, EventManagerEventsActivity.class));
         });
 
-        // Privacy Settings Quick Access Card
-        btnPrivacySettings.setOnClickListener(v -> {
-            Toast.makeText(this, "Will set to privacy screen!", Toast.LENGTH_SHORT).show();
-        });
+        // Privacy Settings Quick Access Card — navigate to shared PrivacySettingsActivity
+        btnPrivacySettings.setOnClickListener(v ->
+                startActivity(new Intent(this, PrivacySettingsActivity.class))
+        );
 
         // Sign Out Button
         btnSignOut.setOnClickListener(v -> {

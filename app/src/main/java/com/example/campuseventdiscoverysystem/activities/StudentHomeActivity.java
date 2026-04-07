@@ -66,6 +66,11 @@ public class StudentHomeActivity extends AppCompatActivity {
                         "Notifications coming soon!", Toast.LENGTH_SHORT).show()
         );
 
+        // Trending Events card → US-10
+        findViewById(R.id.cardTrending).setOnClickListener(v ->
+                startActivity(new Intent(this, TrendingEventsActivity.class))
+        );
+
 //        // ✅ FIXED: Stay Updated card click → go to placeholder screen
 //        findViewById(R.id.stayUpdatedCard).setOnClickListener(v ->
 //                startActivity(new Intent(this, PersonalizedRecommendationsActivity.class))
@@ -112,7 +117,7 @@ public class StudentHomeActivity extends AppCompatActivity {
     // ── Count approved events ──
     private void loadEventsThisWeek() {
         db.collection("events")
-                .whereEqualTo("status", "approved")
+                .whereEqualTo("status", "active")
                 .get()
                 .addOnSuccessListener(query ->
                         tvEventsThisWeek.setText(query.size() + " Events")
@@ -150,7 +155,7 @@ public class StudentHomeActivity extends AppCompatActivity {
         upcomingEventsList.removeAllViews();
 
         db.collection("events")
-                .whereEqualTo("status", "approved")
+                .whereEqualTo("status", "active")
                 .get()
                 .addOnSuccessListener(query -> {
 
@@ -196,6 +201,29 @@ public class StudentHomeActivity extends AppCompatActivity {
                                         new SimpleDateFormat("MMM", Locale.getDefault())
                                                 .format(d).toUpperCase());
                         }
+
+                        // Open EventDetailActivity when student taps an upcoming event card
+                        String eventIdFinal   = doc.getId();
+                        String titleFinal     = title;
+                        String venueFinal     = venue;
+                        String descFinal      = doc.getString("description");
+                        int    capFinal       = doc.getLong("capacity") != null
+                                ? doc.getLong("capacity").intValue() : 0;
+                        int    regFinal       = doc.getLong("registeredCount") != null
+                                ? doc.getLong("registeredCount").intValue() : 0;
+                        long   dateMillis     = date != null ? date.toDate().getTime() : 0;
+
+                        itemView.setOnClickListener(v -> {
+                            Intent intent = new Intent(this, EventDetailActivity.class);
+                            intent.putExtra("eventId", eventIdFinal);
+                            intent.putExtra("eventTitle", titleFinal);
+                            intent.putExtra("eventVenue", venueFinal);
+                            intent.putExtra("eventDescription", descFinal);
+                            intent.putExtra("eventCapacity", capFinal);
+                            intent.putExtra("eventRegistered", regFinal);
+                            intent.putExtra("eventDateMillis", dateMillis);
+                            startActivity(intent);
+                        });
 
                         upcomingEventsList.addView(itemView);
                     }
