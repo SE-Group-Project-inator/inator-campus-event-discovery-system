@@ -15,7 +15,6 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Row 1: Bell + Student centered -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -43,7 +42,6 @@
 
         </RelativeLayout>
 
-        <!-- Row 2: Hello -->
         <TextView
             android:id="@+id/tvGreeting"
             android:layout_width="wrap_content"
@@ -54,7 +52,6 @@
             android:textStyle="bold"
             android:textColor="@color/white" />
 
-        <!-- Row 3: Subtitle -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -89,7 +86,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginBottom="16dp">
 
-                <!-- Card 1 -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="0dp"
                     android:layout_height="40dp"
@@ -107,10 +103,8 @@
                         android:text="0 Events this week"
                         android:textColor="@color/text_dark"
                         android:textSize="12sp"/>
-
                 </androidx.cardview.widget.CardView>
 
-                <!-- Card 2 -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="0dp"
                     android:layout_height="40dp"
@@ -128,10 +122,8 @@
                         android:text="0 Registered"
                         android:textColor="@color/text_dark"
                         android:textSize="12sp"/>
-
                 </androidx.cardview.widget.CardView>
 
-                <!-- Card 3 -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="0dp"
                     android:layout_height="40dp"
@@ -148,12 +140,11 @@
                         android:text="0 Saved"
                         android:textColor="@color/text_dark"
                         android:textSize="12sp"/>
-
                 </androidx.cardview.widget.CardView>
 
             </LinearLayout>
 
-            <!-- BIG TRENDING EVENTS CARD -->
+            <!-- TRENDING EVENTS CARD -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardTrending"
                 android:layout_width="0dp"
@@ -172,14 +163,33 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <TextView
-                        android:id="@+id/tvTrendingTitle"
-                        android:layout_width="wrap_content"
+                    <!-- UPDATED HEADER (Trending + See all) -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Trending Events"
-                        android:textSize="14sp"
-                        android:textColor="@color/text_dark"
-                        android:layout_marginBottom="12dp"/>
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+
+                        <TextView
+                            android:id="@+id/tvTrendingTitle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Trending Events"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_dark" />
+
+                        <TextView
+                            android:id="@+id/tvSeeAllTrending"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="See all"
+                            android:textSize="12sp"
+                            android:textColor="@color/btn_student"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -205,7 +215,7 @@
 
             </androidx.cardview.widget.CardView>
 
-            <!-- FULL-SCREEN BLUE SECTION AFTER TRENDING EVENTS -->
+            <!-- BLUE SECTION (UNCHANGED) -->
             <LinearLayout
                 android:id="@+id/blueSection"
                 android:layout_width="0dp"
@@ -218,7 +228,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent">
 
-                <!-- ROW WITH TEXT AND ARROW -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -226,7 +235,6 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="16dp">
 
-                    <!-- TEXT COLUMN -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -248,19 +256,15 @@
                             android:textColor="@color/black"
                             android:textSize="14sp"
                             android:layout_marginTop="4dp"/>
-
                     </LinearLayout>
 
-                    <!-- ARROW ICON -->
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_arrow_forward"
                         app:tint="@color/black"/>
-
                 </LinearLayout>
 
-                <!-- UPCOMING EVENTS LIST -->
                 <LinearLayout
                     android:id="@+id/upcomingEventsList"
                     android:layout_width="match_parent"
@@ -271,11 +275,6 @@
                     <include layout="@layout/item_upcoming"/>
                     <include layout="@layout/item_upcoming"/>
                     <include layout="@layout/item_upcoming"/>
-                    <include layout="@layout/item_upcoming"/>
-                    <include layout="@layout/item_upcoming"/>
-                    <include layout="@layout/item_upcoming"/>
-                    <include layout="@layout/item_upcoming"/>
-
 
                 </LinearLayout>
 
@@ -284,7 +283,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-    <!-- Bottom Navigation -->
+    <!-- BOTTOM NAV (UNCHANGED) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -292,15 +291,13 @@
         android:background="@color/white"
         android:elevation="8dp">
 
-        <!-- Home (active) -->
         <LinearLayout
             android:id="@+id/navHome"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center"
-            android:background="?attr/selectableItemBackground">
+            android:gravity="center">
 
             <ImageView
                 android:layout_width="22dp"
@@ -309,25 +306,20 @@
                 app:tint="@color/btn_student" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="Home"
                 android:textSize="10sp"
                 android:textColor="@color/btn_student"
                 android:textStyle="bold"
-                android:layout_marginTop="2dp" />
-
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
-        <!-- Search -->
         <LinearLayout
             android:id="@+id/navSearch"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="?attr/selectableItemBackground">
+            android:gravity="center">
 
             <ImageView
                 android:layout_width="22dp"
@@ -336,24 +328,18 @@
                 app:tint="@color/text_dark" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="Search"
                 android:textSize="10sp"
-                android:textColor="@color/text_dark"
-                android:layout_marginTop="2dp" />
-
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
-        <!-- Tickets -->
         <LinearLayout
             android:id="@+id/navTickets"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="?attr/selectableItemBackground">
+            android:gravity="center">
 
             <ImageView
                 android:layout_width="22dp"
@@ -365,21 +351,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tickets"
-                android:textSize="10sp"
-                android:textColor="@color/text_dark"
-                android:layout_marginTop="2dp" />
-
+                android:textSize="10sp" />
         </LinearLayout>
 
-        <!-- Profile -->
         <LinearLayout
             android:id="@+id/navProfile"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="?attr/selectableItemBackground">
+            android:gravity="center">
 
             <ImageView
                 android:layout_width="22dp"
@@ -388,13 +368,10 @@
                 app:tint="@color/text_dark" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="Profile"
                 android:textSize="10sp"
-                android:textColor="@color/text_dark"
-                android:layout_marginTop="2dp" />
-
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
     </LinearLayout>

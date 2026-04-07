@@ -66,10 +66,10 @@ public class StudentHomeActivity extends AppCompatActivity {
                         "Notifications coming soon!", Toast.LENGTH_SHORT).show()
         );
 
-        // Trending Events card → US-10
-        findViewById(R.id.cardTrending).setOnClickListener(v ->
-                startActivity(new Intent(this, TrendingEventsActivity.class))
-        );
+//        // Trending Events card → US-10
+//        findViewById(R.id.cardTrending).setOnClickListener(v ->
+//                startActivity(new Intent(this, TrendingEventsActivity.class))
+//        );
 
 //        // ✅ FIXED: Stay Updated card click → go to placeholder screen
 //        findViewById(R.id.stayUpdatedCard).setOnClickListener(v ->
@@ -92,6 +92,12 @@ public class StudentHomeActivity extends AppCompatActivity {
 
         navProfile.setOnClickListener(v ->
                 startActivity(new Intent(this, StudentProfileActivity.class))
+        );
+
+        TextView tvSeeAllTrending = findViewById(R.id.tvSeeAllTrending);
+
+        tvSeeAllTrending.setOnClickListener(v ->
+                startActivity(new Intent(this, TrendingEventsActivity.class))
         );
     }
 
