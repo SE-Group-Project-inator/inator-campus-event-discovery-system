@@ -87,8 +87,14 @@ public class EventsListActivity extends AppCompatActivity {
     }
 
     private void loadAllEvents() {
+        // FIX: Use whereIn to only fetch pending + active events.
+        // Previously the query fetched ALL events (no status filter), so "rejected" events
+        // remained visible in the list even after declining them — the snapshot listener
+        // re-populated allEvents with rejected docs and applyCardFilter() showed them in
+        // "all" mode. Now rejected events are excluded at the query level.
         db.collection("events")
-                .orderBy("date", Query.Direction.ASCENDING)
+                .whereIn("status", java.util.Arrays.asList("pending_approval", "active"))
+                .orderBy("status")
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null || snapshots == null) return;
                     allEvents.clear();
