@@ -15,8 +15,10 @@ public class Event {
     private int capacity;
     private int registeredCount;
     private Timestamp date;
-    private String time;
+    private String startTime;
+    private String endTime;
     private String category;
+    private String society;
 
     public Event() {}
 
@@ -31,8 +33,11 @@ public class Event {
     public int getCapacity() { return capacity; }
     public int getRegisteredCount() { return registeredCount; }
     public Timestamp getDate() { return date; }
-    public String getTime() { return time; }
+    public String getStartTime() { return startTime; }
+    public String getEndTime() { return endTime; }
     public String getCategory() { return category; }
+
+    public String getSociety() {return society;}
 
     public void setId(String id) { this.id = id; }
     public void setTitle(String title) { this.title = title; }
@@ -45,6 +50,9 @@ public class Event {
     public void setCapacity(int capacity) { this.capacity = capacity; }
     public void setRegisteredCount(int count) { this.registeredCount = count; }
     public void setDate(Timestamp date) { this.date = date; }
-    public void setTime(String time) { this.time = time; }
+    public void setStartTime(String time) { this.startTime = time; }
+    public void setEndTime(String time) { this.endTime = time; }
     public void setCategory(String category) { this.category = category; }
+
+    public void setSociety(String society) { this.society = society; }
 }

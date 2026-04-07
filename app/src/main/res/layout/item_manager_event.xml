@@ -10,53 +10,37 @@
     app:cardCornerRadius="12dp"
     app:cardElevation="2dp">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Title + Status row -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/tvEventTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="12dp"
-                android:text="Event Title"
-                android:textColor="@color/text_dark"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/tvEventStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Pending"
-                android:textColor="@color/white"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:backgroundTint="#FFB300"
-                app:cornerRadius="16dp" />
-        </LinearLayout>
-
-        <!-- View Attendees button — US-27 -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnViewAttendees"
+        <TextView
+            android:id="@+id/tvEventTitle"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:layout_marginTop="10dp"
-            android:text="View Attendees"
-            android:textColor="@color/white"
-            android:textSize="11sp"
-            android:backgroundTint="@color/btn_eventmgr"
-            app:cornerRadius="8dp" />
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/tvEventStatus"
+            android:layout_marginEnd="16dp"
+            android:text="Event Title"
+            android:textColor="@color/text_dark"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
-    </LinearLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/tvEventStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="Pending"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:backgroundTint="#FFB300"
+            app:cornerRadius="16dp" />
+
+    </RelativeLayout>
 </androidx.cardview.widget.CardView>
