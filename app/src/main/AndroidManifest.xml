@@ -34,8 +34,8 @@
         <activity android:name=".activities.EventManagerDashboardActivity"/>
         <activity android:name=".activities.CreateEventActivity"/>
         <activity android:name=".activities.EditEventActivity"/>
-<!--        <activity android:name=".activities.EventManagerProfileActivity"/>-->
-<!--        <activity android:name=".activities.EventManagerEventsActivity"/>-->
+        <activity android:name=".activities.EventManagerProfileActivity"/>
+        <activity android:name=".activities.EventManagerEventsActivity"/>
 
         <activity android:name=".activities.StudentProfileActivity"/>
         <activity android:name=".activities.StudentHomeActivity"/>

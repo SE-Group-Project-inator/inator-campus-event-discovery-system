@@ -25,17 +25,28 @@ public class ManagerEventAdapter extends RecyclerView.Adapter<ManagerEventAdapte
 
     private final List<Event> eventList;
     private final OnItemClickListener listener;
+    private boolean isEditMode = false;
+    private boolean showStatusBadge = true;
+
+    public void setShowStatusBadge(boolean show) {
+        this.showStatusBadge = show;
+    }
 
     public ManagerEventAdapter(List<Event> eventList, OnItemClickListener listener) {
         this.eventList = eventList;
         this.listener = listener;
     }
 
+    public void setEditMode(boolean editMode) {
+        this.isEditMode = editMode;
+        notifyDataSetChanged(); // This forces the list to redraw with the new colors!
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_manager_event, parent, false);
+                .inflate(R.layout.item_event_history, parent, false);
         return new ViewHolder(view);
     }
 
@@ -47,15 +58,44 @@ public class ManagerEventAdapter extends RecyclerView.Adapter<ManagerEventAdapte
 
         String status = event.getStatus();
         if ("active".equals(status)) {
-            holder.tvEventStatus.setText("Approved");
-            holder.tvEventStatus.setBackgroundColor(Color.parseColor("#4CAF50"));
+            // Set text on the TextView
+            holder.tvStatus.setText("Approved");
+            // Set color on the CardView
+            holder.cardStatus.setCardBackgroundColor(Color.parseColor("#4CAF50"));
         } else if ("rejected".equals(status)) {
-            holder.tvEventStatus.setText("Declined");
-            holder.tvEventStatus.setBackgroundColor(Color.parseColor("#E53935"));
+            holder.tvStatus.setText("Declined");
+            holder.cardStatus.setCardBackgroundColor(Color.parseColor("#E53935"));
         } else {
-            holder.tvEventStatus.setText("Pending");
-            holder.tvEventStatus.setBackgroundColor(Color.parseColor("#FFB300"));
+            holder.tvStatus.setText("Pending");
+            holder.cardStatus.setCardBackgroundColor(Color.parseColor("#FFB300"));
         }
+
+        if (showStatusBadge) {
+            holder.cardStatus.setVisibility(View.VISIBLE);
+        } else {
+            holder.cardStatus.setVisibility(View.GONE);
+        }
+
+        // Optional but recommended: Bind your dates to the UI since you have the views!
+        if (event.getDate() != null) {
+            java.util.Date date = event.getDate().toDate();
+            holder.tvMonth.setText(new java.text.SimpleDateFormat("MMM", java.util.Locale.US).format(date).toUpperCase());
+            holder.tvDay.setText(new java.text.SimpleDateFormat("dd", java.util.Locale.US).format(date));
+        }
+
+        if (holder.itemView instanceof com.google.android.material.card.MaterialCardView) {
+            com.google.android.material.card.MaterialCardView rootCard =
+                    (com.google.android.material.card.MaterialCardView) holder.itemView;
+
+            if (isEditMode) {
+                // Light grey background when in edit mode
+                rootCard.setCardBackgroundColor(Color.parseColor("#E0E0E0"));
+            } else {
+                // Standard white background
+                rootCard.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
+            }
+        }
+
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
@@ -70,12 +110,16 @@ public class ManagerEventAdapter extends RecyclerView.Adapter<ManagerEventAdapte
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvEventTitle, tvEventStatus;
+        TextView tvEventTitle, tvStatus, tvMonth, tvDay;
+        com.google.android.material.card.MaterialCardView cardStatus;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvEventTitle = itemView.findViewById(R.id.tvEventTitle);
-            tvEventStatus = itemView.findViewById(R.id.tvEventStatus);
+            tvEventTitle = itemView.findViewById(R.id.tvHistoryEventTitle);
+            tvStatus = itemView.findViewById(R.id.tvStatus);
+            tvMonth = itemView.findViewById(R.id.tvMonth);
+            tvDay = itemView.findViewById(R.id.tvDay);
+            cardStatus = itemView.findViewById(R.id.cardStatus);
         }
     }
 }

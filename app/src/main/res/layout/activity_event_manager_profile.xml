@@ -12,13 +12,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@color/btn_eventmgr"
-        android:paddingBottom="10dp">
+        android:padding="16dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp">
+            android:layout_height="wrap_content" >
 
             <ImageButton
                 android:id="@+id/btnNotificationsTop"
@@ -35,18 +33,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="Events Manager"
+                android:text="Event Manager"
                 android:textSize="22sp"
+                android:textStyle="bold"
                 android:textColor="@color/white" />
         </RelativeLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:text="My Profile"
             android:textColor="@color/white"
             android:textSize="20sp"
-            android:paddingStart="16dp" />
+            android:textStyle="bold" />
     </LinearLayout>
 
     <ScrollView

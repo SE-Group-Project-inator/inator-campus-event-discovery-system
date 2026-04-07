@@ -2,8 +2,10 @@ package com.example.campuseventdiscoverysystem.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.CalendarView;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,127 +15,195 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.campuseventdiscoverysystem.R;
 import com.example.campuseventdiscoverysystem.adapters.ManagerEventAdapter;
 import com.example.campuseventdiscoverysystem.models.Event;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
-
-// WILL EDIT THIS CLASS
+import java.util.Locale;
 
 /**
- * Main dashboard for the Event Manager.
- * Features navigation, event history, and routing to event creation/editing.
+ * EventManagerDashboardActivity
+ * Serves as the main home screen for the Event Manager
+ * Features a calendar view allowing the user to select specific dates,
+ * which in turn fetches and displays all active/approved campus events for that day
  */
 public class EventManagerDashboardActivity extends AppCompatActivity {
 
-    // UI Components
-    private ImageButton btnNotifications;
-    private FloatingActionButton fabCreate;
-    private LinearLayout navHome, navEvents, navProfile;
-
-    // RecyclerView Components
-    private RecyclerView rvManagerEvents;
-    private ManagerEventAdapter adapter;
-    private List<Event> myEventsList;
-
-    // Firebase
+    // Firebase instances for database operations
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+
+    // UI Components
+    private CalendarView calendarView;
+    private TextView tvSelectedDateHeader, tvGreeting;
+    private RecyclerView rvDateEvents;
+    private ImageButton btnNotifications;
+
+    // Adapter and data source for populating the daily events list
+    private ManagerEventAdapter adapter;
+    private List<Event> dateEventsList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Bind to the XML layout
         setContentView(R.layout.activity_event_manager_dashboard);
 
-        // Initialize Firebase
+        // Initialize Firebase connections
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        // Link Views
-        btnNotifications = findViewById(R.id.btnNotifications);
-        fabCreate = findViewById(R.id.fabCreate);
-        navHome = findViewById(R.id.navHome);
-        navEvents = findViewById(R.id.navEvents);
-        navProfile = findViewById(R.id.navProfile);
-        rvManagerEvents = findViewById(R.id.rvManagerEvents);
+        // Link Java variables to the XML Views
+        bindViews();
 
+        // Setup components of the screen
+        setupHeader();
         setupRecyclerView();
-        setupClickListeners();
-        loadMyEvents();
+        setupNavigation();
+
+        // Automatically load events for the current day when the dashboard is first opened
+        loadEventsForDate(new Date());
+
+        // Listen for user interactions with the CalendarView
+        calendarView.setOnDateChangeListener((view, year, month, day) -> {
+            // Construct a Calendar object from the selected date parameters
+            Calendar clickedDate = Calendar.getInstance();
+            clickedDate.set(year, month, day);
+
+            // Fetch events for the newly selected date
+            loadEventsForDate(clickedDate.getTime());
+        });
     }
 
     /**
-     * Initializes the RecyclerView and links it to the ManagerEventAdapter.
-     * Also sets up the click listener to open the Edit screen.
+     * Maps all the XML UI components to Java variables
+     */
+    private void bindViews() {
+
+        calendarView = findViewById(R.id.calendarView);
+        tvSelectedDateHeader = findViewById(R.id.tvSelectedDateHeader);
+        rvDateEvents = findViewById(R.id.rvDateEvents);
+        tvGreeting = findViewById(R.id.tvGreeting);
+        btnNotifications = findViewById(R.id.btnNotifications);
+    }
+
+    /**
+     * Configures the personalized greeting and the notification icon listener
+     */
+    private void setupHeader() {
+
+        // Setup greeting by extracting the user's display name
+        if (mAuth.getCurrentUser() != null) {
+            String fullName = mAuth.getCurrentUser().getDisplayName();
+            if (fullName != null && !fullName.isEmpty()) {
+                tvGreeting.setText("Hello, " + fullName + "!");
+            }
+        }
+
+        // Will implement this notification screen routing later
+        btnNotifications.setOnClickListener(v -> {
+            Toast.makeText(this, "Will set to notifications screen!", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    /**
+     * Initializes the RecyclerView and its adapter
+     * Defines what happens when an individual event card is clicked
      */
     private void setupRecyclerView() {
-        myEventsList = new ArrayList<>();
 
-        // Pass the list and the click action to the adapter
-        adapter = new ManagerEventAdapter(myEventsList, eventId -> {
-            // When an event is clicked, open EditEventActivity and pass the event ID
-            Intent intent = new Intent(EventManagerDashboardActivity.this, EditEventActivity.class);
-            intent.putExtra("EVENT_ID", eventId);
-            startActivity(intent);
+        adapter = new ManagerEventAdapter(dateEventsList, eventId -> {
+            // Will implement this later
+            Toast.makeText(this, "Will set this to event details screen!", Toast.LENGTH_SHORT).show();
         });
 
-        rvManagerEvents.setLayoutManager(new LinearLayoutManager(this));
-        rvManagerEvents.setAdapter(adapter);
+        // Hide status badge of events for the dashboard
+        adapter.setShowStatusBadge(false);
+
+        // Use a vertical scrolling list and attach the adapter
+        rvDateEvents.setLayoutManager(new LinearLayoutManager(this));
+        rvDateEvents.setAdapter(adapter);
     }
 
     /**
-     * Fetches events from Firestore that were created by the currently logged-in user.
+     * Queries Firestore to fetch all "active" events for the
+     * currently selected date on the calendar
+     * @param selectedDate The date selected by the user
      */
-    private void loadMyEvents() {
-        if (mAuth.getCurrentUser() == null) return;
+    private void loadEventsForDate(Date selectedDate) {
 
-        String currentUserId = mAuth.getCurrentUser().getUid();
+        // Update the header text to reflect the selected date
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+        tvSelectedDateHeader.setText("Events on " + sdf.format(selectedDate));
 
-        // Use addSnapshotListener to get real-time updates
+        // Define the start of the selected day
+        Calendar start = Calendar.getInstance();
+        start.setTime(selectedDate);
+        start.set(Calendar.HOUR_OF_DAY, 0);
+        start.set(Calendar.MINUTE, 0);
+        start.set(Calendar.SECOND, 0);
+        start.set(Calendar.MILLISECOND, 0);
+
+        // Define the end of the selected day
+        Calendar end = Calendar.getInstance();
+        end.setTime(selectedDate);
+        end.set(Calendar.HOUR_OF_DAY, 23);
+        end.set(Calendar.MINUTE, 59);
+        end.set(Calendar.SECOND, 59);
+        end.set(Calendar.MILLISECOND, 999);
+
+        // Query against the "events" collection in database
         db.collection("events")
-                .whereEqualTo("createdBy", currentUserId)
-                .addSnapshotListener((snapshots, error) -> {
-                    if (error != null) {
-                        Toast.makeText(this, "Failed to load events.", Toast.LENGTH_SHORT).show();
-                        return;
+                .whereEqualTo("status", "active")
+                .whereGreaterThanOrEqualTo("date", start.getTime())
+                .whereLessThanOrEqualTo("date", end.getTime())
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+
+                    // Clear the last day's events
+                    dateEventsList.clear();
+
+                    // Iterate through the fetched documents and add events to the list
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        Event event = doc.toObject(Event.class);
+                        if (event != null) {
+                            event.setId(doc.getId());
+                            dateEventsList.add(event);
+                        }
                     }
 
-                    if (snapshots != null) {
-                        myEventsList.clear(); // Clear old list
-                        for (DocumentSnapshot doc : snapshots) {
-                            Event event = doc.toObject(Event.class);
-                            if (event != null) {
-                                event.setId(doc.getId());
-                                myEventsList.add(event);
-                            }
-                        }
-                        adapter.notifyDataSetChanged();
-                    }
+                    // Notify the adapter
+                    adapter.notifyDataSetChanged();
                 });
     }
 
-    private void setupClickListeners() {
-        btnNotifications.setOnClickListener(v -> {
-            Toast.makeText(this, "Notifications section coming soon!", Toast.LENGTH_SHORT).show();
+    /**
+     * Handles routing for the bottom navigation bar and floating create button
+     */
+    private void setupNavigation() {
+
+        // Events Navigation Tab
+        findViewById(R.id.navEvents).setOnClickListener(v -> {
+            startActivity(new Intent(this, EventManagerEventsActivity.class));
+            finish();
         });
 
-        fabCreate.setOnClickListener(v -> {
-            startActivity(new Intent(EventManagerDashboardActivity.this, CreateEventActivity.class));
+        // Profile Navigation Tab
+        findViewById(R.id.navProfile).setOnClickListener(v -> {
+            startActivity(new Intent(this, EventManagerProfileActivity.class));
+            finish();
         });
 
-        navHome.setOnClickListener(v -> {
-            Toast.makeText(this, "Already on Home", Toast.LENGTH_SHORT).show();
-        });
-
-        navEvents.setOnClickListener(v -> {
-            Toast.makeText(this, "Events section coming soon!", Toast.LENGTH_SHORT).show();
-        });
-
-        navProfile.setOnClickListener(v -> {
-            startActivity(new Intent(EventManagerDashboardActivity.this, EventManagerProfileActivity.class));
+        // Floating Create Button
+        findViewById(R.id.fabCreate).setOnClickListener(v -> {
+            startActivity(new Intent(this, CreateEventActivity.class));
         });
     }
 }
