@@ -119,8 +119,9 @@ public class EventManagerDashboardActivity extends AppCompatActivity {
      */
     private void setupRecyclerView() {
 
+        // Route to the AttendeeListActivity
         adapter = new ManagerEventAdapter(dateEventsList, eventId -> {
-            Intent intent = new Intent(this, EditEventActivity.class);
+            Intent intent = new Intent(this, AttendeeListActivity.class);
             intent.putExtra("EVENT_ID", eventId);
             startActivity(intent);
         });

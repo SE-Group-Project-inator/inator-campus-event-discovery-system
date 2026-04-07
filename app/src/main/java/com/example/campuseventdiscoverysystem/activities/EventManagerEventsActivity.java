@@ -128,8 +128,10 @@ public class EventManagerEventsActivity extends AppCompatActivity {
                 intent.putExtra("EVENT_ID", eventId);
                 startActivity(intent);
             } else {
-                // Normal Mode: Route the user to the (will implement this activity)
-                Toast.makeText(this, "Will set to event analytics screen!", Toast.LENGTH_SHORT).show();
+                // Normal Mode: Route the user to the AttendeeListActivity
+                Intent intent = new Intent(this, AttendeeListActivity.class);
+                intent.putExtra("EVENT_ID", eventId);
+                startActivity(intent);
             }
         });
 
