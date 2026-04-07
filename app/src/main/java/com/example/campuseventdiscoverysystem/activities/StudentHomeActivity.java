@@ -112,7 +112,7 @@ public class StudentHomeActivity extends AppCompatActivity {
     // ── Count approved events ──
     private void loadEventsThisWeek() {
         db.collection("events")
-                .whereEqualTo("status", "approved")
+                .whereEqualTo("status", "active")
                 .get()
                 .addOnSuccessListener(query ->
                         tvEventsThisWeek.setText(query.size() + " Events")
@@ -150,7 +150,7 @@ public class StudentHomeActivity extends AppCompatActivity {
         upcomingEventsList.removeAllViews();
 
         db.collection("events")
-                .whereEqualTo("status", "approved")
+                .whereEqualTo("status", "active")
                 .get()
                 .addOnSuccessListener(query -> {
 

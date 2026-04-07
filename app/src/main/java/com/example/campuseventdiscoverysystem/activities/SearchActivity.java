@@ -162,7 +162,7 @@ public class SearchActivity extends AppCompatActivity {
 
     private void loadAllEvents() {
         db.collection("events")
-                .whereEqualTo("status", "approved")
+                .whereEqualTo("status", "active")
                 .get()
                 .addOnSuccessListener(query -> {
                     allEvents.clear();

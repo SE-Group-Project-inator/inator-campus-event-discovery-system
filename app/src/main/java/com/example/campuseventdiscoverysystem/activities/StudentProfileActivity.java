@@ -94,7 +94,7 @@ public class StudentProfileActivity extends AppCompatActivity {
 
         // Bottom Navigation
         navHome.setOnClickListener(v -> {
-            startActivity(new Intent(this, StudentHomeActivity.class));
+            startActivity(new Intent(this, RoleSelectActivity.class));
             finish();
         });
 
