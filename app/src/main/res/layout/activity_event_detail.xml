@@ -404,16 +404,15 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- ── Fixed Bottom: Add to Calendar (US-21) ── -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnAddToCalendar"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="Add to Calendar"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        android:textStyle="bold"
+        android:id="@+id/btnreservespot"
+        android:layout_width="182dp"
+        android:layout_height="55dp"
+        android:layout_gravity="center_horizontal"
         android:backgroundTint="@color/green_accept"
-        app:cornerRadius="0dp" />
+        android:text="@string/reserve_a_spot"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        app:cornerRadius="8dp" />
 
 </LinearLayout>

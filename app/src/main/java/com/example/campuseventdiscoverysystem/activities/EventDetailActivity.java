@@ -100,17 +100,36 @@ public class EventDetailActivity extends AppCompatActivity {
         String title      = in.getStringExtra("eventTitle");
         String venue      = in.getStringExtra("eventVenue");
         String desc       = in.getStringExtra("eventDescription");
-
+        String eventId    = in.getStringExtra("eventId");
         // Back
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+// --- ADD THIS NEW BLOCK FOR YOUR RESERVE BUTTON ---
+        View btnReserveSpot = findViewById(R.id.btnreservespot);
+        if (btnReserveSpot != null) {
+            btnReserveSpot.setOnClickListener(v -> {
+                Intent rsvpIntent = new Intent(EventDetailActivity.this, RsvpActivity.class);
 
-        // Top-right export icon — US-21
-        findViewById(R.id.btnExportCalendar).setOnClickListener(v ->
-                exportToCalendar(title, venue, desc, dateMillis));
+                // Pass the event details to the RSVP screen
+                rsvpIntent.putExtra("EVENT_ID", eventId);
+                rsvpIntent.putExtra("EVENT_TITLE", title);
+                rsvpIntent.putExtra("EVENT_VENUE", venue);
 
-        // Fixed bottom button — US-21
-        findViewById(R.id.btnAddToCalendar).setOnClickListener(v ->
-                exportToCalendar(title, venue, desc, dateMillis));
+                // RsvpActivity expects strings for date/time, so we convert the millis back
+                if (dateMillis > 0) {
+                    Date d = new Date(dateMillis);
+                    String dateStr = new SimpleDateFormat("EEEE, dd MMMM yyyy", Locale.getDefault()).format(d);
+                    String timeStr = new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(d);
+
+                    rsvpIntent.putExtra("EVENT_DATE", dateStr);
+                    rsvpIntent.putExtra("EVENT_TIME", timeStr);
+                } else {
+                    rsvpIntent.putExtra("EVENT_DATE", "Date TBD");
+                    rsvpIntent.putExtra("EVENT_TIME", "Time TBD");
+                }
+
+                startActivity(rsvpIntent);
+            });
+        }
 
         // Collapsible About section
         LinearLayout aboutToggle = findViewById(R.id.layoutAboutToggle);
@@ -129,7 +148,6 @@ public class EventDetailActivity extends AppCompatActivity {
         });
 
         // SEE WHO'S ATTENDING → show attendees (read-only for students)
-        String eventId = in.getStringExtra("eventId");
         String eventTitle = in.getStringExtra("eventTitle");
         findViewById(R.id.btnSeeAttendees).setOnClickListener(v -> {
             Intent attendeesIntent = new Intent(this, AttendeeListActivity.class);
@@ -143,34 +161,5 @@ public class EventDetailActivity extends AppCompatActivity {
     /**
      * US-21: Opens the system calendar app with event details pre-filled.
      */
-    private void exportToCalendar(String title, String venue,
-                                   String description, long startMillis) {
-        if (startMillis <= 0) {
-            Toast.makeText(this,
-                    "Event date not available for calendar export.",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
 
-        long endMillis = startMillis + (2 * 60 * 60 * 1000); // default 2-hour duration
-
-        Intent intent = new Intent(Intent.ACTION_INSERT)
-                .setData(CalendarContract.Events.CONTENT_URI)
-                .putExtra(CalendarContract.Events.TITLE,
-                        title != null ? title : "Campus Event")
-                .putExtra(CalendarContract.Events.EVENT_LOCATION,
-                        venue != null ? venue : "")
-                .putExtra(CalendarContract.Events.DESCRIPTION,
-                        description != null ? description : "")
-                .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, startMillis)
-                .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endMillis);
-
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        } else {
-            Toast.makeText(this,
-                    "No calendar app found on this device.",
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
 }

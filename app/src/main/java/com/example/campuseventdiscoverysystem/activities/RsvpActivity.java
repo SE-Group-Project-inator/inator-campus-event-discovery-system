@@ -1,5 +1,5 @@
 package com.example.campuseventdiscoverysystem.activities;
-
+import com.google.firebase.auth.FirebaseAuth;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -15,10 +15,11 @@ import androidx.work.WorkManager;
 import java.util.concurrent.TimeUnit;
 import com.example.campuseventdiscoverysystem.R;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-
+import android.provider.CalendarContract;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -39,10 +40,16 @@ public class RsvpActivity extends AppCompatActivity {
     private FirebaseFirestore db;
 
     private String eventId;
-    private String studentId = "student_123"; // Hardcoded for testing
+    private String studentId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            studentId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        } else {
+            // Fallback just in case the login drops
+            studentId = "unknown_student";
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rsvp);
 
@@ -73,14 +80,19 @@ public class RsvpActivity extends AppCompatActivity {
         btnConfirmRsvp = findViewById(R.id.btnConfirmRsvp);
         btnDone = findViewById(R.id.btnDone);
         btnCancelRsvp = findViewById(R.id.btnCancelRsvp);
+// 5. Initialize Buttons
+        btnConfirmRsvp = findViewById(R.id.btnConfirmRsvp);
+        btnDone = findViewById(R.id.btnDone);
+        btnCancelRsvp = findViewById(R.id.btnCancelRsvp);
 
+        // Add your new Calendar button link here:
+        MaterialButton btnAddToCalendar = findViewById(R.id.btnAddToCalendar); // Use whatever ID is in your XML
+        if (btnAddToCalendar != null) {
+            btnAddToCalendar.setOnClickListener(v -> exportToCalendar());
+        }
         // 6. Unpack Intent Data & Add Fallback for Testing
         Intent intent = getIntent();
         eventId = intent.getStringExtra("EVENT_ID");
-
-        if (eventId == null || eventId.isEmpty()) {
-            eventId = "tech_fest_2025";
-        }
 
         String title = intent.getStringExtra("EVENT_TITLE");
         String date = intent.getStringExtra("EVENT_DATE");
@@ -348,6 +360,51 @@ public class RsvpActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+    private void exportToCalendar() {
+        String title = tvEventTitle != null ? tvEventTitle.getText().toString() : "Campus Event";
+        String venue = tvCardVenue != null ? tvCardVenue.getText().toString() : "";
+        String dateStr = tvCardDate != null ? tvCardDate.getText().toString() : "";
+        String timeStr = tvCardTime != null ? tvCardTime.getText().toString() : "";
+
+        long startMillis = 0;
+        try {
+            // Extract the start time and combine it with the date
+            String startTimeStr = timeStr;
+            if (timeStr != null && timeStr.contains("-")) {
+                startTimeStr = timeStr.split("-")[0].trim();
+            }
+            String dateTimeStr = dateStr + " " + startTimeStr;
+
+            SimpleDateFormat sdf = new SimpleDateFormat("EEEE, dd MMMM yyyy hh:mm a", Locale.getDefault());
+            Date eventDate = sdf.parse(dateTimeStr);
+
+            if (eventDate != null) {
+                startMillis = eventDate.getTime();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (startMillis <= 0) {
+            Toast.makeText(this, "Event date not available for calendar export.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        long endMillis = startMillis + (2 * 60 * 60 * 1000); // Default 2-hour duration
+
+        Intent intent = new Intent(Intent.ACTION_INSERT)
+                .setData(CalendarContract.Events.CONTENT_URI)
+                .putExtra(CalendarContract.Events.TITLE, title)
+                .putExtra(CalendarContract.Events.EVENT_LOCATION, venue)
+                .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, startMillis)
+                .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endMillis);
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "No calendar app found on this device.", Toast.LENGTH_SHORT).show();
         }
     }
 }

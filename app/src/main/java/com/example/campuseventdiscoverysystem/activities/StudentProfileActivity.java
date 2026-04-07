@@ -69,10 +69,10 @@ public class StudentProfileActivity extends AppCompatActivity {
                 Toast.makeText(this, "Notifications coming soon!", Toast.LENGTH_SHORT).show()
         );
 
-        // Attendance History
-//        btnAttendanceHistory.setOnClickListener(v ->
-//                startActivity(new Intent(this, AttendanceHistoryActivity.class))
-//        );
+// Attendance History
+        btnAttendanceHistory.setOnClickListener(v ->
+                startActivity(new Intent(StudentProfileActivity.this, EventHistoryActivity.class))
+        );
 
         // My Societies
 //        btnMySocieties.setOnClickListener(v ->

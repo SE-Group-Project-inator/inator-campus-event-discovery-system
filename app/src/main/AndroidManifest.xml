@@ -34,6 +34,9 @@
         <activity android:name=".activities.EventManagerDashboardActivity"/>
         <activity android:name=".activities.CreateEventActivity"/>
         <activity android:name=".activities.EditEventActivity"/>
+        <activity android:name=".activities.RsvpActivity"/>
+        <activity android:name=".activities.NotificationsActivity"/>
+        <activity android:name=".activities.EventHistoryActivity"/>
         <activity android:name=".activities.EventManagerProfileActivity"/>
         <activity android:name=".activities.EventManagerEventsActivity"/>
 
