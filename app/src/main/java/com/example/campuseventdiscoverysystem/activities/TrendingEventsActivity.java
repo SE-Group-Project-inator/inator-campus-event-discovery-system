@@ -74,7 +74,13 @@ public class TrendingEventsActivity extends AppCompatActivity {
         });
 
         // navHome is the current screen — no-op
-        findViewById(R.id.navHome).setOnClickListener(v -> { /* already here */ });
+        // ✅ Home button → go to StudentHomeActivity
+        findViewById(R.id.navHome).setOnClickListener(v -> {
+            Intent intent = new Intent(this, StudentHomeActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // avoids stacking
+            startActivity(intent);
+            finish();
+        });
     }
 
     private void loadTrendingEvents() {
