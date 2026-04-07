@@ -65,8 +65,6 @@ public class TrendingEventsActivity extends AppCompatActivity {
     }
 
     private void setupNavigation() {
-        // Top-right X → go back to previous screen
-        findViewById(R.id.btnSignOut).setOnClickListener(v -> finish());
 
         findViewById(R.id.navSignOut).setOnClickListener(v -> {
             mAuth.signOut();
