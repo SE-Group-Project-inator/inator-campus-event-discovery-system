@@ -8,16 +8,16 @@
     android:gravity="center_vertical"
     android:paddingTop="10dp"
     android:paddingBottom="10dp"
-    android:paddingLeft="4dp"
-    android:paddingRight="4dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
     android:background="?attr/selectableItemBackground">
 
-    <!-- Avatar circle -->
+    <!-- Circular avatar with initials -->
     <androidx.cardview.widget.CardView
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="12dp"
-        app:cardCornerRadius="20dp"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginEnd="14dp"
+        app:cardCornerRadius="22dp"
         app:cardBackgroundColor="@color/btn_eventmgr"
         app:cardElevation="0dp">
         <TextView
@@ -27,37 +27,29 @@
             android:gravity="center"
             android:text="?"
             android:textColor="@color/white"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
     </androidx.cardview.widget.CardView>
 
-    <!-- Roll number + name -->
-    <LinearLayout
+    <!-- Name - RollNumber -->
+    <TextView
+        android:id="@+id/tvAttendeeName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:text="Name - 00000000"
+        android:textColor="@color/text_dark"
+        android:textSize="14sp"
+        android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvRollNumber"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="26100257"
-            android:textColor="@color/text_dark"
-            android:textSize="13sp"
-            android:textStyle="bold" />
+    <!-- Hidden roll number field kept for search compatibility -->
+    <TextView
+        android:id="@+id/tvRollNumber"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
 
-        <TextView
-            android:id="@+id/tvAttendeeName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textColor="#888888"
-            android:textSize="11sp"
-            android:visibility="gone" />
-    </LinearLayout>
-
-    <!-- Register / Registered button (US-32) -->
+    <!-- Confirm button — visible only in event manager view (US-32) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnConfirm"
         android:layout_width="wrap_content"
@@ -66,6 +58,7 @@
         android:textSize="10sp"
         android:textColor="@color/white"
         android:backgroundTint="@color/btn_eventmgr"
+        android:visibility="gone"
         app:cornerRadius="6dp" />
 
 </LinearLayout>

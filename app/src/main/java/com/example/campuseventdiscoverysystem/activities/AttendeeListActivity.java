@@ -1,11 +1,11 @@
 package com.example.campuseventdiscoverysystem.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.campuseventdiscoverysystem.R;
 import com.example.campuseventdiscoverysystem.adapters.AttendeeAdapter;
 import com.example.campuseventdiscoverysystem.models.Registration;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
@@ -22,8 +23,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * US-27: Event Manager Attendee List — Event Analytics screen.
- * US-32: Seat/Registration Confirmation — "+ Register" → "✓ Registered".
+ * US-27: Attendee List — shows who is attending an event.
+ * US-32: Seat/Registration Confirmation — event manager can confirm registrations.
+ * readOnly=true → student view (Reserve A Spot button visible, confirm buttons hidden)
+ * readOnly=false → event manager view (confirm buttons visible per row)
  */
 public class AttendeeListActivity extends AppCompatActivity {
 
@@ -31,12 +34,9 @@ public class AttendeeListActivity extends AppCompatActivity {
     private final List<Registration> allRegistrations = new ArrayList<>();
     private final List<Registration> displayList = new ArrayList<>();
     private AttendeeAdapter adapter;
-    private TextView tvTotalRegistered, tvCheckInRate, tvWaitlist,
-            tvCapacityPct, tvEmpty;
-    private ProgressBar progressCapacity;
+    private TextView tvEmpty;
     private String eventId;
     private boolean readOnly;
-    private int eventCapacity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,24 +45,13 @@ public class AttendeeListActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
-        eventId       = getIntent().getStringExtra("eventId");
-        readOnly      = getIntent().getBooleanExtra("readOnly", false);
-        eventCapacity = getIntent().getIntExtra("eventCapacity", 0);
-        String eventTitle = getIntent().getStringExtra("eventTitle");
-        String eventVenue = getIntent().getStringExtra("eventVenue");
+        // Accept both "eventId" (from EventDetailActivity) and "EVENT_ID" (from EventManagerDashboard)
+        eventId = getIntent().getStringExtra("eventId");
+        if (eventId == null) eventId = getIntent().getStringExtra("EVENT_ID");
 
-        ((TextView) findViewById(R.id.tvEventName))
-                .setText(eventTitle != null ? eventTitle : "Event");
-        if (eventVenue != null) {
-            ((TextView) findViewById(R.id.tvEventVenue)).setText(eventVenue);
-        }
+        readOnly = getIntent().getBooleanExtra("readOnly", false);
 
-        tvTotalRegistered = findViewById(R.id.tvTotalRegistered);
-        tvCheckInRate     = findViewById(R.id.tvCheckInRate);
-        tvWaitlist        = findViewById(R.id.tvWaitlist);
-        tvCapacityPct     = findViewById(R.id.tvCapacityPct);
-        progressCapacity  = findViewById(R.id.progressCapacity);
-        tvEmpty           = findViewById(R.id.tvEmpty);
+        tvEmpty = findViewById(R.id.tvEmpty);
 
         setupRecyclerView();
         setupSearch();
@@ -101,9 +90,7 @@ public class AttendeeListActivity extends AppCompatActivity {
                         && r.getUserEmail().toLowerCase().contains(lower);
                 boolean matchesName = r.getUserName() != null
                         && r.getUserName().toLowerCase().contains(lower);
-                if (matchesEmail || matchesName) {
-                    displayList.add(r);
-                }
+                if (matchesEmail || matchesName) displayList.add(r);
             }
         }
         adapter.notifyDataSetChanged();
@@ -112,11 +99,21 @@ public class AttendeeListActivity extends AppCompatActivity {
 
     private void setupNavigation() {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
-        // "View List" scrolls to the list (it's already visible, so no-op visually)
-        findViewById(R.id.btnViewList).setOnClickListener(v -> {
-            RecyclerView rv = findViewById(R.id.rvAttendees);
-            rv.smoothScrollToPosition(0);
-        });
+
+        MaterialButton btnReserve = findViewById(R.id.btnReserve);
+        if (readOnly) {
+            // Student view — "Reserve A Spot!" opens RsvpActivity
+            btnReserve.setVisibility(View.VISIBLE);
+            btnReserve.setOnClickListener(v -> {
+                Intent intent = new Intent(this, RsvpActivity.class);
+                intent.putExtra("EVENT_ID", eventId);
+                intent.putExtra("EVENT_TITLE", getIntent().getStringExtra("eventTitle"));
+                startActivity(intent);
+            });
+        } else {
+            // Event manager view — bottom button not needed
+            btnReserve.setVisibility(View.GONE);
+        }
     }
 
     private void loadAttendees() {
@@ -128,44 +125,19 @@ public class AttendeeListActivity extends AppCompatActivity {
                     if (error != null || snapshots == null) return;
 
                     allRegistrations.clear();
-                    int confirmedCount = 0;
-
                     for (DocumentSnapshot doc : snapshots) {
                         Registration reg = doc.toObject(Registration.class);
                         if (reg != null) {
                             reg.setId(doc.getId());
                             allRegistrations.add(reg);
-                            if (reg.isConfirmed()) confirmedCount++;
                         }
                     }
 
                     displayList.clear();
                     displayList.addAll(allRegistrations);
                     adapter.notifyDataSetChanged();
-
-                    updateStats(confirmedCount);
                     updateEmptyState();
                 });
-    }
-
-    private void updateStats(int confirmedCount) {
-        int total = allRegistrations.size();
-        tvTotalRegistered.setText(String.valueOf(total));
-
-        int checkInPct = total > 0 ? (confirmedCount * 100 / total) : 0;
-        tvCheckInRate.setText(checkInPct + "%");
-
-        // Waitlist = unconfirmed registrations
-        tvWaitlist.setText(String.valueOf(total - confirmedCount));
-
-        // Capacity
-        if (eventCapacity > 0) {
-            int capPct = Math.min(total * 100 / eventCapacity, 100);
-            tvCapacityPct.setText(capPct + "%");
-            progressCapacity.setProgress(capPct);
-        } else {
-            tvCapacityPct.setText("–");
-        }
     }
 
     private void updateEmptyState() {
@@ -180,7 +152,8 @@ public class AttendeeListActivity extends AppCompatActivity {
     }
 
     /**
-     * US-32: Confirms a student's registration (marks confirmed = true).
+     * US-32: Confirms a student's registration (sets confirmed = true in Firestore).
+     * Only reachable from event manager view (readOnly=false).
      */
     private void confirmRegistration(Registration registration, int position) {
         Map<String, Object> updates = new HashMap<>();
@@ -195,12 +168,6 @@ public class AttendeeListActivity extends AppCompatActivity {
                     Toast.makeText(this,
                             "Registration confirmed for " + registration.getUserName(),
                             Toast.LENGTH_SHORT).show();
-                    // Refresh stats
-                    int confirmed = 0;
-                    for (Registration r : allRegistrations) {
-                        if (r.isConfirmed()) confirmed++;
-                    }
-                    updateStats(confirmed);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this,
