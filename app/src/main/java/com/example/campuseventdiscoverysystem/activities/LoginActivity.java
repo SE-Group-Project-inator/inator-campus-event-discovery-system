@@ -20,12 +20,25 @@ import com.example.campuseventdiscoverysystem.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * Activity responsible for authenticating users based on their selected role.
+ * This class handles Firebase Email/Password authentication, password resets,
+ * and performs a secondary role-validation check against Firestore to ensure
+ * users access the correct dashboard.
+ */
 public class LoginActivity extends AppCompatActivity {
 
+    /** Instance of Firebase Auth used for sign-in and password reset operations. */
     private FirebaseAuth mAuth;
+    /** Instance of Firebase Firestore used to verify user roles. */
     private FirebaseFirestore db;
+    /** The role selected by the user in the previous activity (e.g., "admin", "student", "event_manager"). */
     private String selectedRole;
 
+    /**
+     * Initializes the activity, retrieves the intent data, and triggers UI styling.
+     * @param savedInstanceState If the activity is being re-initialized, this contains the most recent data.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +54,11 @@ public class LoginActivity extends AppCompatActivity {
         setupClickListeners();
     }
 
+    /**
+     * Dynamically updates the UI colors, text labels, and backgrounds based on
+     * the {@code selectedRole}. This ensures the login screen matches the branding
+     * of the specific user type (Admin, Student, or Event Manager).
+     */
     private void applyRoleTheme() {
         RelativeLayout topBar = findViewById(R.id.topBar);
         TextView tvRole = findViewById(R.id.tvRoleTitle);
@@ -86,6 +104,10 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sets up listeners for all interactive elements, including the login button,
+     * back button, forgot password text, and sign-up navigation.
+     */
     private void setupClickListeners() {
         Button btnLogin = findViewById(R.id.btnLogin);
         EditText etEmail = findViewById(R.id.etEmail);
@@ -148,6 +170,10 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Displays an AlertDialog that prompts the user for their email address
+     * to send a Firebase password reset link.
+     */
     private void showForgotPasswordDialog() {
         EditText emailInput = new EditText(this);
         emailInput.setHint("Enter your email address");
@@ -181,6 +207,13 @@ public class LoginActivity extends AppCompatActivity {
                 .show();
     }
 
+    /**
+     * Cross-references the authenticated UID with the users collection in Firestore.
+     * If the role in the database does not match the role selected during login,
+     * the user is signed out to prevent unauthorized access to the wrong dashboard.
+     * * @param uid The unique Firebase Authentication ID of the user.
+     * @param btnLogin Reference to the login button to re-enable it if verification fails.
+     */
     private void verifyRoleAndNavigate(String uid, Button btnLogin) {
         Log.d("LOGIN_DEBUG", "Verifying role for UID: " + uid);
         db.collection("users").document(uid).get()

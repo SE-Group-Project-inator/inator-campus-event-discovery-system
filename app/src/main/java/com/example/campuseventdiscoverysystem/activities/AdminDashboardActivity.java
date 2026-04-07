@@ -16,17 +16,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
-
+/**
+ * Activity class that serves as the administrative dashboard for the Campus Event Discovery System.
+ * This dashboard allows administrators to review pending event requests, view system statistics,
+ * and filter events based on urgency or recency.
+ */
 public class AdminDashboardActivity extends AppCompatActivity {
 
+    /** Instance of Firestore database for data operations. */
     private FirebaseFirestore db;
+    /** Instance of Firebase Auth for managing admin sessions. */
     private FirebaseAuth mAuth;
+    /** UI components to display the count of pending and approved events. */
     private TextView tvPendingCount, tvApprovedCount;
+    /** The list currently displayed in the RecyclerView. */
     private final List<Event> pendingList = new ArrayList<>();
+    /** Adapter for the pending events RecyclerView. */
     private PendingEventAdapter adapter;
+    /** Master list of all pending events retrieved from the database. */
     private final List<Event> allPendingList = new ArrayList<>();
+    /** The currently selected filter mode: "all", "urgent", or "newest". */
     private String currentFilter = "all";
 
+    /**
+     * Initializes the activity, sets up Firebase instances, and triggers UI initialization.
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down,
+     * this contains the data it most recently supplied.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +61,11 @@ public class AdminDashboardActivity extends AppCompatActivity {
         listenToPendingEvents();
     }
 
+    /**
+     * Configures the RecyclerView used to display pending events.
+     * Sets up the layout manager and initializes the adapter with callback logic
+     * for event approval and rejection.
+     */
     private void setupRecyclerView() {
         RecyclerView rv = findViewById(R.id.rvPendingEvents);
         adapter = new PendingEventAdapter(
@@ -56,6 +77,10 @@ public class AdminDashboardActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
     }
 
+    /**
+     * Sets up click listeners for navigation elements, including sign out
+     * and redirection to the full events list.
+     */
     private void setupNavigation() {
         // Sign out
         findViewById(R.id.navSignOut).setOnClickListener(v -> {
@@ -65,15 +90,18 @@ public class AdminDashboardActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // See all
         // See all → Events List
         findViewById(R.id.tvSeeAll).setOnClickListener(v ->
                 startActivity(new Intent(this, EventsListActivity.class)));
 
-// Events nav button
+        // Events nav button
         findViewById(R.id.navEvents).setOnClickListener(v ->
                 startActivity(new Intent(this, EventsListActivity.class)));
     }
+
+    /**
+     * Initializes the Material Chips used for filtering the pending events list.
+     */
     private void setupFilters() {
         com.google.android.material.chip.Chip chipAll = findViewById(R.id.chipAll);
         com.google.android.material.chip.Chip chipUrgent = findViewById(R.id.chipUrgent);
@@ -93,6 +121,12 @@ public class AdminDashboardActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Filters and sorts the {@code allPendingList} based on the {@code currentFilter} value.
+     * - "urgent": Events occurring within the next 7 days.
+     * - "newest": Events sorted by date in descending order.
+     * - "all": Displays all events without specific sorting/filtering.
+     */
     private void applyFilter() {
         List<Event> filtered = new ArrayList<>();
         Date today = new Date();
@@ -127,6 +161,10 @@ public class AdminDashboardActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
+    /**
+     * Fetches current statistics from Firestore, such as the total count of
+     * pending and active events, and updates the UI accordingly.
+     */
     private void loadStats() {
         db.collection("events")
                 .whereEqualTo("status", "pending_approval")
@@ -141,6 +179,10 @@ public class AdminDashboardActivity extends AppCompatActivity {
                         tvApprovedCount.setText(String.valueOf(snap.size())));
     }
 
+    /**
+     * Sets up a real-time Firestore listener to monitor changes in events with "pending_approval" status.
+     * Automatically updates the UI when events are added or modified.
+     */
     private void listenToPendingEvents() {
         db.collection("events")
                 .whereEqualTo("status", "pending_approval")
@@ -159,6 +201,11 @@ public class AdminDashboardActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Updates the status of a specific event in Firestore.
+     * @param eventId The unique document ID of the event.
+     * @param status The new status to apply (e.g., "active" for approval, "rejected" for denial).
+     */
     private void updateEventStatus(String eventId, String status) {
         db.collection("events").document(eventId)
                 .update("status", status)

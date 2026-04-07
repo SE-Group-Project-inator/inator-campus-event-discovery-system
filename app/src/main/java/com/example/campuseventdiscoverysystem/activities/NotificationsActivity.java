@@ -20,14 +20,34 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Activity responsible for displaying a list of notifications for a specific student.
+ * It listens for real-time updates from a Firebase Firestore sub-collection and
+ * updates the UI dynamically as new notifications arrive.
+ */
 public class NotificationsActivity extends AppCompatActivity {
 
+    /** The RecyclerView used to display the notification items. */
     private RecyclerView rvNotifications;
+
+    /** The adapter used to bind {@code NotificationItem} data to the RecyclerView. */
     private NotificationAdapter adapter;
+
+    /** The data source list containing notification items retrieved from the database. */
     private List<NotificationItem> notificationList;
+
+    /** Instance of Firebase Firestore for database operations. */
     private FirebaseFirestore db;
+
+    /** The unique identifier for the student whose notifications are being retrieved. */
     private String studentId = "student_123"; // Our hardcoded test user
 
+    /**
+     * Initializes the activity, sets up the RecyclerView and adapter,
+     * and triggers the database listener.
+     * @param savedInstanceState If the activity is being re-initialized, this
+     * contains the most recent data.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +72,11 @@ public class NotificationsActivity extends AppCompatActivity {
         listenForNotifications();
     }
 
+    /**
+     * Establishes a real-time listener on the Firestore "notifications" sub-collection
+     * for the current student. When data changes in the database, the local list is
+     * cleared and repopulated, and the adapter is notified to refresh the UI.
+     */
     private void listenForNotifications() {
         // We look inside: users -> student_123 -> notifications
         db.collection("users").document(studentId).collection("notifications")

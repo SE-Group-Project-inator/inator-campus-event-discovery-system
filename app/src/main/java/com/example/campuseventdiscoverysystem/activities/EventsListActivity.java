@@ -14,15 +14,32 @@ import com.google.firebase.firestore.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Activity class that displays a comprehensive list of all events in the system.
+ * It provides administrative controls to filter events by their approval status
+ * (Approved vs. Pending) using interactive CardView statistics.
+ */
 public class EventsListActivity extends AppCompatActivity {
 
+    /** The Firestore database instance for retrieving and updating event data. */
     private FirebaseFirestore db;
+    /** The master list containing every event retrieved from the database. */
     private final List<Event> allEvents = new ArrayList<>();
+    /** The subset of {@code allEvents} currently being displayed in the UI based on active filters. */
     private final List<Event> displayList = new ArrayList<>();
+    /** The adapter used to manage and display event items in the RecyclerView. */
     private PendingEventAdapter adapter;
+    /** TextViews used to display the numeric count of total and approved events. */
     private TextView tvTotalCount, tvApprovedCount;
+    /** Tracks the current UI filter state. Possible values: "all", "approved", "pending". */
     private String currentCardFilter = "all"; // "all", "approved", "pending"
 
+    /**
+     * Initializes the activity, sets up the RecyclerView, and attaches event listeners
+     * to navigation and filter components.
+     * @param savedInstanceState A mapping from String keys to various Parcelable values
+     * if the activity is re-initialized.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +64,11 @@ public class EventsListActivity extends AppCompatActivity {
         loadAllEvents();
     }
 
+    /**
+     * Configures click listeners for the dashboard-style CardViews.
+     * Clicking these cards filters the event list to show only pending or only approved events,
+     * while providing visual feedback via alpha (transparency) changes.
+     */
     private void setupCardFilters() {
         CardView cardTotal = findViewById(R.id.cardTotal);
         CardView cardApproved = findViewById(R.id.cardApproved);
@@ -70,6 +92,10 @@ public class EventsListActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Logic to filter the {@code allEvents} master list into the {@code displayList}.
+     * This method is called whenever the user changes a filter or the underlying data updates.
+     */
     private void applyCardFilter() {
         displayList.clear();
         for (Event e : allEvents) {
@@ -86,6 +112,11 @@ public class EventsListActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
+    /**
+     * Establishes a real-time SnapshotListener on the Firestore "events" collection.
+     * The list is ordered chronologically by date. This method also recalculates
+     * the total and approved counts for the stat header.
+     */
     private void loadAllEvents() {
         db.collection("events")
                 .orderBy("date", Query.Direction.ASCENDING)
@@ -109,6 +140,11 @@ public class EventsListActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Updates the status of a specific event document in Firestore.
+     * @param eventId The unique identifier of the event document to update.
+     * @param status The new status string to apply (e.g., "active" or "rejected").
+     */
     private void updateStatus(String eventId, String status) {
         db.collection("events").document(eventId)
                 .update("status", status)

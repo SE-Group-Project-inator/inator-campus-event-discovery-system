@@ -20,13 +20,30 @@ import com.example.campuseventdiscoverysystem.models.HistoryItem;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Activity responsible for displaying the user's event participation history.
+ * It retrieves RSVP data from Firebase Firestore and displays it in a list format,
+ * while also calculating participation statistics.
+ */
 public class EventHistoryActivity extends AppCompatActivity {
 
+    /** The RecyclerView used to display the list of history items. */
     private RecyclerView rvEventHistory;
+
+    /** The adapter used to bind the {@code HistoryItem} data to the RecyclerView. */
     private HistoryAdapter adapter;
+
+    /** The data source containing the list of events the user has interacted with. */
     private List<HistoryItem> historyList;
+
+    /** TextViews used to display calculated statistics for total and monthly attendance. */
     private TextView tvTotalAttended, tvThisMonth;
 
+    /**
+     * Initializes the activity, sets up the UI components, and begins the data loading process.
+     * * @param savedInstanceState If the activity is being re-initialized after
+     * previously being shut down, this contains the most recent data.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +73,13 @@ public class EventHistoryActivity extends AppCompatActivity {
         updateStats();
     }
 
+    /**
+     * Retrieves the logged-in student's ID and queries the Firebase Firestore "rsvps"
+     * collection group to fetch all associated event history.
+     * <p>
+     * On successful retrieval, it parses document fields into {@code HistoryItem}
+     * objects and triggers a UI refresh.
+     */
     private void loadHistoryData() {
         // 1. Get the real logged-in student ID
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -102,6 +126,11 @@ public class EventHistoryActivity extends AppCompatActivity {
                     e.printStackTrace();
                 });
     }
+
+    /**
+     * Iterates through the current {@code historyList} to calculate and update
+     * the "Total Attended" and "This Month" statistic counters on the UI.
+     */
     private void updateStats() {
         int attendedCount = 0;
         int marchCount = 0;
