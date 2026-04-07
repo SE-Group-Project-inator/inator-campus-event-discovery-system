@@ -357,3 +357,19 @@ We surveyed 16 LUMS students (6–7 March 2026) to validate our assumptions.
 | US-32 | Seat Assignment Confirmation | Event Mgr | 3 | Low | Halfway |
 | US-33 | Student Profile | Student | 2 | Low | Halfway |
 | US-34 | Edit Event Manager Profile | Event Mgr | 2 | Low | Halfway |
+
+
+***UML Code Diagram**
+<img width="1124" height="457" alt="image" src="https://github.com/user-attachments/assets/f767a743-0cd1-4f2e-a5de-2556fc500f47" />
+<img width="1675" height="536" alt="image" src="https://github.com/user-attachments/assets/05107b24-e8b3-4c1c-b0a5-15876ba1cbfe" />
+<img width="584" height="231" alt="image" src="https://github.com/user-attachments/assets/f0b59b93-3fe3-44c9-aff6-35da489a1a9e" />
+<img width="706" height="275" alt="image" src="https://github.com/user-attachments/assets/bdeb246f-b2b5-4881-93de-c5dd8ed391fd" />
+<img width="642" height="438" alt="image" src="https://github.com/user-attachments/assets/3c400cee-6d47-4f45-9820-a7b730f6079a" />
+<img width="1333" height="321" alt="image" src="https://github.com/user-attachments/assets/ab2de29d-e1d2-4550-b59b-ef7cf8cbbd78" />
+<img width="1798" height="580" alt="image" src="https://github.com/user-attachments/assets/5327b397-725b-4724-bbda-8a49142def9b" />
+<img width="773" height="292" alt="image" src="https://github.com/user-attachments/assets/6e8ea33d-003e-4896-bb17-5cb6db65b91c" />
+
+
+
+
+
