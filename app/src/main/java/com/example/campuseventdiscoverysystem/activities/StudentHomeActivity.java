@@ -22,6 +22,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * StudentHomeActivity
+ *
+ * Main dashboard screen for students.
+ * Displays greeting, event statistics, and a list of upcoming events.
+ * Integrates with Firebase Authentication and Firestore.
+ */
 public class StudentHomeActivity extends AppCompatActivity {
 
     // UI elements
@@ -30,18 +37,24 @@ public class StudentHomeActivity extends AppCompatActivity {
     private LinearLayout navHome, navSearch, navTickets, navProfile;
     private LinearLayout upcomingEventsList;
 
-    // Firebase
+    // Firebase instances
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
+    /**
+     * Called when activity is created.
+     * Initializes UI components, Firebase, and loads data.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_homepage);
 
+        // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
+        // Bind UI elements
         tvEventsThisWeek   = findViewById(R.id.tvEventsThisWeek);
         tvRegistered       = findViewById(R.id.tvRegistered);
         tvSaved            = findViewById(R.id.tvSaved);
@@ -53,55 +66,50 @@ public class StudentHomeActivity extends AppCompatActivity {
         navProfile         = findViewById(R.id.navProfile);
         upcomingEventsList = findViewById(R.id.upcomingEventsList);
 
-        // Load data
+        // Load dashboard data
         loadGreeting();
         loadEventsThisWeek();
         loadRegisteredCount();
         loadSavedCount();
         loadUpcomingEvents();
 
-        // Notification bell
+        // Notification button (placeholder)
         btnNotification.setOnClickListener(v ->
                 Toast.makeText(this,
                         "Notifications coming soon!", Toast.LENGTH_SHORT).show()
         );
 
-//        // Trending Events card → US-10
-//        findViewById(R.id.cardTrending).setOnClickListener(v ->
-//                startActivity(new Intent(this, TrendingEventsActivity.class))
-//        );
-
-//        // ✅ FIXED: Stay Updated card click → go to placeholder screen
-//        findViewById(R.id.stayUpdatedCard).setOnClickListener(v ->
-//                startActivity(new Intent(this, PersonalizedRecommendationsActivity.class))
-//        );
-
         // Bottom Navigation
         navHome.setOnClickListener(v -> {
-            // already here
+            // Already on home screen
         });
 
+        // Navigate to Search screen
         navSearch.setOnClickListener(v ->
                 startActivity(new Intent(this, SearchActivity.class))
         );
 
+        // Tickets (not implemented yet)
         navTickets.setOnClickListener(v ->
                 Toast.makeText(this,
                         "Tickets coming soon!", Toast.LENGTH_SHORT).show()
         );
 
+        // Navigate to Profile screen
         navProfile.setOnClickListener(v ->
                 startActivity(new Intent(this, StudentProfileActivity.class))
         );
 
+        // "See All" → opens Trending Events screen
         TextView tvSeeAllTrending = findViewById(R.id.tvSeeAllTrending);
-
         tvSeeAllTrending.setOnClickListener(v ->
                 startActivity(new Intent(this, TrendingEventsActivity.class))
         );
     }
 
-    // ── Greeting ──
+    /**
+     * Loads and displays the user's greeting using their first name.
+     */
     private void loadGreeting() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) return;
@@ -120,7 +128,9 @@ public class StudentHomeActivity extends AppCompatActivity {
                 });
     }
 
-    // ── Count approved events ──
+    /**
+     * Loads the total number of active events.
+     */
     private void loadEventsThisWeek() {
         db.collection("events")
                 .whereEqualTo("status", "active")
@@ -133,7 +143,9 @@ public class StudentHomeActivity extends AppCompatActivity {
                 );
     }
 
-    // ── Registered count ──
+    /**
+     * Loads the count of events the user has registered for.
+     */
     private void loadRegisteredCount() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) return;
@@ -150,14 +162,21 @@ public class StudentHomeActivity extends AppCompatActivity {
                 );
     }
 
-    // ── Saved count ──
+    /**
+     * Loads saved events count.
+     * Currently hardcoded (feature not implemented yet).
+     */
     private void loadSavedCount() {
         tvSaved.setText("0 Saved");
     }
 
-    // ── Load ALL approved events ──
+    /**
+     * Loads all active events and dynamically displays them
+     * in the upcoming events list.
+     */
     private void loadUpcomingEvents() {
 
+        // Clear previous views
         upcomingEventsList.removeAllViews();
 
         db.collection("events")
@@ -165,6 +184,7 @@ public class StudentHomeActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(query -> {
 
+                    // Show empty state if no events
                     if (query.isEmpty()) {
                         TextView empty = new TextView(this);
                         empty.setText("No events available!");
@@ -174,24 +194,29 @@ public class StudentHomeActivity extends AppCompatActivity {
                         return;
                     }
 
+                    // Loop through each event
                     for (QueryDocumentSnapshot doc : query) {
 
                         String title = doc.getString("title");
                         String venue = doc.getString("venue");
                         Timestamp date = doc.getTimestamp("date");
 
+                        // Inflate event card layout
                         View itemView = LayoutInflater.from(this)
                                 .inflate(R.layout.item_upcoming,
                                         upcomingEventsList, false);
 
+                        // Set event title
                         TextView tvTitle = itemView.findViewById(R.id.tvTitle);
                         if (tvTitle != null && title != null)
                             tvTitle.setText(title);
 
+                        // Set event location
                         TextView tvLocation = itemView.findViewById(R.id.tvLocation);
                         if (tvLocation != null && venue != null)
                             tvLocation.setText("📍 " + venue);
 
+                        // Format and display event date
                         if (date != null) {
                             Date d = date.toDate();
 
@@ -208,7 +233,7 @@ public class StudentHomeActivity extends AppCompatActivity {
                                                 .format(d).toUpperCase());
                         }
 
-                        // Open EventDetailActivity when student taps an upcoming event card
+                        // Prepare event data for detail screen
                         String eventIdFinal   = doc.getId();
                         String titleFinal     = title;
                         String venueFinal     = venue;
@@ -219,6 +244,7 @@ public class StudentHomeActivity extends AppCompatActivity {
                                 ? doc.getLong("registeredCount").intValue() : 0;
                         long   dateMillis     = date != null ? date.toDate().getTime() : 0;
 
+                        // Navigate to EventDetailActivity on click
                         itemView.setOnClickListener(v -> {
                             Intent intent = new Intent(this, EventDetailActivity.class);
                             intent.putExtra("eventId", eventIdFinal);
@@ -231,6 +257,7 @@ public class StudentHomeActivity extends AppCompatActivity {
                             startActivity(intent);
                         });
 
+                        // Add event card to layout
                         upcomingEventsList.addView(itemView);
                     }
                 })

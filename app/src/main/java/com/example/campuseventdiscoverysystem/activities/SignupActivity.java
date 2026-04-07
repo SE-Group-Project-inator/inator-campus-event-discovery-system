@@ -1,3 +1,14 @@
+/**
+ * Activity responsible for user registration (Sign Up) for all roles:
+ * Student, Event Manager, and Admin.
+ *
+ * <p>This activity handles:
+ * - Role-based UI customization
+ * - Input validation for registration fields
+ * - Firebase Authentication account creation
+ * - Firestore user profile storage
+ * </p>
+ */
 package com.example.campuseventdiscoverysystem.activities;
 
 import android.content.Intent;
@@ -26,8 +37,16 @@ public class SignupActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+
+    /**
+     * Role selected from previous screen (student / event_manager / admin)
+     */
     private String selectedRole;
 
+    /**
+     * Called when activity is created.
+     * Initializes Firebase instances, retrieves role, and sets up UI.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,13 +56,16 @@ public class SignupActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         selectedRole = getIntent().getStringExtra("role");
 
-        // If no role passed, default to student
+        // Default role fallback
         if (selectedRole == null) selectedRole = "student";
 
         applyRoleTheme();
         setupClickListeners();
     }
 
+    /**
+     * Applies UI colors, titles, and visibility based on selected role.
+     */
     private void applyRoleTheme() {
         RelativeLayout topBar = findViewById(R.id.topBar);
         TextView tvRoleTitle = findViewById(R.id.tvRoleTitle);
@@ -78,6 +100,9 @@ public class SignupActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sets up all click listeners and handles signup validation + Firebase logic.
+     */
     private void setupClickListeners() {
         ImageButton btnBack = findViewById(R.id.btnBack);
         Button btnSignUp = findViewById(R.id.btnSignUp);
@@ -105,6 +130,7 @@ public class SignupActivity extends AppCompatActivity {
         tvGoToLogin.setOnClickListener(v -> finish());
 
         btnSignUp.setOnClickListener(v -> {
+
             String name = etName.getText().toString().trim();
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
@@ -137,6 +163,7 @@ public class SignupActivity extends AppCompatActivity {
 
             // Role specific validation
             Map<String, Object> extraData = new HashMap<>();
+
             if (selectedRole.equals("student")) {
                 String sid = etStudentId.getText().toString().trim();
                 if (TextUtils.isEmpty(sid)) {
@@ -146,6 +173,7 @@ public class SignupActivity extends AppCompatActivity {
                 extraData.put("studentId", sid);
                 extraData.put("department", spinnerDept.getText().toString());
                 extraData.put("batch", spinnerBatch.getText().toString());
+
             } else if (selectedRole.equals("event_manager")) {
                 String sname = etSocietyName.getText().toString().trim();
                 if (TextUtils.isEmpty(sname)) {
@@ -155,6 +183,7 @@ public class SignupActivity extends AppCompatActivity {
                 extraData.put("societyName", sname);
                 extraData.put("position", spinnerPosition.getText().toString());
                 extraData.put("phone", etPhone.getText().toString().trim());
+
             } else if (selectedRole.equals("admin")) {
                 String eid = etEmployeeId.getText().toString().trim();
                 if (TextUtils.isEmpty(eid)) {
@@ -170,7 +199,9 @@ public class SignupActivity extends AppCompatActivity {
 
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnSuccessListener(authResult -> {
+
                         String uid = authResult.getUser().getUid();
+
                         Map<String, Object> userMap = new HashMap<>();
                         userMap.put("name", name);
                         userMap.put("email", email);
@@ -181,6 +212,7 @@ public class SignupActivity extends AppCompatActivity {
                         db.collection("users").document(uid).set(userMap)
                                 .addOnSuccessListener(unused -> {
                                     Toast.makeText(this, "Account created!", Toast.LENGTH_SHORT).show();
+
                                     Intent intent = new Intent(this, LoginActivity.class);
                                     intent.putExtra("role", selectedRole);
                                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -193,6 +225,7 @@ public class SignupActivity extends AppCompatActivity {
                                     btnSignUp.setText("CREATE ACCOUNT");
                                     Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                 });
+
                     })
                     .addOnFailureListener(e -> {
                         btnSignUp.setEnabled(true);

@@ -18,20 +18,47 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Calendar;
 
+/**
+ * Activity that displays the student's profile screen.
+ *
+ * <p>This screen shows:
+ * <ul>
+ *     <li>Student name and email</li>
+ *     <li>Total events attended</li>
+ *     <li>Events attended this month</li>
+ *     <li>Following count (future feature)</li>
+ *     <li>Navigation options and settings</li>
+ * </ul>
+ * </p>
+ */
 public class StudentProfileActivity extends AppCompatActivity {
 
-    // UI elements
+    /** Student name display */
     private TextView tvStudentName, tvStudentEmail;
+
+    /** Event statistics display */
     private TextView tvEventsAttended, tvThisMonth, tvFollowing;
+
+    /** Action buttons */
     private CardView btnAttendanceHistory, btnMySocieties;
     private CardView btnQRCheckIn, btnSignOut, btnPrivacySettings;
+
+    /** Notification icon */
     private ImageButton btnNotification;
+
+    /** Bottom navigation containers */
     private LinearLayout navHome, navSearch, navTickets, navProfile;
 
-    // Firebase
+    /** Firebase authentication instance */
     private FirebaseAuth mAuth;
+
+    /** Firestore database instance */
     private FirebaseFirestore db;
 
+    /**
+     * Called when activity is created.
+     * Initializes UI, Firebase, and loads all user data.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,35 +91,20 @@ public class StudentProfileActivity extends AppCompatActivity {
         loadThisMonthCount();
         loadFollowingCount();
 
-        // Notification bell
+        // Notification button
         btnNotification.setOnClickListener(v ->
                 Toast.makeText(this, "Notifications coming soon!", Toast.LENGTH_SHORT).show()
         );
 
-//         Attendance History
-//        btnAttendanceHistory.setOnClickListener(v ->
-//                startActivity(new Intent(this, AttendanceHistoryActivity.class))
-//        );
-//
-//         My Societies
-//        btnMySocieties.setOnClickListener(v ->
-//                startActivity(new Intent(this, SocietiesActivity.class))
-//        );
-//
-//         QR Check In
-//        btnQRCheckIn.setOnClickListener(v ->
-//                startActivity(new Intent(this, QRActivity.class))
-//        );
-
-        // Privacy Settings
+        // Privacy settings navigation
         btnPrivacySettings.setOnClickListener(v ->
                 startActivity(new Intent(this, PrivacySettingsActivity.class))
         );
 
-        // Sign Out
+        // Sign out user
         btnSignOut.setOnClickListener(v -> signOut());
 
-        // Bottom Navigation
+        // Bottom navigation
         navHome.setOnClickListener(v -> {
             startActivity(new Intent(this, StudentHomeActivity.class));
             finish();
@@ -107,16 +119,17 @@ public class StudentProfileActivity extends AppCompatActivity {
         );
 
         navProfile.setOnClickListener(v -> {
-            // already on profile, do nothing
+            // already on profile
         });
     }
 
-    // ── Load name and email from /users/{uid} ──
+    /**
+     * Loads student name and email from Firestore /users collection.
+     */
     private void loadStudentProfile() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) return;
 
-        // Set email from Auth immediately as fallback
         tvStudentEmail.setText(user.getEmail());
 
         db.collection("users")
@@ -136,8 +149,9 @@ public class StudentProfileActivity extends AppCompatActivity {
                 );
     }
 
-
-    // Fields used: userId, status
+    /**
+     * Loads total number of confirmed event attendances.
+     */
     private void loadAttendedCount() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) return;
@@ -154,19 +168,20 @@ public class StudentProfileActivity extends AppCompatActivity {
                 );
     }
 
-
-    // Fields used: userId, status, createdAt
+    /**
+     * Loads number of events attended in the current month.
+     */
     private void loadThisMonthCount() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) return;
 
-        // Get first day of current month as Timestamp
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_MONTH, 1);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
+
         Timestamp startOfMonth = new Timestamp(cal.getTime());
 
         db.collection("rsvps")
@@ -182,14 +197,16 @@ public class StudentProfileActivity extends AppCompatActivity {
                 );
     }
 
-    // ── Following count ──
-    // No following collection in DB yet — set to 0 for now
+    /**
+     * Loads following count (placeholder until Firestore feature is added).
+     */
     private void loadFollowingCount() {
-        // TODO: update when following collection is added to Firestore
         tvFollowing.setText("0");
     }
 
-    // ── Sign out ──
+    /**
+     * Signs out the current user and clears activity stack.
+     */
     private void signOut() {
         mAuth.signOut();
         Intent intent = new Intent(this, RoleSelectActivity.class);

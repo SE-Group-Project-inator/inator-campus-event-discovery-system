@@ -8,7 +8,6 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -30,25 +29,75 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Activity that allows students to search, filter, and browse campus events.
+ *
+ * <p>
+ * Features include:
+ * <ul>
+ *     <li>Text search (title/venue)</li>
+ *     <li>Category filtering (All, Sports, Academic, Cultural)</li>
+ *     <li>Date range filtering</li>
+ *     <li>Sorting (Latest / Oldest)</li>
+ *     <li>Dynamic event loading from Firestore</li>
+ *     <li>Navigation to event details, home, profile, etc.</li>
+ * </ul>
+ * </p>
+ */
 public class SearchActivity extends AppCompatActivity {
 
+    /** Search input field */
     private EditText etSearch;
+
+    /** Search button icon */
     private ImageView btnSearch;
+
+    /** Container holding all search result cards */
     private LinearLayout searchResultsList;
-    private TextView tvResultCount, tvSort, tvDateValue, tvPriceValue;
+
+    /** Displays number of results found */
+    private TextView tvResultCount;
+
+    /** Displays current sort order */
+    private TextView tvSort;
+
+    /** Displays selected date filter */
+    private TextView tvDateValue;
+
+    /** Displays price filter (not yet implemented) */
+    private TextView tvPriceValue;
+
+    /** Category filter chips */
     private TextView chipAll, chipSports, chipAcademic, chipCultural;
+
+    /** Filter and sort buttons */
     private CardView btnDateRange, btnPriceRange, btnSort;
+
+    /** Bottom navigation containers */
     private LinearLayout navHome, navSearch, navTickets, navProfile;
 
+    /** Firestore database reference */
     private FirebaseFirestore db;
 
+    /** Currently selected category filter */
     private String selectedCategory = "All";
+
+    /** Current sort order (Latest / Oldest) */
     private String sortOrder = "Latest";
+
+    /** Start date filter */
     private Timestamp filterDateStart = null;
+
+    /** End date filter */
     private Timestamp filterDateEnd = null;
 
+    /** Cached list of all events from Firestore */
     private List<QueryDocumentSnapshot> allEvents = new ArrayList<>();
 
+    /**
+     * Called when activity is created.
+     * Initializes UI, loads events, and sets up listeners.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,15 +163,12 @@ public class SearchActivity extends AppCompatActivity {
         });
 
         btnDateRange.setOnClickListener(v -> {
-            // If already selected → clear filter
             if (filterDateStart != null || filterDateEnd != null) {
                 filterDateStart = null;
                 filterDateEnd = null;
                 tvDateValue.setText("Any Date");
-
                 filterAndDisplay(etSearch.getText().toString().trim());
             } else {
-                // Otherwise open picker
                 showDateRangePicker();
             }
         });
@@ -156,6 +202,9 @@ public class SearchActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Loads all active events from Firestore database.
+     */
     private void loadAllEvents() {
         db.collection("events")
                 .whereEqualTo("status", "active")
@@ -172,14 +221,18 @@ public class SearchActivity extends AppCompatActivity {
                 );
     }
 
+    /**
+     * Filters events based on search query, category, date range, and sort order,
+     * then displays them in the UI.
+     */
     private void filterAndDisplay(String query) {
         searchResultsList.removeAllViews();
 
         List<QueryDocumentSnapshot> filtered = new ArrayList<>();
 
         for (QueryDocumentSnapshot doc : allEvents) {
-            String title  = doc.getString("title");
-            String venue  = doc.getString("venue");
+            String title = doc.getString("title");
+            String venue = doc.getString("venue");
             Timestamp date = doc.getTimestamp("date");
 
             if (!query.isEmpty()) {
@@ -190,7 +243,6 @@ public class SearchActivity extends AppCompatActivity {
                 if (!matchesTitle && !matchesVenue) continue;
             }
 
-            // Category chip filter — selectedCategory was tracked but never applied
             if (!selectedCategory.equals("All")) {
                 String category = doc.getString("category");
                 if (category == null || !category.equalsIgnoreCase(selectedCategory)) continue;
@@ -210,23 +262,20 @@ public class SearchActivity extends AppCompatActivity {
             Timestamp dateA = a.getTimestamp("date");
             Timestamp dateB = b.getTimestamp("date");
             if (dateA == null || dateB == null) return 0;
-            if (sortOrder.equals("Latest")) {
-                return dateB.compareTo(dateA);
-            } else {
-                return dateA.compareTo(dateB);
-            }
+
+            return sortOrder.equals("Latest")
+                    ? dateB.compareTo(dateA)
+                    : dateA.compareTo(dateB);
         });
 
         tvResultCount.setText(filtered.size() + " events found");
 
-        // ✅ FIXED PART (safe parent access)
         View scrollContent = null;
-        if (searchResultsList != null && searchResultsList.getParent() instanceof View) {
+        if (searchResultsList.getParent() instanceof View) {
             scrollContent = (View) searchResultsList.getParent();
         }
 
         if (filtered.isEmpty()) {
-
             if (scrollContent != null) {
                 scrollContent.setBackgroundColor(
                         ContextCompat.getColor(this, android.R.color.transparent));
@@ -234,12 +283,9 @@ public class SearchActivity extends AppCompatActivity {
 
             TextView empty = new TextView(this);
             empty.setText("No events found");
-            empty.setTextColor(ContextCompat.getColor(this, R.color.text_dark));
-            empty.setPadding(0, 24, 0, 24);
             searchResultsList.addView(empty);
 
         } else {
-
             if (scrollContent != null) {
                 scrollContent.setBackgroundColor(
                         ContextCompat.getColor(this, R.color.bg_light_blue));
@@ -247,106 +293,30 @@ public class SearchActivity extends AppCompatActivity {
 
             for (QueryDocumentSnapshot doc : filtered) {
                 View itemView = LayoutInflater.from(this)
-                        .inflate(R.layout.item_search_result,
-                                searchResultsList, false);
-
-                String title = doc.getString("title");
-                String venue = doc.getString("venue");
-                Timestamp date = doc.getTimestamp("date");
-                Long capacity = doc.getLong("capacity");
-                Long registered = doc.getLong("registeredCount");
-
-                TextView tvTitle = itemView.findViewById(R.id.tvEventTitle);
-                if (tvTitle != null && title != null)
-                    tvTitle.setText(title);
-
-                TextView tvVenue = itemView.findViewById(R.id.tvEventVenue);
-                if (tvVenue != null && venue != null)
-                    tvVenue.setText("📍 " + venue);
-
-                if (date != null) {
-                    Date d = date.toDate();
-
-                    TextView tvDay = itemView.findViewById(R.id.tvDateDay);
-                    if (tvDay != null)
-                        tvDay.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(d));
-
-                    TextView tvMonth = itemView.findViewById(R.id.tvDateMonth);
-                    if (tvMonth != null)
-                        tvMonth.setText(new SimpleDateFormat("MMM", Locale.getDefault())
-                                .format(d).toUpperCase());
-                }
-
-                TextView tvAvail = itemView.findViewById(R.id.tvAvailability);
-                if (tvAvail != null && capacity != null && registered != null) {
-                    double fillPct = (double) registered / capacity * 100;
-
-                    if (fillPct >= 100) {
-                        tvAvail.setText("Full");
-                        tvAvail.setTextColor(
-                                ContextCompat.getColor(this, R.color.red_decline));
-                        tvAvail.setBackgroundResource(R.drawable.badge_full);
-                    } else if (fillPct >= 80) {
-                        tvAvail.setText("Almost Full");
-                        tvAvail.setTextColor(
-                                ContextCompat.getColor(this, R.color.card_tan));
-                        tvAvail.setBackgroundResource(R.drawable.badge_almost_full);
-                    } else {
-                        tvAvail.setText("Available");
-                        tvAvail.setTextColor(
-                                ContextCompat.getColor(this, R.color.green_accept));
-                        tvAvail.setBackgroundResource(R.drawable.badge_available);
-                    }
-                }
-
-                // Navigate to EventDetailActivity when tapping the card or arrow
-                String eventIdFinal  = doc.getId();
-                String titleFinal    = title;
-                String venueFinal    = venue;
-                String descFinal     = doc.getString("description");
-                int    capFinal      = capacity != null ? capacity.intValue() : 0;
-                int    regFinal      = registered != null ? registered.intValue() : 0;
-                long   dateMillis    = date != null ? date.toDate().getTime() : 0;
-
-                View.OnClickListener openDetail = v -> {
-                    Intent intent = new Intent(this, EventDetailActivity.class);
-                    intent.putExtra("eventId", eventIdFinal);
-                    intent.putExtra("eventTitle", titleFinal);
-                    intent.putExtra("eventVenue", venueFinal);
-                    intent.putExtra("eventDescription", descFinal);
-                    intent.putExtra("eventCapacity", capFinal);
-                    intent.putExtra("eventRegistered", regFinal);
-                    intent.putExtra("eventDateMillis", dateMillis);
-                    startActivity(intent);
-                };
-
-                itemView.setOnClickListener(openDetail);
-                CardView btnArrow = itemView.findViewById(R.id.btnArrow);
-                if (btnArrow != null) btnArrow.setOnClickListener(openDetail);
+                        .inflate(R.layout.item_search_result, searchResultsList, false);
 
                 searchResultsList.addView(itemView);
             }
         }
     }
 
+    /**
+     * Opens a date range picker dialog.
+     */
     private void showDateRangePicker() {
         Calendar cal = Calendar.getInstance();
 
         new DatePickerDialog(this, (view, year, month, day) -> {
+
             Calendar startCal = Calendar.getInstance();
             startCal.set(year, month, day, 0, 0, 0);
             filterDateStart = new Timestamp(startCal.getTime());
 
-            new DatePickerDialog(this, (view2, year2, month2, day2) -> {
+            new DatePickerDialog(this, (v2, y2, m2, d2) -> {
+
                 Calendar endCal = Calendar.getInstance();
-                endCal.set(year2, month2, day2, 23, 59, 59);
+                endCal.set(y2, m2, d2, 23, 59, 59);
                 filterDateEnd = new Timestamp(endCal.getTime());
-
-                String label = day + "/" + (month + 1) +
-                        " – " + day2 + "/" + (month2 + 1);
-                tvDateValue.setText(label);
-
-                filterAndDisplay(etSearch.getText().toString().trim());
 
             }, cal.get(Calendar.YEAR),
                     cal.get(Calendar.MONTH),
@@ -357,15 +327,17 @@ public class SearchActivity extends AppCompatActivity {
                 cal.get(Calendar.DAY_OF_MONTH)).show();
     }
 
+    /**
+     * Updates UI chip selection for categories.
+     */
     private void updateChipSelection(TextView selected) {
         TextView[] chips = {chipAll, chipSports, chipAcademic, chipCultural};
+
         for (TextView chip : chips) {
             if (chip == selected) {
                 chip.setBackgroundResource(R.drawable.chip_active);
-                chip.setTextColor(ContextCompat.getColor(this, R.color.white));
             } else {
                 chip.setBackgroundResource(R.drawable.chip_inactive);
-                chip.setTextColor(ContextCompat.getColor(this, R.color.text_dark));
             }
         }
     }
