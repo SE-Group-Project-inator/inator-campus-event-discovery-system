@@ -34,7 +34,6 @@ public class SearchActivity extends AppCompatActivity {
 
     private EditText etSearch;
     private ImageView btnSearch;
-    private ImageButton btnBack;
     private LinearLayout searchResultsList;
     private TextView tvResultCount, tvSort, tvDateValue, tvPriceValue;
     private TextView chipAll, chipSports, chipAcademic, chipCultural;
@@ -59,7 +58,6 @@ public class SearchActivity extends AppCompatActivity {
 
         etSearch        = findViewById(R.id.etSearch);
         btnSearch       = findViewById(R.id.btnSearch);
-        btnBack         = findViewById(R.id.btnBack);
         searchResultsList = findViewById(R.id.searchResultsList);
         tvResultCount   = findViewById(R.id.tvResultCount);
         tvSort          = findViewById(R.id.tvSort);
@@ -90,8 +88,6 @@ public class SearchActivity extends AppCompatActivity {
         btnSearch.setOnClickListener(v ->
                 filterAndDisplay(etSearch.getText().toString().trim())
         );
-
-        btnBack.setOnClickListener(v -> finish());
 
         chipAll.setOnClickListener(v -> {
             selectedCategory = "All";
@@ -162,7 +158,7 @@ public class SearchActivity extends AppCompatActivity {
 
     private void loadAllEvents() {
         db.collection("events")
-                .whereEqualTo("status", "approved")
+                .whereEqualTo("status", "active")
                 .get()
                 .addOnSuccessListener(query -> {
                     allEvents.clear();
@@ -192,6 +188,12 @@ public class SearchActivity extends AppCompatActivity {
                 boolean matchesVenue = venue != null &&
                         venue.toLowerCase().contains(query.toLowerCase());
                 if (!matchesTitle && !matchesVenue) continue;
+            }
+
+            // Category chip filter — selectedCategory was tracked but never applied
+            if (!selectedCategory.equals("All")) {
+                String category = doc.getString("category");
+                if (category == null || !category.equalsIgnoreCase(selectedCategory)) continue;
             }
 
             if (filterDateStart != null && date != null) {
@@ -297,12 +299,30 @@ public class SearchActivity extends AppCompatActivity {
                     }
                 }
 
+                // Navigate to EventDetailActivity when tapping the card or arrow
+                String eventIdFinal  = doc.getId();
+                String titleFinal    = title;
+                String venueFinal    = venue;
+                String descFinal     = doc.getString("description");
+                int    capFinal      = capacity != null ? capacity.intValue() : 0;
+                int    regFinal      = registered != null ? registered.intValue() : 0;
+                long   dateMillis    = date != null ? date.toDate().getTime() : 0;
+
+                View.OnClickListener openDetail = v -> {
+                    Intent intent = new Intent(this, EventDetailActivity.class);
+                    intent.putExtra("eventId", eventIdFinal);
+                    intent.putExtra("eventTitle", titleFinal);
+                    intent.putExtra("eventVenue", venueFinal);
+                    intent.putExtra("eventDescription", descFinal);
+                    intent.putExtra("eventCapacity", capFinal);
+                    intent.putExtra("eventRegistered", regFinal);
+                    intent.putExtra("eventDateMillis", dateMillis);
+                    startActivity(intent);
+                };
+
+                itemView.setOnClickListener(openDetail);
                 CardView btnArrow = itemView.findViewById(R.id.btnArrow);
-                if (btnArrow != null) {
-                    btnArrow.setOnClickListener(v ->
-                            Toast.makeText(this,
-                                    "Opening: " + title, Toast.LENGTH_SHORT).show());
-                }
+                if (btnArrow != null) btnArrow.setOnClickListener(openDetail);
 
                 searchResultsList.addView(itemView);
             }

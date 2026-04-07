@@ -153,6 +153,7 @@
                             android:textSize="14sp"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <!-- LOGIN BUTTON (was missing from original layout in some cases) -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnLogin"
                         android:layout_width="match_parent"
@@ -175,7 +176,37 @@
                         android:layout_gravity="center"
                         android:layout_marginTop="14dp"
                         android:paddingTop="8dp"
-                        android:paddingBottom="8dp"/>
+                        android:paddingBottom="8dp"
+                        android:clickable="true"
+                        android:focusable="true"/>
+
+                    <!-- ── FIX: Sign Up link ── -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Don't have an account? "
+                            android:textSize="13sp"
+                            android:textColor="@color/text_dark"
+                            android:alpha="0.7"/>
+
+                        <TextView
+                            android:id="@+id/tvSignUp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sign Up"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_link"
+                            android:clickable="true"
+                            android:focusable="true"/>
+                    </LinearLayout>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

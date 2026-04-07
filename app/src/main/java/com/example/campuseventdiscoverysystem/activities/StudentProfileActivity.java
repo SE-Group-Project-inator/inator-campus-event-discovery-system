@@ -94,7 +94,7 @@ public class StudentProfileActivity extends AppCompatActivity {
 
         // Bottom Navigation
         navHome.setOnClickListener(v -> {
-            startActivity(new Intent(this, StudentHomeActivity.class));
+            startActivity(new Intent(this, RoleSelectActivity.class));
             finish();
         });
 
@@ -192,10 +192,8 @@ public class StudentProfileActivity extends AppCompatActivity {
     // ── Sign out ──
     private void signOut() {
         mAuth.signOut();
-        // TODO: uncomment when LoginActivity is confirmed ready
-        // Intent intent = new Intent(this, LoginActivity.class);
-        // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        // startActivity(intent);
-        finish();
+        Intent intent = new Intent(this, RoleSelectActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 }

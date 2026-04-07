@@ -1,50 +1,52 @@
 package com.example.campuseventdiscoverysystem.adapters;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.campuseventdiscoverysystem.R;
 import com.example.campuseventdiscoverysystem.models.Event;
-import com.google.android.material.button.MaterialButton;
+
 import java.util.List;
+
+// WILL EDIT THIS CLASS
 
 public class ManagerEventAdapter extends RecyclerView.Adapter<ManagerEventAdapter.ViewHolder> {
 
-    /** Called when the event card is tapped — opens EditEventActivity (existing feature). */
+    // Interface to handle clicks so clicking opens the Edit Event screen
     public interface OnItemClickListener {
         void onItemClick(String eventId);
     }
 
-    /** Called when "View Attendees" is tapped — opens AttendeeListActivity (US-27). */
-    public interface OnAttendeesClickListener {
-        void onAttendeesClick(Event event);
-    }
-
     private final List<Event> eventList;
-    private final OnItemClickListener clickListener;
-    private final OnAttendeesClickListener attendeesListener;
+    private final OnItemClickListener listener;
+    private boolean isEditMode = false;
+    private boolean showStatusBadge = true;
 
-    public ManagerEventAdapter(List<Event> eventList,
-                                OnItemClickListener clickListener,
-                                OnAttendeesClickListener attendeesListener) {
-        this.eventList = eventList;
-        this.clickListener = clickListener;
-        this.attendeesListener = attendeesListener;
+    public void setShowStatusBadge(boolean show) {
+        this.showStatusBadge = show;
     }
 
-    /** Backwards-compatible constructor for callers that don't need attendees. */
-    public ManagerEventAdapter(List<Event> eventList, OnItemClickListener clickListener) {
-        this(eventList, clickListener, null);
+    public ManagerEventAdapter(List<Event> eventList, OnItemClickListener listener) {
+        this.eventList = eventList;
+        this.listener = listener;
+    }
+
+    public void setEditMode(boolean editMode) {
+        this.isEditMode = editMode;
+        notifyDataSetChanged(); // This forces the list to redraw with the new colors!
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_manager_event, parent, false);
+                .inflate(R.layout.item_event_history, parent, false);
         return new ViewHolder(view);
     }
 
@@ -52,46 +54,72 @@ public class ManagerEventAdapter extends RecyclerView.Adapter<ManagerEventAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Event event = eventList.get(position);
 
-        holder.tvEventTitle.setText(
-                event.getTitle() != null ? event.getTitle() : "Untitled Event");
+        holder.tvEventTitle.setText(event.getTitle() != null ? event.getTitle() : "Untitled Event");
 
         String status = event.getStatus();
         if ("active".equals(status)) {
-            holder.tvEventStatus.setText("Approved");
-            holder.tvEventStatus.setBackgroundTintList(
-                    holder.itemView.getContext().getColorStateList(R.color.green_accept));
+            // Set text on the TextView
+            holder.tvStatus.setText("Approved");
+            // Set color on the CardView
+            holder.cardStatus.setCardBackgroundColor(Color.parseColor("#4CAF50"));
         } else if ("rejected".equals(status)) {
-            holder.tvEventStatus.setText("Declined");
-            holder.tvEventStatus.setBackgroundTintList(
-                    holder.itemView.getContext().getColorStateList(R.color.red_decline));
+            holder.tvStatus.setText("Declined");
+            holder.cardStatus.setCardBackgroundColor(Color.parseColor("#E53935"));
         } else {
-            holder.tvEventStatus.setText("Pending");
-            // default orange (#FFB300) set in XML
+            holder.tvStatus.setText("Pending");
+            holder.cardStatus.setCardBackgroundColor(Color.parseColor("#FFB300"));
         }
+
+        if (showStatusBadge) {
+            holder.cardStatus.setVisibility(View.VISIBLE);
+        } else {
+            holder.cardStatus.setVisibility(View.GONE);
+        }
+
+        // Optional but recommended: Bind your dates to the UI since you have the views!
+        if (event.getDate() != null) {
+            java.util.Date date = event.getDate().toDate();
+            holder.tvMonth.setText(new java.text.SimpleDateFormat("MMM", java.util.Locale.US).format(date).toUpperCase());
+            holder.tvDay.setText(new java.text.SimpleDateFormat("dd", java.util.Locale.US).format(date));
+        }
+
+        if (holder.itemView instanceof com.google.android.material.card.MaterialCardView) {
+            com.google.android.material.card.MaterialCardView rootCard =
+                    (com.google.android.material.card.MaterialCardView) holder.itemView;
+
+            if (isEditMode) {
+                // Light grey background when in edit mode
+                rootCard.setCardBackgroundColor(Color.parseColor("#E0E0E0"));
+            } else {
+                // Standard white background
+                rootCard.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
+            }
+        }
+
 
         holder.itemView.setOnClickListener(v -> {
-            if (clickListener != null) clickListener.onItemClick(event.getId());
+            if (listener != null) {
+                listener.onItemClick(event.getId());
+            }
         });
-
-        if (attendeesListener != null) {
-            holder.btnViewAttendees.setOnClickListener(v ->
-                    attendeesListener.onAttendeesClick(event));
-        }
     }
 
     @Override
-    public int getItemCount() { return eventList.size(); }
+    public int getItemCount() {
+        return eventList.size();
+    }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvEventTitle;
-        MaterialButton tvEventStatus;
-        MaterialButton btnViewAttendees;
+        TextView tvEventTitle, tvStatus, tvMonth, tvDay;
+        com.google.android.material.card.MaterialCardView cardStatus;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvEventTitle    = itemView.findViewById(R.id.tvEventTitle);
-            tvEventStatus   = itemView.findViewById(R.id.tvEventStatus);
-            btnViewAttendees = itemView.findViewById(R.id.btnViewAttendees);
+            tvEventTitle = itemView.findViewById(R.id.tvHistoryEventTitle);
+            tvStatus = itemView.findViewById(R.id.tvStatus);
+            tvMonth = itemView.findViewById(R.id.tvMonth);
+            tvDay = itemView.findViewById(R.id.tvDay);
+            cardStatus = itemView.findViewById(R.id.cardStatus);
         }
     }
 }

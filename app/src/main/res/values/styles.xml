@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="PurpleCalendarTheme" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/btn_eventmgr</item>
+    </style>
+
+
+    <style name="PurplePickerTheme" parent="Theme.MaterialComponents.Light.Dialog">
+        <item name="colorPrimary">@color/btn_eventmgr</item>
+        <item name="colorAccent">@color/btn_eventmgr</item>
+
+        <item name="android:buttonBarPositiveButtonStyle">@style/PickerButtonStyle</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/PickerButtonStyle</item>
+
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:textColorPrimary">@color/text_dark</item>
+    </style>
+
+    <style name="PickerButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/btn_eventmgr</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+</resources>

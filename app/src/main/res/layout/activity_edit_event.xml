@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_menu_revert"
+            android:src="@drawable/ic_arrow_back"
             app:tint="@color/white" />
 
         <TextView
@@ -30,7 +30,7 @@
             android:layout_toEndOf="@id/btnBack"
             android:text="Edit Event"
             android:textColor="@color/white"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textStyle="bold" />
     </RelativeLayout>
 
@@ -96,6 +96,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:background="@android:drawable/editbox_background"
+                    android:textColor="@color/text_dark"
                     android:paddingHorizontal="12dp"
                     android:layout_marginBottom="16dp"/>
 
@@ -105,17 +106,45 @@
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
                     android:background="@android:drawable/editbox_background"
+                    android:textColor="@color/text_dark"
                     android:gravity="top|start"
                     android:padding="12dp"
                     android:layout_marginBottom="16dp"/>
 
                 <TextView android:text="Venue" android:textColor="@color/text_dark" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                <Spinner
-                    android:id="@+id/spVenue"
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:background="@android:drawable/btn_dropdown"
-                    android:layout_marginBottom="16dp"/>
+                    android:background="@android:drawable/editbox_background"
+                    android:layout_marginBottom="16dp">
+                    <Spinner
+                        android:id="@+id/spVenue"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="16dp"
+                        android:text="▼"
+                        android:textColor="@color/text_dark"
+                        android:textSize="12sp" />
+                </RelativeLayout>
+
+                <TextView android:text="Date" android:textColor="@color/text_dark" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <EditText
+                    android:id="@+id/etDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@android:drawable/editbox_background"
+                    android:textColor="@color/text_dark"
+                    android:clickable="true"
+                    android:focusable="false"
+                    android:hint="Tap to select date"
+                    android:paddingHorizontal="12dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -129,12 +158,16 @@
                         android:layout_weight="1"
                         android:orientation="vertical"
                         android:layout_marginEnd="8dp">
-                        <TextView android:text="Date" android:textColor="@color/text_dark" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:text="Start Time" android:textColor="@color/text_dark" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                         <EditText
-                            android:id="@+id/etDate"
+                            android:id="@+id/etStartTime"
                             android:layout_width="match_parent"
                             android:layout_height="50dp"
                             android:background="@android:drawable/editbox_background"
+                            android:textColor="@color/text_dark"
+                            android:hint="Tap to select"
+                            android:focusable="false"
+                            android:clickable="true"
                             android:paddingHorizontal="12dp"/>
                     </LinearLayout>
 
@@ -144,23 +177,41 @@
                         android:layout_weight="1"
                         android:orientation="vertical"
                         android:layout_marginStart="8dp">
-                        <TextView android:text="Time" android:textColor="@color/text_dark" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:text="End Time" android:textColor="@color/text_dark" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                         <EditText
-                            android:id="@+id/etTime"
+                            android:id="@+id/etEndTime"
                             android:layout_width="match_parent"
                             android:layout_height="50dp"
                             android:background="@android:drawable/editbox_background"
+                            android:textColor="@color/text_dark"
+                            android:hint="Tap to select"
+                            android:focusable="false"
+                            android:clickable="true"
                             android:paddingHorizontal="12dp"/>
                     </LinearLayout>
                 </LinearLayout>
 
                 <TextView android:text="Category" android:textColor="@color/text_dark" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                <Spinner
-                    android:id="@+id/spCategory"
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:background="@android:drawable/btn_dropdown"
-                    android:layout_marginBottom="16dp"/>
+                    android:background="@android:drawable/editbox_background"
+                    android:layout_marginBottom="16dp">
+                    <Spinner
+                        android:id="@+id/spCategory"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@null" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="16dp"
+                        android:text="▼"
+                        android:textColor="@color/text_dark"
+                        android:textSize="12sp" />
+                </RelativeLayout>
 
                 <TextView android:text="Max Capacity" android:textColor="@color/text_dark" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                 <EditText
@@ -168,6 +219,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:background="@android:drawable/editbox_background"
+                    android:textColor="@color/text_dark"
                     android:inputType="number"
                     android:paddingHorizontal="12dp"
                     android:layout_marginBottom="24dp"/>
@@ -176,7 +228,7 @@
                     android:id="@+id/btnSaveChanges"
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
-                    android:text="✓ Save Changes"
+                    android:text="Save"
                     android:textColor="@color/white"
                     android:textSize="16sp"
                     android:textStyle="bold"

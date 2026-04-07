@@ -2,6 +2,8 @@ package com.example.campuseventdiscoverysystem.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -9,7 +11,10 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.campuseventdiscoverysystem.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -84,19 +89,34 @@ public class LoginActivity extends AppCompatActivity {
         EditText etEmail = findViewById(R.id.etEmail);
         EditText etPassword = findViewById(R.id.etPassword);
         ImageButton btnBack = findViewById(R.id.btnBack);
+        TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
+        TextView tvSignUp = findViewById(R.id.tvSignUp); // Add this TextView to your layout
 
         btnBack.setOnClickListener(v -> finish());
 
+        // ── FIX 1: Forgot Password ──
+        tvForgotPassword.setOnClickListener(v -> showForgotPasswordDialog());
+
+        // ── FIX 2: Sign Up navigation ──
+        if (tvSignUp != null) {
+            tvSignUp.setOnClickListener(v -> {
+                Intent intent = new Intent(this, SignupActivity.class);
+                intent.putExtra("role", selectedRole);
+                startActivity(intent);
+            });
+        }
+
+        // ── FIX 3: Login button (was missing signup/student/event_manager routing) ──
         btnLogin.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
-            if (email.isEmpty()) {
+            if (TextUtils.isEmpty(email)) {
                 etEmail.setError("Email is required");
                 etEmail.requestFocus();
                 return;
             }
-            if (password.isEmpty()) {
+            if (TextUtils.isEmpty(password)) {
                 etPassword.setError("Password is required");
                 etPassword.requestFocus();
                 return;
@@ -113,78 +133,59 @@ public class LoginActivity extends AppCompatActivity {
                     .addOnFailureListener(e -> {
                         btnLogin.setEnabled(true);
                         btnLogin.setText("Login");
-                        Toast.makeText(this,
-                                "Login failed: " + e.getMessage(),
-                                Toast.LENGTH_LONG).show();
+                        // Show friendlier error messages
+                        String msg = e.getMessage();
+                        if (msg != null && msg.contains("no user record")) {
+                            msg = "No account found with this email.";
+                        } else if (msg != null && msg.contains("password is invalid")) {
+                            msg = "Incorrect password. Please try again.";
+                        }
+                        Toast.makeText(this, "Login failed: " + msg, Toast.LENGTH_LONG).show();
                     });
         });
     }
 
-    //
-//    private void verifyRoleAndNavigate(String uid, Button btnLogin) {
-//        db.collection("users").document(uid).get()
-//                .addOnSuccessListener(doc -> {
-//                    if (!doc.exists()) {
-//                        Toast.makeText(this,
-//                                "Account not found. Contact admin.",
-//                                Toast.LENGTH_LONG).show();
-//                        mAuth.signOut();
-//                        btnLogin.setEnabled(true);
-//                        btnLogin.setText("Login");
-//                        return;
-//                    }
-//
-//                    String dbRole = doc.getString("role");
-//
-//                    if (dbRole == null || !dbRole.equals(selectedRole)) {
-//                        Toast.makeText(this,
-//                                "Wrong role! You are registered as: " + dbRole,
-//                                Toast.LENGTH_LONG).show();
-//                        mAuth.signOut();
-//                        btnLogin.setEnabled(true);
-//                        btnLogin.setText("Login");
-//                        return;
-//                    }
-//
-//                    // Navigate based on role — teammates will replace these
-//                    // with their own activities as they build them
-//                    // Navigate based on role
-//                    Intent intent;
-//                    switch (dbRole) {
-//                        case "admin":
-//                            intent = new Intent(this, AdminDashboardActivity.class);
-//                            break;
-//                        default:
-//                            // Teammates will replace with their own activities
-//                            Toast.makeText(this,
-//                                    "Welcome! Logged in as " + dbRole,
-//                                    Toast.LENGTH_SHORT).show();
-//                            btnLogin.setEnabled(true);
-//                            btnLogin.setText("Login");
-//                            return;
-//                    }
-//                    startActivity(intent);
-//                    finish();
-//                })
-//                .addOnFailureListener(e -> {
-//                    Toast.makeText(this,
-//                            "Error: " + e.getMessage(),
-//                            Toast.LENGTH_SHORT).show();
-//                    btnLogin.setEnabled(true);
-//                    btnLogin.setText("Login");
-//                });
-//    }
-    private void verifyRoleAndNavigate(String uid, Button btnLogin) {
-        android.util.Log.d("LOGIN", "Checking UID: " + uid);
-        android.util.Log.d("LOGIN", "Selected role: " + selectedRole);
+    // ── FIX 1: Forgot Password dialog ──
+    private void showForgotPasswordDialog() {
+        EditText emailInput = new EditText(this);
+        emailInput.setHint("Enter your email address");
+        emailInput.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        int padding = (int) (16 * getResources().getDisplayMetrics().density);
+        emailInput.setPadding(padding, padding, padding, padding);
 
+        new AlertDialog.Builder(this)
+                .setTitle("Reset Password")
+                .setMessage("We'll send a password reset link to your email.")
+                .setView(emailInput)
+                .setPositiveButton("Send Link", (dialog, which) -> {
+                    String email = emailInput.getText().toString().trim();
+                    if (TextUtils.isEmpty(email)) {
+                        Toast.makeText(this, "Please enter your email.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    mAuth.sendPasswordResetEmail(email)
+                            .addOnSuccessListener(unused ->
+                                    new AlertDialog.Builder(this)
+                                            .setTitle("Email Sent!")
+                                            .setMessage("A password reset link has been sent to " + email + ".\n\nOpen the link in your email, set a new password, then come back and log in.")
+                                            .setPositiveButton("Got it", null)
+                                            .show()
+                            )
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
+                            );
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    // ── FIX 3: Complete role routing ──
+    private void verifyRoleAndNavigate(String uid, Button btnLogin) {
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(doc -> {
-                    android.util.Log.d("LOGIN", "Doc exists: " + doc.exists());
-
                     if (!doc.exists()) {
                         Toast.makeText(this,
-                                "Account not found. Contact admin.",
+                                "Account not found in database. Please sign up first.",
                                 Toast.LENGTH_LONG).show();
                         mAuth.signOut();
                         btnLogin.setEnabled(true);
@@ -193,12 +194,10 @@ public class LoginActivity extends AppCompatActivity {
                     }
 
                     String dbRole = doc.getString("role");
-                    android.util.Log.d("LOGIN", "DB role: " + dbRole);
-                    android.util.Log.d("LOGIN", "Selected role: " + selectedRole);
 
                     if (dbRole == null || !dbRole.equals(selectedRole)) {
                         Toast.makeText(this,
-                                "Wrong role! You are registered as: " + dbRole,
+                                "Wrong role selected! Your account is registered as: " + dbRole,
                                 Toast.LENGTH_LONG).show();
                         mAuth.signOut();
                         btnLogin.setEnabled(true);
@@ -211,28 +210,29 @@ public class LoginActivity extends AppCompatActivity {
                         case "admin":
                             intent = new Intent(this, AdminDashboardActivity.class);
                             break;
-                        case "student":
-                            intent = new Intent(this, StudentHomeActivity.class);
-                            break;
                         case "event_manager":
-                            intent = new Intent(this, EventManagerDashboardActivity.class);
+                            // TODO: Replace with EventManagerDashboardActivity when your teammate builds it
+                            intent = new Intent(this, EventsListActivity.class);
+                            intent.putExtra("role", "event_manager");
+                            break;
+                        case "student":
+                            // TODO: Replace with StudentDashboardActivity when your teammate builds it
+                            intent = new Intent(this, EventsListActivity.class);
+                            intent.putExtra("role", "student");
                             break;
                         default:
-                            Toast.makeText(this,
-                                    "Welcome! Logged in as " + dbRole,
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Unknown role. Contact admin.", Toast.LENGTH_SHORT).show();
+                            mAuth.signOut();
                             btnLogin.setEnabled(true);
                             btnLogin.setText("Login");
                             return;
                     }
+
                     startActivity(intent);
                     finish();
                 })
                 .addOnFailureListener(e -> {
-                    android.util.Log.e("LOGIN", "Error: " + e.getMessage());
-                    Toast.makeText(this,
-                            "Error: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Database error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     btnLogin.setEnabled(true);
                     btnLogin.setText("Login");
                 });
