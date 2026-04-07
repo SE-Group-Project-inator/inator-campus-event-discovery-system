@@ -36,6 +36,7 @@
     <string name="event_reminder">Event Reminder</string>
     <string name="tech_fest_starts_in_1_hour_n10_30_am">Tech fest starts in 1 hour!\n10:30 am</string>
     <string name="notifications">Notifications</string>
+    <string name="reserve_a_spot">Reserve a spot!</string>
 
     <string-array name="venue_array">
         <item>SSE 9B2</item>
