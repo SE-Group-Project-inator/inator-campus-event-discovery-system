@@ -31,22 +31,6 @@
         <activity android:name=".activities.AdminDashboardActivity"/>
         <activity android:name=".activities.EventsListActivity"/>
         <activity android:name=".activities.PrivacySettingsActivity"/>
-        <activity android:name=".activities.EventManagerDashboardActivity"/>
-        <activity android:name=".activities.CreateEventActivity"/>
-        <activity android:name=".activities.EditEventActivity"/>
-        <activity android:name=".activities.EventManagerProfileActivity"/>
-        <activity android:name=".activities.EventManagerEventsActivity"/>
-
-        <activity android:name=".activities.StudentProfileActivity"/>
-        <activity android:name=".activities.StudentHomeActivity"/>
-        <activity android:name=".activities.SearchActivity"/>
-
-        <!-- US-10: Trending Events (Student home) -->
-        <activity android:name=".activities.TrendingEventsActivity"/>
-        <!-- US-21: Event Detail + Calendar Export -->
-        <activity android:name=".activities.EventDetailActivity"/>
-        <!-- US-27 / US-32: Attendee List + Seat Confirmation -->
-        <activity android:name=".activities.AttendeeListActivity"/>
 
     </application>
 </manifest>
