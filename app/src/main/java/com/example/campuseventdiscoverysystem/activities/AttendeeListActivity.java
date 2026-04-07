@@ -45,7 +45,8 @@ public class AttendeeListActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
-        eventId       = getIntent().getStringExtra("eventId");
+        eventId = getIntent().getStringExtra("eventId");
+        if (eventId == null) eventId = getIntent().getStringExtra("EVENT_ID");
         readOnly      = getIntent().getBooleanExtra("readOnly", false);
         eventCapacity = getIntent().getIntExtra("eventCapacity", 0);
         String eventTitle = getIntent().getStringExtra("eventTitle");
