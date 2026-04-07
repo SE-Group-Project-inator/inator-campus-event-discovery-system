@@ -31,6 +31,7 @@
         <activity android:name=".activities.AdminDashboardActivity"/>
         <activity android:name=".activities.EventsListActivity"/>
         <activity android:name=".activities.PrivacySettingsActivity"/>
+        <activity android:name=".activities.SignupActivity" />
 
     </application>
 </manifest>
