@@ -2,12 +2,10 @@ package com.example.campuseventdiscoverysystem.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.CalendarContract;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.campuseventdiscoverysystem.R;
 import java.text.SimpleDateFormat;
@@ -15,9 +13,9 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * US-21: Export Event to Calendar
- * Shows full event details matching the Figma design, with calendar export via
- * the top-right share icon and the fixed "Add to Calendar" button at the bottom.
+ * US-21: Event Detail screen.
+ * Shows full event details. "Confirm RSVP" button at the bottom opens RsvpActivity.
+ * "SEE WHO'S ATTENDING" opens AttendeeListActivity in read-only mode.
  */
 public class EventDetailActivity extends AppCompatActivity {
 
@@ -96,21 +94,14 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private void setupButtons() {
         Intent in = getIntent();
-        long   dateMillis = in.getLongExtra("eventDateMillis", 0);
-        String title      = in.getStringExtra("eventTitle");
-        String venue      = in.getStringExtra("eventVenue");
-        String desc       = in.getStringExtra("eventDescription");
+        String eventId    = in.getStringExtra("eventId");
+        String eventTitle = in.getStringExtra("eventTitle");
+        String eventVenue = in.getStringExtra("eventVenue");
+        String eventDate  = in.getStringExtra("eventDate");
+        String eventTime  = in.getStringExtra("eventTime");
 
         // Back
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
-
-        // Top-right export icon — US-21
-        findViewById(R.id.btnExportCalendar).setOnClickListener(v ->
-                exportToCalendar(title, venue, desc, dateMillis));
-
-        // Fixed bottom button — US-21
-        findViewById(R.id.btnAddToCalendar).setOnClickListener(v ->
-                exportToCalendar(title, venue, desc, dateMillis));
 
         // Collapsible About section
         LinearLayout aboutToggle = findViewById(R.id.layoutAboutToggle);
@@ -128,9 +119,7 @@ public class EventDetailActivity extends AppCompatActivity {
             }
         });
 
-        // SEE WHO'S ATTENDING → show attendees (read-only for students)
-        String eventId = in.getStringExtra("eventId");
-        String eventTitle = in.getStringExtra("eventTitle");
+        // SEE WHO'S ATTENDING → read-only attendee list
         findViewById(R.id.btnSeeAttendees).setOnClickListener(v -> {
             Intent attendeesIntent = new Intent(this, AttendeeListActivity.class);
             attendeesIntent.putExtra("eventId", eventId);
@@ -138,39 +127,16 @@ public class EventDetailActivity extends AppCompatActivity {
             attendeesIntent.putExtra("readOnly", true);
             startActivity(attendeesIntent);
         });
-    }
 
-    /**
-     * US-21: Opens the system calendar app with event details pre-filled.
-     */
-    private void exportToCalendar(String title, String venue,
-                                   String description, long startMillis) {
-        if (startMillis <= 0) {
-            Toast.makeText(this,
-                    "Event date not available for calendar export.",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        long endMillis = startMillis + (2 * 60 * 60 * 1000); // default 2-hour duration
-
-        Intent intent = new Intent(Intent.ACTION_INSERT)
-                .setData(CalendarContract.Events.CONTENT_URI)
-                .putExtra(CalendarContract.Events.TITLE,
-                        title != null ? title : "Campus Event")
-                .putExtra(CalendarContract.Events.EVENT_LOCATION,
-                        venue != null ? venue : "")
-                .putExtra(CalendarContract.Events.DESCRIPTION,
-                        description != null ? description : "")
-                .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, startMillis)
-                .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endMillis);
-
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        } else {
-            Toast.makeText(this,
-                    "No calendar app found on this device.",
-                    Toast.LENGTH_SHORT).show();
-        }
+        // Confirm RSVP → RsvpActivity
+        findViewById(R.id.btnConfirmRsvp).setOnClickListener(v -> {
+            Intent rsvpIntent = new Intent(this, RsvpActivity.class);
+            rsvpIntent.putExtra("EVENT_ID", eventId);
+            rsvpIntent.putExtra("EVENT_TITLE", eventTitle);
+            rsvpIntent.putExtra("EVENT_VENUE", eventVenue);
+            if (eventDate != null) rsvpIntent.putExtra("EVENT_DATE", eventDate);
+            if (eventTime != null) rsvpIntent.putExtra("EVENT_TIME", eventTime);
+            startActivity(rsvpIntent);
+        });
     }
 }

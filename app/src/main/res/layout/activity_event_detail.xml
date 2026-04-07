@@ -39,16 +39,10 @@
                 android:layout_height="1dp"
                 android:layout_weight="1" />
 
-            <!-- Export / Add-to-Calendar icon (US-21) -->
-            <ImageButton
-                android:id="@+id/btnExportCalendar"
+            <!-- Placeholder keeps the back button left-aligned -->
+            <View
                 android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:src="@android:drawable/ic_menu_share"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="@color/white"
-                android:contentDescription="Export to Calendar"
-                android:scaleType="fitCenter" />
+                android:layout_height="36dp" />
         </LinearLayout>
 
         <!-- Title + Category badge -->
@@ -404,12 +398,12 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- ── Fixed Bottom: Add to Calendar (US-21) ── -->
+    <!-- Fixed bottom: Confirm RSVP → RsvpActivity -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnAddToCalendar"
+        android:id="@+id/btnConfirmRsvp"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:text="Add to Calendar"
+        android:text="Confirm RSVP"
         android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"

@@ -40,38 +40,37 @@ public class AttendeeAdapter extends
     public void onBindViewHolder(@NonNull ViewHolder h, int position) {
         Registration reg = registrations.get(position);
 
-        // Roll number — derive from email prefix (e.g. "26100257@lums.edu.pk" → "26100257")
-        // or fall back to userId
         String roll = extractRollNumber(reg);
-        h.tvRollNumber.setText(roll);
-
-        // Name (show under roll number if available)
         String name = reg.getUserName();
+
+        // Show "Name - RollNumber" in one label (matches Figma design)
         if (name != null && !name.isEmpty()) {
-            h.tvName.setText(name);
-            h.tvName.setVisibility(View.VISIBLE);
+            h.tvName.setText(name + " - " + roll);
         } else {
-            h.tvName.setVisibility(View.GONE);
+            h.tvName.setText(roll);
         }
 
-        // Initials
+        // Initials for avatar circle
         h.tvInitials.setText(getInitials(name != null ? name : roll));
 
-        // Confirm button — US-32
+        // US-32: confirm button visible only in event manager view (readOnly=false)
         if (readOnly) {
             h.btnConfirm.setVisibility(View.GONE);
-        } else if (reg.isConfirmed()) {
-            h.btnConfirm.setText("✓ Registered");
-            h.btnConfirm.setBackgroundTintList(
-                    h.itemView.getContext().getColorStateList(R.color.green_accept));
-            h.btnConfirm.setEnabled(false);
         } else {
-            h.btnConfirm.setText("+ Register");
-            h.btnConfirm.setBackgroundTintList(
-                    h.itemView.getContext().getColorStateList(R.color.btn_eventmgr));
-            h.btnConfirm.setEnabled(true);
-            h.btnConfirm.setOnClickListener(v ->
-                    listener.onConfirm(reg, h.getAdapterPosition()));
+            h.btnConfirm.setVisibility(View.VISIBLE);
+            if (reg.isConfirmed()) {
+                h.btnConfirm.setText("✓ Registered");
+                h.btnConfirm.setBackgroundTintList(
+                        h.itemView.getContext().getColorStateList(R.color.green_accept));
+                h.btnConfirm.setEnabled(false);
+            } else {
+                h.btnConfirm.setText("+ Register");
+                h.btnConfirm.setBackgroundTintList(
+                        h.itemView.getContext().getColorStateList(R.color.btn_eventmgr));
+                h.btnConfirm.setEnabled(true);
+                h.btnConfirm.setOnClickListener(v ->
+                        listener.onConfirm(reg, h.getAdapterPosition()));
+            }
         }
     }
 
