@@ -14,6 +14,13 @@
   - [Meeting 8 – March 18, 2026](#meeting-8--march-18-2026)
   - [Meeting 9 – March 20, 2026](#meeting-9--march-20-2026)
   - [Meeting 10 – March 25, 2026](#meeting-10--march-25-2026)
+  - [Meeting 11 – March 29, 2026](#meeting-11--march-29-2026)
+  - [Meeting 12 – March 29, 2026](#meeting-12--march-29-2026)
+  - [Meeting 13 – March 30, 2026](#meeting-13--march-30-2026)
+  - [Meeting 14 – March 31, 2026](#meeting-14--march-31-2026)
+  - [Meeting 15 – April 5, 2026](#meeting-15--April-5-2026)
+
+
 
 - [Project Part 2 - Preparation](#project-part-2---preparation)
   
@@ -238,6 +245,126 @@ Friday, March 20, 2026
 ---
 
 ### Meeting 10 – March 25, 2026
+
+#### Meeting Minutes  
+50 minutes
+
+#### Date  
+Wednesday, March 25, 2026
+
+#### Attendance  
+- Abeer Zahid Bhatti  
+- Maryam Ayub  
+- Areeba Fatima  
+- Umer Khalid 
+
+#### Description  
+- We revised how to split the work
+- A database on firebase was made for the data of the project
+
+#### Prepared Questions & Decisions  
+- Decision: divide work based on class instead of user stories -> Yes
+- Decision: find database online for project -> Yes
+
+---
+
+### Meeting 11 – March 29, 2026
+
+#### Meeting Minutes  
+50 minutes
+
+#### Date  
+Wednesday, March 25, 2026
+
+#### Attendance  
+- Abeer Zahid Bhatti  
+- Maryam Ayub  
+- Areeba Fatima  
+- Umer Khalid 
+
+#### Description  
+- We revised how to split the work
+- A database on firebase was made for the data of the project
+
+#### Prepared Questions & Decisions  
+- Decision: divide work based on class instead of user stories -> Yes
+- Decision: find database online for project -> Yes
+
+---
+
+### Meeting 12 – March 29, 2026
+
+#### Meeting Minutes  
+50 minutes
+
+#### Date  
+Wednesday, March 25, 2026
+
+#### Attendance  
+- Abeer Zahid Bhatti  
+- Maryam Ayub  
+- Areeba Fatima  
+- Umer Khalid 
+
+#### Description  
+- We revised how to split the work
+- A database on firebase was made for the data of the project
+
+#### Prepared Questions & Decisions  
+- Decision: divide work based on class instead of user stories -> Yes
+- Decision: find database online for project -> Yes
+
+---
+
+### Meeting 13 – March 30, 2026
+
+#### Meeting Minutes  
+50 minutes
+
+#### Date  
+Wednesday, March 25, 2026
+
+#### Attendance  
+- Abeer Zahid Bhatti  
+- Maryam Ayub  
+- Areeba Fatima  
+- Umer Khalid 
+
+#### Description  
+- We revised how to split the work
+- A database on firebase was made for the data of the project
+
+#### Prepared Questions & Decisions  
+- Decision: divide work based on class instead of user stories -> Yes
+- Decision: find database online for project -> Yes
+
+---
+
+### Meeting 14 – March 31, 2026
+
+#### Meeting Minutes  
+50 minutes
+
+#### Date  
+Wednesday, March 25, 2026
+
+#### Attendance  
+- Abeer Zahid Bhatti  
+- Maryam Ayub  
+- Areeba Fatima  
+- Umer Khalid 
+
+#### Description  
+- We revised how to split the work
+- A database on firebase was made for the data of the project
+
+#### Prepared Questions & Decisions  
+- Decision: divide work based on class instead of user stories -> Yes
+- Decision: find database online for project -> Yes
+
+---
+
+### Meeting 15 – April 5, 2026
 
 #### Meeting Minutes  
 50 minutes
