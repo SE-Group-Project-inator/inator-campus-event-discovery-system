@@ -232,13 +232,11 @@ Friday, March 20, 2026
 - Umer Khalid  
 - Basit Teaching Assistant (TA)
 
-#### Description  
+#### Prepared Questions & Decisions  
 - The Teaching Assistant (TA) went over Phase 02 of the project  
 - Provided an overview of key components  
 - Reviewed CRC cards, prototype, and user stories  
 - Gave feedback to ensure alignment with project requirements  
-
-#### Prepared Questions & Decisions  
 - Checked and reviewed all Phase 02 components → Yes  
 - TA feedback incorporated for improvements → In progress
   
@@ -258,11 +256,9 @@ Wednesday, March 25, 2026
 - Areeba Fatima  
 - Umer Khalid 
 
-#### Description  
+#### Prepared Questions & Decisions
 - We revised how to split the work
-- A database on firebase was made for the data of the project
-
-#### Prepared Questions & Decisions  
+- A database on firebase was made for the data of the project  
 - Decision: divide work based on class instead of user stories -> Yes
 - Decision: find database online for project -> Yes
 
@@ -271,72 +267,61 @@ Wednesday, March 25, 2026
 ### Meeting 11 – March 29, 2026
 
 #### Meeting Minutes  
-50 minutes
+20 minutes
 
 #### Date  
-Wednesday, March 25, 2026
+Sunday, March 29, 2026
 
 #### Attendance  
+- Basit Teaching Assistant (TA)
 - Abeer Zahid Bhatti  
 - Maryam Ayub  
 - Areeba Fatima  
 - Umer Khalid 
-
-#### Description  
-- We revised how to split the work
-- A database on firebase was made for the data of the project
+- Salsabeel Fatima
 
 #### Prepared Questions & Decisions  
-- Decision: divide work based on class instead of user stories -> Yes
-- Decision: find database online for project -> Yes
+- Went over the work completed
+- got clarity over database related queries 
 
 ---
 
 ### Meeting 12 – March 29, 2026
 
 #### Meeting Minutes  
-50 minutes
+10 minutes
 
 #### Date  
-Wednesday, March 25, 2026
+Sunday, March 29, 2026
 
 #### Attendance  
 - Abeer Zahid Bhatti  
-- Maryam Ayub  
-- Areeba Fatima  
+- Salsabeel Fatima
 - Umer Khalid 
 
-#### Description  
-- We revised how to split the work
-- A database on firebase was made for the data of the project
-
 #### Prepared Questions & Decisions  
-- Decision: divide work based on class instead of user stories -> Yes
-- Decision: find database online for project -> Yes
+- Decision: use the colors.xml file for colors of the app -> Yes
 
 ---
 
 ### Meeting 13 – March 30, 2026
 
 #### Meeting Minutes  
-50 minutes
+20 minutes
 
 #### Date  
-Wednesday, March 25, 2026
+Monday, March 30, 2026
 
 #### Attendance  
 - Abeer Zahid Bhatti  
 - Maryam Ayub  
 - Areeba Fatima  
-- Umer Khalid 
-
-#### Description  
-- We revised how to split the work
-- A database on firebase was made for the data of the project
+- Umer Khalid
+- Salsabeel Fatima
 
 #### Prepared Questions & Decisions  
-- Decision: divide work based on class instead of user stories -> Yes
-- Decision: find database online for project -> Yes
+- review work by each member
+- fixed mismatches in UI
 
 ---
 
@@ -346,45 +331,39 @@ Wednesday, March 25, 2026
 50 minutes
 
 #### Date  
-Wednesday, March 25, 2026
+Tuesday, March 31, 2026
 
 #### Attendance  
 - Abeer Zahid Bhatti  
 - Maryam Ayub  
 - Areeba Fatima  
-- Umer Khalid 
-
-#### Description  
-- We revised how to split the work
-- A database on firebase was made for the data of the project
+- Umer Khalid
+- Salsabeel Fatima
 
 #### Prepared Questions & Decisions  
-- Decision: divide work based on class instead of user stories -> Yes
-- Decision: find database online for project -> Yes
+- Decision: finish screens as soon as possible and start integration testing -> Yes
+- Decision: name xml and java files according to the function / short form of User Story -> Yes
 
 ---
 
 ### Meeting 15 – April 5, 2026
 
 #### Meeting Minutes  
-50 minutes
+20 minutes
 
 #### Date  
-Wednesday, March 25, 2026
+Sunday, April 5, 2026
 
 #### Attendance  
+- Basit Teaching Assistant (TA)
 - Abeer Zahid Bhatti  
 - Maryam Ayub  
 - Areeba Fatima  
-- Umer Khalid 
+- Umer Khalid
+- Salsabeel Fatima
 
-#### Description  
-- We revised how to split the work
-- A database on firebase was made for the data of the project
-
-#### Prepared Questions & Decisions  
-- Decision: divide work based on class instead of user stories -> Yes
-- Decision: find database online for project -> Yes
+#### Prepared Questions & Decisions 
+- review of screens
 
 ---
 
