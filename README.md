@@ -399,6 +399,26 @@ Friday, April 17, 2026
 
 ---
 
+### Meeting 16 – April 17, 2026
+
+#### Meeting Minutes  
+30 minutes
+
+#### Date  
+Friday, April 17, 2026
+
+#### Attendance 
+- Basit Teaching Assistant (TA)
+- Abeer Zahid Bhatti  
+- Maryam Ayub  
+- Areeba Fatima
+- Salsabeel Fatima
+
+#### Prepared Questions & Decisions 
+- review of project part 4
+
+--- 
+
 # Project Part 2 - Preparation
 
 ### Figma Link
