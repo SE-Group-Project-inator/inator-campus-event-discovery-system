@@ -509,5 +509,640 @@ We surveyed 16 LUMS students (6–7 March 2026) to validate our assumptions.
 
 
 
+# UML Class Diagram — Campus Event Discovery System
+
+> Paste the code block below into any Mermaid renderer (GitHub `.md` files render this automatically).  
+> Recommended viewer: https://mermaid.live
+
+```mermaid
+classDiagram
+
+%% ─────────────────────────────────────────
+%%  MODELS
+%% ─────────────────────────────────────────
+
+class Event {
+    - String id
+    - String title
+    - String description
+    - String venue
+    - String status
+    - String submittedByName
+    - String submittedByEmail
+    - String createdBy
+    - int capacity
+    - int registeredCount
+    - Timestamp date
+    - String startTime
+    - String endTime
+    - String category
+    - String society
+    + getId() String
+    + getTitle() String
+    + getDescription() String
+    + getVenue() String
+    + getStatus() String
+    + getCapacity() int
+    + getRegisteredCount() int
+    + getDate() Timestamp
+    + getCategory() String
+    + getSociety() String
+    + setId(String)
+    + setTitle(String)
+    + setStatus(String)
+    + setRegisteredCount(int)
+    + setDate(Timestamp)
+    ..note: Firestore document model.
+    ..note: status ∈ {pending, active, rejected}
+}
+
+class Registration {
+    - String id
+    - String eventId
+    - String userId
+    - String userName
+    - String userEmail
+    - int seatNumber
+    - boolean confirmed
+    - Timestamp registeredAt
+    + getId() String
+    + getEventId() String
+    + getUserId() String
+    + getUserName() String
+    + getUserEmail() String
+    + getSeatNumber() int
+    + isConfirmed() boolean
+    + setConfirmed(boolean)
+    ..note: Links a student (userId) to an Event (eventId)
+}
+
+class NotificationItem {
+    - String title
+    - String message
+    - boolean unread
+    - Timestamp timestamp
+    + NotificationItem()
+    + NotificationItem(String, String, boolean, Timestamp)
+    + getTitle() String
+    + getMessage() String
+    + isUnread() boolean
+    + getTimestamp() Timestamp
+    ..note: Stored under users/{uid}/notifications in Firestore
+}
+
+class HistoryItem {
+    - String title
+    - String day
+    - String month
+    - String status
+    + HistoryItem(String, String, String, String)
+    + getTitle() String
+    + getDay() String
+    + getMonth() String
+    + getStatus() String
+    ..note: status ∈ {Attended, Did Not Attend, Recap}
+    ..note: Constructed locally from Firestore Registration docs
+}
+
+%% ─────────────────────────────────────────
+%%  ADAPTERS  (all extend RecyclerView.Adapter)
+%% ─────────────────────────────────────────
+
+class AttendeeAdapter {
+    - List~Registration~ registrations
+    - OnConfirmListener listener
+    - boolean readOnly
+    + AttendeeAdapter(List, OnConfirmListener, boolean)
+    + onCreateViewHolder(ViewGroup, int) ViewHolder
+    + onBindViewHolder(ViewHolder, int)
+    + getItemCount() int
+    + updateItem(int)
+    - extractRollNumber(Registration) String
+    - getInitials(String) String
+    ..note: readOnly=true → student view (no confirm button)
+    ..note: readOnly=false → manager view (confirm buttons shown)
+}
+
+class AttendeeAdapter_OnConfirmListener {
+    <<interface>>
+    + onConfirm(Registration, int)
+}
+
+class AttendeeAdapter_ViewHolder {
+    + TextView tvInitials
+    + TextView tvRollNumber
+    + TextView tvName
+    + MaterialButton btnConfirm
+}
+
+class HistoryAdapter {
+    - List~HistoryItem~ historyList
+    + HistoryAdapter(List~HistoryItem~)
+    + onCreateViewHolder(ViewGroup, int) HistoryViewHolder
+    + onBindViewHolder(HistoryViewHolder, int)
+    + getItemCount() int
+}
+
+class HistoryAdapter_HistoryViewHolder {
+    + TextView tvTitle
+    + TextView tvDay
+    + TextView tvMonth
+    + TextView tvStatus
+    + MaterialCardView cardStatus
+}
+
+class ManagerEventAdapter {
+    - List~Event~ eventList
+    - OnItemClickListener listener
+    - boolean isEditMode
+    - boolean showStatusBadge
+    + ManagerEventAdapter(List, OnItemClickListener)
+    + setEditMode(boolean)
+    + setShowStatusBadge(boolean)
+    + onCreateViewHolder(ViewGroup, int) ViewHolder
+    + onBindViewHolder(ViewHolder, int)
+    + getItemCount() int
+    ..note: Edit mode changes card background color
+}
+
+class ManagerEventAdapter_OnItemClickListener {
+    <<interface>>
+    + onItemClick(String eventId)
+}
+
+class ManagerEventAdapter_ViewHolder {
+    + TextView tvEventTitle
+    + TextView tvStatus
+    + TextView tvMonth
+    + TextView tvDay
+    + MaterialCardView cardStatus
+}
+
+class NotificationAdapter {
+    - List~NotificationItem~ notificationList
+    + NotificationAdapter(List~NotificationItem~)
+    + onCreateViewHolder(ViewGroup, int) NotificationViewHolder
+    + onBindViewHolder(NotificationViewHolder, int)
+    + getItemCount() int
+}
+
+class NotificationAdapter_NotificationViewHolder {
+    + TextView tvTitle
+    + TextView tvMessage
+    + ImageView ivUnreadDot
+}
+
+class PendingEventAdapter {
+    - List~Event~ events
+    - ActionListener onAccept
+    - ActionListener onDecline
+    + PendingEventAdapter(List, ActionListener, ActionListener)
+    + onCreateViewHolder(ViewGroup, int) ViewHolder
+    + onBindViewHolder(ViewHolder, int)
+    + getItemCount() int
+    ..note: Used by both AdminDashboardActivity and EventsListActivity
+}
+
+class PendingEventAdapter_ActionListener {
+    <<interface>>
+    + onAction(String eventId)
+}
+
+class PendingEventAdapter_ViewHolder {
+    + TextView tvTitle
+    + TextView tvSubmittedBy
+    + TextView tvEmail
+    + TextView tvVenue
+    + TextView tvDay
+    + TextView tvMonth
+    + MaterialButton btnAccept
+    + MaterialButton btnDecline
+}
+
+class TrendingEventAdapter {
+    - List~Event~ events
+    - OnEventClickListener listener
+    + TrendingEventAdapter(List, OnEventClickListener)
+    + onCreateViewHolder(ViewGroup, int) ViewHolder
+    + onBindViewHolder(ViewHolder, int)
+    + getItemCount() int
+}
+
+class TrendingEventAdapter_OnEventClickListener {
+    <<interface>>
+    + onEventClick(Event)
+}
+
+class TrendingEventAdapter_ViewHolder {
+    + TextView tvRank
+    + TextView tvDay
+    + TextView tvMonth
+    + TextView tvTitle
+    + TextView tvVenue
+    + TextView tvRegistered
+}
+
+%% ─────────────────────────────────────────
+%%  WORKER
+%% ─────────────────────────────────────────
+
+class ReminderWorker {
+    + ReminderWorker(Context, WorkerParameters)
+    + doWork() Result
+    - showNotification(String title, String message)
+    ..note: Triggered via WorkManager from RsvpActivity
+    ..note: Inputs: EVENT_NAME, MESSAGE (key-value Data)
+    ..note: Fires a push notification on the event_reminders channel
+}
+
+%% ─────────────────────────────────────────
+%%  ACTIVITIES — Auth / Onboarding
+%% ─────────────────────────────────────────
+
+class RoleSelectActivity {
+    + onCreate(Bundle)
+    - navigateTo(Class, String role)
+    + goToSignUp(Context, String role)$
+    ..note: Entry point. Passes role extra to LoginActivity
+}
+
+class LoginActivity {
+    - FirebaseAuth mAuth
+    - FirebaseFirestore db
+    - String selectedRole
+    + onCreate(Bundle)
+    - applyRoleTheme()
+    - setupClickListeners()
+    ..note: Routes to Admin / EventManager / Student dashboard
+    ..note: Also handles forgot-password flow via Firebase
+}
+
+class SignupActivity {
+    - FirebaseAuth mAuth
+    - FirebaseFirestore db
+    - String selectedRole
+    + onCreate(Bundle)
+    - applyRoleTheme()
+    - setupClickListeners()
+    ..note: Writes user doc to Firestore users collection
+    ..note: Supports student / event_manager / admin roles
+}
+
+%% ─────────────────────────────────────────
+%%  ACTIVITIES — Student
+%% ─────────────────────────────────────────
+
+class StudentHomeActivity {
+    - FirebaseAuth mAuth
+    - FirebaseFirestore db
+    - TextView tvEventsThisWeek
+    - TextView tvRegistered
+    - TextView tvSaved
+    - LinearLayout upcomingEventsList
+    + onCreate(Bundle)
+    - loadGreeting()
+    - loadEventsThisWeek()
+    - loadRegisteredCount()
+    - loadSavedCount()
+    ..note: Displays upcoming active events + personal stats
+}
+
+class StudentProfileActivity {
+    - FirebaseAuth mAuth
+    - FirebaseFirestore db
+    - TextView tvStudentName
+    - TextView tvEventsAttended
+    - TextView tvThisMonth
+    - TextView tvFollowing
+    + onCreate(Bundle)
+    ..note: Links to EventHistoryActivity, PrivacySettingsActivity
+}
+
+class SearchActivity {
+    - FirebaseFirestore db
+    - String selectedCategory
+    - String sortOrder
+    - Timestamp filterDateStart
+    - Timestamp filterDateEnd
+    - List~QueryDocumentSnapshot~ allEvents
+    + onCreate(Bundle)
+    - performSearch(String query)
+    - applyFilters()
+    - renderResults()
+    ..note: Filters by category, date range, sort order
+    ..note: Category chips: All / Sports / Academic / Cultural
+}
+
+class EventDetailActivity {
+    - boolean aboutExpanded
+    + onCreate(Bundle)
+    - populateDetails()
+    - setupButtons()
+    ..note: Receives event data via Intent extras
+    ..note: Opens RsvpActivity or AttendeeListActivity (readOnly=true)
+}
+
+class RsvpActivity {
+    - FirebaseFirestore db
+    - FirebaseAuth mAuth
+    - String eventId
+    - String studentId
+    - CheckBox cbVisibleName
+    - CheckBox cbVisibleRollNo
+    - CheckBox cbWaitlist
+    - MaterialButton btnConfirmRsvp
+    + onCreate(Bundle)
+    - confirmRsvp()
+    - cancelRsvp()
+    - scheduleReminder(long eventDateMillis, String eventName)
+    ..note: Writes Registration doc to Firestore
+    ..note: Schedules ReminderWorker via WorkManager
+    ..note: Adds event to Android Calendar via CalendarContract
+}
+
+class EventHistoryActivity {
+    - FirebaseFirestore db
+    - FirebaseAuth mAuth
+    - HistoryAdapter adapter
+    - List~HistoryItem~ historyList
+    - TextView tvTotalAttended
+    - TextView tvThisMonth
+    + onCreate(Bundle)
+    - loadHistoryData()
+    - updateStats()
+    ..note: Reads registrations for the current user from Firestore
+}
+
+class NotificationsActivity {
+    - FirebaseFirestore db
+    - NotificationAdapter adapter
+    - List~NotificationItem~ notificationList
+    + onCreate(Bundle)
+    - listenForNotifications()
+    ..note: Listens to users/{uid}/notifications (real-time)
+}
+
+class TrendingEventsActivity {
+    - FirebaseFirestore db
+    - FirebaseAuth mAuth
+    - List~Event~ eventList
+    - TrendingEventAdapter adapter
+    + onCreate(Bundle)
+    - setupRecyclerView()
+    - setupNavigation()
+    - loadTrendingEvents()
+    ..note: Orders events by registeredCount DESC
+}
+
+class AttendeeListActivity {
+    - FirebaseFirestore db
+    - List~Registration~ allRegistrations
+    - List~Registration~ displayList
+    - AttendeeAdapter adapter
+    - String eventId
+    - boolean readOnly
+    + onCreate(Bundle)
+    - loadAttendees()
+    - setupSearch()
+    - setupNavigation()
+    ..note: readOnly=true → student view
+    ..note: readOnly=false → manager can confirm registrations
+}
+
+class PrivacySettingsActivity {
+    - FirebaseFirestore db
+    - FirebaseAuth mAuth
+    - Switch switchShowProfile
+    - Switch switchShareAttendance
+    - Switch switchEmailNotifs
+    - Switch switchRecommendations
+    - Switch switchLocation
+    + onCreate(Bundle)
+    - loadPrivacySettings()
+    - setupToggleListeners()
+    ..note: Persists settings to users/{uid} in Firestore
+}
+
+%% ─────────────────────────────────────────
+%%  ACTIVITIES — Event Manager
+%% ─────────────────────────────────────────
+
+class EventManagerDashboardActivity {
+    - FirebaseFirestore db
+    - FirebaseAuth mAuth
+    - CalendarView calendarView
+    - ManagerEventAdapter adapter
+    - List~Event~ dateEventsList
+    + onCreate(Bundle)
+    - setupCalendar()
+    - loadEventsForDate(Date)
+    - setupNavigation()
+    ..note: Calendar-driven: shows active events for selected day
+}
+
+class EventManagerEventsActivity {
+    - FirebaseFirestore db
+    - FirebaseAuth mAuth
+    - ManagerEventAdapter adapter
+    - List~Event~ myEventsList
+    - boolean isEditMode
+    + onCreate(Bundle)
+    - loadMyEvents()
+    - toggleEditMode()
+    ..note: Shows all events created by the current manager
+    ..note: Edit mode → click opens EditEventActivity
+}
+
+class EventManagerProfileActivity {
+    - FirebaseFirestore db
+    - FirebaseAuth mAuth
+    - TextView tvManagedCount
+    - TextView tvThisMonthCount
+    - TextView tvFollowersCount
+    - EditText etSocietyName
+    + onCreate(Bundle)
+    - bindViews()
+    - loadProfileData()
+    ..note: Quick actions: Create Event, View History, Privacy, Sign Out
+}
+
+class CreateEventActivity {
+    - FirebaseFirestore db
+    - FirebaseAuth mAuth
+    - EditText etTitle
+    - EditText etDescription
+    - EditText etDate
+    - EditText etStartTime
+    - EditText etEndTime
+    - EditText etCapacity
+    - Spinner spVenue
+    - Spinner spCategory
+    + onCreate(Bundle)
+    - bindViews()
+    - setupSpinners()
+    - setupPickers()
+    - setupNavigation()
+    - submitEvent()
+    ..note: Writes Event doc with status=pending to Firestore
+}
+
+class EditEventActivity {
+    - FirebaseFirestore db
+    - String eventID
+    - EditText etTitle
+    - EditText etDescription
+    - EditText etDate
+    - EditText etStartTime
+    - EditText etEndTime
+    - EditText etCapacity
+    - Spinner spVenue
+    - Spinner spCategory
+    + onCreate(Bundle)
+    - loadEventData()
+    - setupSpinners()
+    - setupPickers()
+    - saveChanges()
+    - deleteEvent()
+    ..note: eventID received via Intent extra "EVENT_ID"
+}
+
+%% ─────────────────────────────────────────
+%%  ACTIVITIES — Admin
+%% ─────────────────────────────────────────
+
+class AdminDashboardActivity {
+    - FirebaseFirestore db
+    - FirebaseAuth mAuth
+    - List~Event~ pendingList
+    - List~Event~ allPendingList
+    - PendingEventAdapter adapter
+    - String currentFilter
+    + onCreate(Bundle)
+    - setupRecyclerView()
+    - setupNavigation()
+    - setupFilters()
+    - loadStats()
+    - listenToPendingEvents()
+    - updateEventStatus(String eventId, String status)
+    ..note: Accepts or declines Event (sets status=active|rejected)
+}
+
+class EventsListActivity {
+    - FirebaseFirestore db
+    - List~Event~ allEvents
+    - List~Event~ displayList
+    - PendingEventAdapter adapter
+    - String currentCardFilter
+    + onCreate(Bundle)
+    - setupCardFilters()
+    - loadAllEvents()
+    - applyCardFilter()
+    - updateStatus(String eventId, String status)
+    ..note: Full events database view for admins
+    ..note: Card filter: all / approved / pending
+}
+
+%% ─────────────────────────────────────────
+%%  MISC
+%% ─────────────────────────────────────────
+
+class MainActivity {
+    + onCreate(Bundle)
+    ..note: Splash / launch activity; redirects to RoleSelectActivity
+}
+
+%% ─────────────────────────────────────────
+%%  RELATIONSHIPS
+%% ─────────────────────────────────────────
+
+%% Model associations
+Registration --> Event : references via eventId
+
+%% Adapter ↔ Model
+AttendeeAdapter o-- Registration : displays list of
+HistoryAdapter o-- HistoryItem : displays list of
+ManagerEventAdapter o-- Event : displays list of
+NotificationAdapter o-- NotificationItem : displays list of
+PendingEventAdapter o-- Event : displays list of
+TrendingEventAdapter o-- Event : displays list of
+
+%% Adapter inner classes
+AttendeeAdapter +-- AttendeeAdapter_ViewHolder
+AttendeeAdapter +-- AttendeeAdapter_OnConfirmListener
+HistoryAdapter +-- HistoryAdapter_HistoryViewHolder
+ManagerEventAdapter +-- ManagerEventAdapter_ViewHolder
+ManagerEventAdapter +-- ManagerEventAdapter_OnItemClickListener
+NotificationAdapter +-- NotificationAdapter_NotificationViewHolder
+PendingEventAdapter +-- PendingEventAdapter_ViewHolder
+PendingEventAdapter +-- PendingEventAdapter_ActionListener
+TrendingEventAdapter +-- TrendingEventAdapter_ViewHolder
+TrendingEventAdapter +-- TrendingEventAdapter_OnEventClickListener
+
+%% Activity → Adapter usage
+AdminDashboardActivity --> PendingEventAdapter : creates & drives
+EventsListActivity --> PendingEventAdapter : creates & drives
+AttendeeListActivity --> AttendeeAdapter : creates & drives
+EventHistoryActivity --> HistoryAdapter : creates & drives
+NotificationsActivity --> NotificationAdapter : creates & drives
+TrendingEventsActivity --> TrendingEventAdapter : creates & drives
+EventManagerDashboardActivity --> ManagerEventAdapter : creates & drives
+EventManagerEventsActivity --> ManagerEventAdapter : creates & drives
+
+%% Navigation / launch flow
+MainActivity --> RoleSelectActivity : starts
+RoleSelectActivity --> LoginActivity : starts (with role extra)
+RoleSelectActivity --> SignupActivity : via goToSignUp()
+LoginActivity --> StudentHomeActivity : on student login
+LoginActivity --> EventManagerDashboardActivity : on manager login
+LoginActivity --> AdminDashboardActivity : on admin login
+
+%% Student navigation
+StudentHomeActivity --> SearchActivity : nav bar
+StudentHomeActivity --> NotificationsActivity : bell icon
+StudentHomeActivity --> EventDetailActivity : event card tap
+StudentHomeActivity --> StudentProfileActivity : nav bar
+StudentProfileActivity --> EventHistoryActivity : attendance history
+StudentProfileActivity --> PrivacySettingsActivity : privacy card
+EventDetailActivity --> RsvpActivity : Confirm RSVP button
+EventDetailActivity --> AttendeeListActivity : See Who's Attending (readOnly=true)
+RsvpActivity --> ReminderWorker : schedules via WorkManager
+TrendingEventsActivity --> EventDetailActivity : event tap
+SearchActivity --> EventDetailActivity : search result tap
+
+%% Manager navigation
+EventManagerDashboardActivity --> EventManagerEventsActivity : nav bar
+EventManagerDashboardActivity --> EventManagerProfileActivity : nav bar
+EventManagerDashboardActivity --> NotificationsActivity : bell icon
+EventManagerDashboardActivity --> AttendeeListActivity : attendee list (readOnly=false)
+EventManagerEventsActivity --> EditEventActivity : edit mode tap
+EventManagerProfileActivity --> CreateEventActivity : quick create
+EventManagerProfileActivity --> EventHistoryActivity : quick history
+EventManagerProfileActivity --> PrivacySettingsActivity : privacy settings
+
+%% Admin navigation
+AdminDashboardActivity --> EventsListActivity : view all events
+```
+
+---
+
+## Package Overview
+
+| Package | Classes | Responsibility |
+|---|---|---|
+| `models` | `Event`, `Registration`, `NotificationItem`, `HistoryItem` | Plain data objects (POJOs) mapped to/from Firestore |
+| `adapters` | `AttendeeAdapter`, `HistoryAdapter`, `ManagerEventAdapter`, `NotificationAdapter`, `PendingEventAdapter`, `TrendingEventAdapter` | RecyclerView adapters — bridge between model lists and UI rows |
+| `activities` | 18 Activity classes | All screens; each manages its own UI, Firebase calls, and navigation |
+| `workers` | `ReminderWorker` | Background WorkManager task for event reminder push notifications |
+
+## Key Design Decisions
+
+- **Role-based navigation:** `RoleSelectActivity` passes a `role` String extra through `LoginActivity` and into the matching dashboard (Admin / Event Manager / Student).
+- **Event lifecycle:** Events start as `pending`, become `active` (approved) or `rejected` by the Admin. Only `active` events appear to students.
+- **Dual-mode `AttendeeListActivity`:** A single activity handles both the student read-only view and the manager confirm-registration view, controlled by the `readOnly` boolean extra.
+- **`PendingEventAdapter` reuse:** The same adapter powers both `AdminDashboardActivity` (live pending feed) and `EventsListActivity` (full database view).
+- **WorkManager reminder:** `RsvpActivity` uses `OneTimeWorkRequest` with a delay to schedule `ReminderWorker` to fire a push notification before the event.
+
+
+
 
 
