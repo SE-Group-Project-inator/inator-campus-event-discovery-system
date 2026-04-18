@@ -508,7 +508,6 @@ We surveyed 16 LUMS students (6–7 March 2026) to validate our assumptions.
 <img width="773" height="292" alt="image" src="https://github.com/user-attachments/assets/6e8ea33d-003e-4896-bb17-5cb6db65b91c" />
 
 
-
 # UML Class Diagram — Campus Event Discovery System
 
 > Paste the code block below into any Mermaid renderer (GitHub `.md` files render this automatically).  
@@ -1067,16 +1066,16 @@ PendingEventAdapter o-- Event : displays list of
 TrendingEventAdapter o-- Event : displays list of
 
 %% Adapter inner classes
-AttendeeAdapter +-- AttendeeAdapter_ViewHolder
-AttendeeAdapter +-- AttendeeAdapter_OnConfirmListener
-HistoryAdapter +-- HistoryAdapter_HistoryViewHolder
-ManagerEventAdapter +-- ManagerEventAdapter_ViewHolder
-ManagerEventAdapter +-- ManagerEventAdapter_OnItemClickListener
-NotificationAdapter +-- NotificationAdapter_NotificationViewHolder
-PendingEventAdapter +-- PendingEventAdapter_ViewHolder
-PendingEventAdapter +-- PendingEventAdapter_ActionListener
-TrendingEventAdapter +-- TrendingEventAdapter_ViewHolder
-TrendingEventAdapter +-- TrendingEventAdapter_OnEventClickListener
+AttendeeAdapter *-- AttendeeAdapter_ViewHolder
+AttendeeAdapter *-- AttendeeAdapter_OnConfirmListener
+HistoryAdapter *-- HistoryAdapter_HistoryViewHolder
+ManagerEventAdapter *-- ManagerEventAdapter_ViewHolder
+ManagerEventAdapter *-- ManagerEventAdapter_OnItemClickListener
+NotificationAdapter *-- NotificationAdapter_NotificationViewHolder
+PendingEventAdapter *-- PendingEventAdapter_ViewHolder
+PendingEventAdapter *-- PendingEventAdapter_ActionListener
+TrendingEventAdapter *-- TrendingEventAdapter_ViewHolder
+TrendingEventAdapter *-- TrendingEventAdapter_OnEventClickListener
 
 %% Activity → Adapter usage
 AdminDashboardActivity --> PendingEventAdapter : creates & drives
@@ -1141,6 +1140,5 @@ AdminDashboardActivity --> EventsListActivity : view all events
 - **Dual-mode `AttendeeListActivity`:** A single activity handles both the student read-only view and the manager confirm-registration view, controlled by the `readOnly` boolean extra.
 - **`PendingEventAdapter` reuse:** The same adapter powers both `AdminDashboardActivity` (live pending feed) and `EventsListActivity` (full database view).
 - **WorkManager reminder:** `RsvpActivity` uses `OneTimeWorkRequest` with a delay to schedule `ReminderWorker` to fire a push notification before the event.
-
 
 
