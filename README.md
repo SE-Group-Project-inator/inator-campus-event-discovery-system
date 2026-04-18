@@ -20,11 +20,13 @@
   - [Meeting 14 – March 31, 2026](#meeting-14--march-31-2026)
   - [Meeting 15 – April 5, 2026](#meeting-15--April-5-2026)
   - [Meeting 16 – April 17, 2026](#meeting-16--April-17-2026)
+  - [Meeting 17 – April 18, 2026](#meeting-17--April-18-2026)
 
 
 
 - [Project Part 2 - Preparation](#project-part-2---preparation)
-- [Project Part 3](#project-part-3)
+- [Project Part 3](#project-part-3---Halfway-Checkpoint)
+- [Project Part 4](#project-part-4---Final-Checkpoint)
   
 ---
 
@@ -495,7 +497,7 @@ We surveyed 16 LUMS students (6–7 March 2026) to validate our assumptions.
 | US-34 | Edit Event Manager Profile | Event Mgr | 2 | Low | Halfway |
 
 
-# Project Part 3 
+# Project Part 3 - Halfway Checkpoint
 
 
 # UML Class Diagram — Campus Event Discovery System
@@ -1131,3 +1133,4 @@ AdminDashboardActivity --> EventsListActivity : view all events
 - **WorkManager reminder:** `RsvpActivity` uses `OneTimeWorkRequest` with a delay to schedule `ReminderWorker` to fire a push notification before the event.
 
 
+# Project Part 4 - Final Checkpoint
