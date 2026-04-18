@@ -25,8 +25,8 @@
 
 
 - [Project Part 2 - Preparation](#project-part-2---preparation)
-- [Project Part 3](#project-part-3---Halfway-Checkpoint)
-- [Project Part 4](#project-part-4---Final-Checkpoint)
+- [Project Part 3 - Halfway Checkpoint](#project-part-3---Halfway-Checkpoint)
+- [Project Part 4 - Final Checkpoint](#project-part-4---Final-Checkpoint)
   
 ---
 
