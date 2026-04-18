@@ -19,6 +19,7 @@
   - [Meeting 13 – March 30, 2026](#meeting-13--march-30-2026)
   - [Meeting 14 – March 31, 2026](#meeting-14--march-31-2026)
   - [Meeting 15 – April 5, 2026](#meeting-15--April-5-2026)
+  - [Meeting 16 – April 17, 2026](#meeting-16--April-17-2026)
 
 
 
@@ -364,6 +365,34 @@ Sunday, April 5, 2026
 
 #### Prepared Questions & Decisions 
 - review of screens
+
+---
+
+### Meeting 16 – April 17, 2026
+
+#### Meeting Minutes  
+25 minutes
+
+#### Date  
+Friday, April 17, 2026
+
+#### Attendance 
+- Abeer Zahid Bhatti  
+- Maryam Ayub  
+- Areeba Fatima
+- Salsabeel Fatima
+- Umer Khalid
+
+#### Prepared Questions & Decisions 
+- put all the javadocs into one folder
+- need to revamp code using better coding practices such as inheritance
+- Question: Can we add new user stories?
+- Decision: split work among members based on screens instead of user stories / classes
+- Decision: keep current color scheme and adjust in last portion of phase 4
+- Decision: Each member will make unit test files themselves
+- Decision: integration tests will be made in last portion of phase 4
+- Decision: Complete code of phase 4 by Friday 24th
+- Decision: complete unit test code by Monday 27th
 
 ---
 
