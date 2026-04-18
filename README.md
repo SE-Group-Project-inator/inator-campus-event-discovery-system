@@ -552,8 +552,8 @@ class Event {
     + setStatus(String)
     + setRegisteredCount(int)
     + setDate(Timestamp)
-    ..note: Firestore document model.
-    ..note: status ∈ {pending, active, rejected}
+    %%  Firestore document model.
+    %%  status ∈ {pending, active, rejected}
 }
 
 class Registration {
@@ -573,7 +573,7 @@ class Registration {
     + getSeatNumber() int
     + isConfirmed() boolean
     + setConfirmed(boolean)
-    ..note: Links a student (userId) to an Event (eventId)
+    %%  Links a student (userId) to an Event (eventId)
 }
 
 class NotificationItem {
@@ -587,7 +587,7 @@ class NotificationItem {
     + getMessage() String
     + isUnread() boolean
     + getTimestamp() Timestamp
-    ..note: Stored under users/{uid}/notifications in Firestore
+    %%  Stored under users/{uid}/notifications in Firestore
 }
 
 class HistoryItem {
@@ -600,8 +600,8 @@ class HistoryItem {
     + getDay() String
     + getMonth() String
     + getStatus() String
-    ..note: status ∈ {Attended, Did Not Attend, Recap}
-    ..note: Constructed locally from Firestore Registration docs
+    %%  status ∈ {Attended, Did Not Attend, Recap}
+    %%  Constructed locally from Firestore Registration docs
 }
 
 %% ─────────────────────────────────────────
@@ -619,8 +619,8 @@ class AttendeeAdapter {
     + updateItem(int)
     - extractRollNumber(Registration) String
     - getInitials(String) String
-    ..note: readOnly=true → student view (no confirm button)
-    ..note: readOnly=false → manager view (confirm buttons shown)
+    %%  readOnly=true → student view (no confirm button)
+    %%  readOnly=false → manager view (confirm buttons shown)
 }
 
 class AttendeeAdapter_OnConfirmListener {
@@ -662,7 +662,7 @@ class ManagerEventAdapter {
     + onCreateViewHolder(ViewGroup, int) ViewHolder
     + onBindViewHolder(ViewHolder, int)
     + getItemCount() int
-    ..note: Edit mode changes card background color
+    %%  Edit mode changes card background color
 }
 
 class ManagerEventAdapter_OnItemClickListener {
@@ -700,7 +700,7 @@ class PendingEventAdapter {
     + onCreateViewHolder(ViewGroup, int) ViewHolder
     + onBindViewHolder(ViewHolder, int)
     + getItemCount() int
-    ..note: Used by both AdminDashboardActivity and EventsListActivity
+    %%  Used by both AdminDashboardActivity and EventsListActivity
 }
 
 class PendingEventAdapter_ActionListener {
@@ -750,9 +750,9 @@ class ReminderWorker {
     + ReminderWorker(Context, WorkerParameters)
     + doWork() Result
     - showNotification(String title, String message)
-    ..note: Triggered via WorkManager from RsvpActivity
-    ..note: Inputs: EVENT_NAME, MESSAGE (key-value Data)
-    ..note: Fires a push notification on the event_reminders channel
+    %%  Triggered via WorkManager from RsvpActivity
+    %%  Inputs: EVENT_NAME, MESSAGE (key-value Data)
+    %%  Fires a push notification on the event_reminders channel
 }
 
 %% ─────────────────────────────────────────
@@ -763,7 +763,7 @@ class RoleSelectActivity {
     + onCreate(Bundle)
     - navigateTo(Class, String role)
     + goToSignUp(Context, String role)$
-    ..note: Entry point. Passes role extra to LoginActivity
+    %%  Entry point. Passes role extra to LoginActivity
 }
 
 class LoginActivity {
@@ -773,8 +773,8 @@ class LoginActivity {
     + onCreate(Bundle)
     - applyRoleTheme()
     - setupClickListeners()
-    ..note: Routes to Admin / EventManager / Student dashboard
-    ..note: Also handles forgot-password flow via Firebase
+    %%  Routes to Admin / EventManager / Student dashboard
+    %%  Also handles forgot-password flow via Firebase
 }
 
 class SignupActivity {
@@ -784,8 +784,8 @@ class SignupActivity {
     + onCreate(Bundle)
     - applyRoleTheme()
     - setupClickListeners()
-    ..note: Writes user doc to Firestore users collection
-    ..note: Supports student / event_manager / admin roles
+    %%  Writes user doc to Firestore users collection
+    %%  Supports student / event_manager / admin roles
 }
 
 %% ─────────────────────────────────────────
@@ -804,7 +804,7 @@ class StudentHomeActivity {
     - loadEventsThisWeek()
     - loadRegisteredCount()
     - loadSavedCount()
-    ..note: Displays upcoming active events + personal stats
+    %%  Displays upcoming active events + personal stats
 }
 
 class StudentProfileActivity {
@@ -815,7 +815,7 @@ class StudentProfileActivity {
     - TextView tvThisMonth
     - TextView tvFollowing
     + onCreate(Bundle)
-    ..note: Links to EventHistoryActivity, PrivacySettingsActivity
+    %%  Links to EventHistoryActivity, PrivacySettingsActivity
 }
 
 class SearchActivity {
@@ -829,8 +829,8 @@ class SearchActivity {
     - performSearch(String query)
     - applyFilters()
     - renderResults()
-    ..note: Filters by category, date range, sort order
-    ..note: Category chips: All / Sports / Academic / Cultural
+    %%  Filters by category, date range, sort order
+    %%  Category chips: All / Sports / Academic / Cultural
 }
 
 class EventDetailActivity {
@@ -838,8 +838,8 @@ class EventDetailActivity {
     + onCreate(Bundle)
     - populateDetails()
     - setupButtons()
-    ..note: Receives event data via Intent extras
-    ..note: Opens RsvpActivity or AttendeeListActivity (readOnly=true)
+    %%  Receives event data via Intent extras
+    %%  Opens RsvpActivity or AttendeeListActivity (readOnly=true)
 }
 
 class RsvpActivity {
@@ -855,9 +855,9 @@ class RsvpActivity {
     - confirmRsvp()
     - cancelRsvp()
     - scheduleReminder(long eventDateMillis, String eventName)
-    ..note: Writes Registration doc to Firestore
-    ..note: Schedules ReminderWorker via WorkManager
-    ..note: Adds event to Android Calendar via CalendarContract
+    %%  Writes Registration doc to Firestore
+    %%  Schedules ReminderWorker via WorkManager
+    %%  Adds event to Android Calendar via CalendarContract
 }
 
 class EventHistoryActivity {
@@ -870,7 +870,7 @@ class EventHistoryActivity {
     + onCreate(Bundle)
     - loadHistoryData()
     - updateStats()
-    ..note: Reads registrations for the current user from Firestore
+    %%  Reads registrations for the current user from Firestore
 }
 
 class NotificationsActivity {
@@ -879,7 +879,7 @@ class NotificationsActivity {
     - List~NotificationItem~ notificationList
     + onCreate(Bundle)
     - listenForNotifications()
-    ..note: Listens to users/{uid}/notifications (real-time)
+    %%  Listens to users/{uid}/notifications (real-time)
 }
 
 class TrendingEventsActivity {
@@ -891,7 +891,7 @@ class TrendingEventsActivity {
     - setupRecyclerView()
     - setupNavigation()
     - loadTrendingEvents()
-    ..note: Orders events by registeredCount DESC
+    %%  Orders events by registeredCount DESC
 }
 
 class AttendeeListActivity {
@@ -905,8 +905,8 @@ class AttendeeListActivity {
     - loadAttendees()
     - setupSearch()
     - setupNavigation()
-    ..note: readOnly=true → student view
-    ..note: readOnly=false → manager can confirm registrations
+    %%  readOnly=true → student view
+    %%  readOnly=false → manager can confirm registrations
 }
 
 class PrivacySettingsActivity {
@@ -920,7 +920,7 @@ class PrivacySettingsActivity {
     + onCreate(Bundle)
     - loadPrivacySettings()
     - setupToggleListeners()
-    ..note: Persists settings to users/{uid} in Firestore
+    %%  Persists settings to users/{uid} in Firestore
 }
 
 %% ─────────────────────────────────────────
@@ -937,7 +937,7 @@ class EventManagerDashboardActivity {
     - setupCalendar()
     - loadEventsForDate(Date)
     - setupNavigation()
-    ..note: Calendar-driven: shows active events for selected day
+    %%  Calendar-driven: shows active events for selected day
 }
 
 class EventManagerEventsActivity {
@@ -949,8 +949,8 @@ class EventManagerEventsActivity {
     + onCreate(Bundle)
     - loadMyEvents()
     - toggleEditMode()
-    ..note: Shows all events created by the current manager
-    ..note: Edit mode → click opens EditEventActivity
+    %%  Shows all events created by the current manager
+    %%  Edit mode → click opens EditEventActivity
 }
 
 class EventManagerProfileActivity {
@@ -963,7 +963,7 @@ class EventManagerProfileActivity {
     + onCreate(Bundle)
     - bindViews()
     - loadProfileData()
-    ..note: Quick actions: Create Event, View History, Privacy, Sign Out
+    %%  Quick actions: Create Event, View History, Privacy, Sign Out
 }
 
 class CreateEventActivity {
@@ -983,7 +983,7 @@ class CreateEventActivity {
     - setupPickers()
     - setupNavigation()
     - submitEvent()
-    ..note: Writes Event doc with status=pending to Firestore
+    %%  Writes Event doc with status=pending to Firestore
 }
 
 class EditEventActivity {
@@ -1003,7 +1003,7 @@ class EditEventActivity {
     - setupPickers()
     - saveChanges()
     - deleteEvent()
-    ..note: eventID received via Intent extra "EVENT_ID"
+    %%  eventID received via Intent extra "EVENT_ID"
 }
 
 %% ─────────────────────────────────────────
@@ -1024,7 +1024,7 @@ class AdminDashboardActivity {
     - loadStats()
     - listenToPendingEvents()
     - updateEventStatus(String eventId, String status)
-    ..note: Accepts or declines Event (sets status=active|rejected)
+    %%  Accepts or declines Event (sets status=active|rejected)
 }
 
 class EventsListActivity {
@@ -1038,8 +1038,8 @@ class EventsListActivity {
     - loadAllEvents()
     - applyCardFilter()
     - updateStatus(String eventId, String status)
-    ..note: Full events database view for admins
-    ..note: Card filter: all / approved / pending
+    %%  Full events database view for admins
+    %%  Card filter: all / approved / pending
 }
 
 %% ─────────────────────────────────────────
@@ -1048,7 +1048,7 @@ class EventsListActivity {
 
 class MainActivity {
     + onCreate(Bundle)
-    ..note: Splash / launch activity; redirects to RoleSelectActivity
+    %%  Splash / launch activity; redirects to RoleSelectActivity
 }
 
 %% ─────────────────────────────────────────
@@ -1141,8 +1141,6 @@ AdminDashboardActivity --> EventsListActivity : view all events
 - **Dual-mode `AttendeeListActivity`:** A single activity handles both the student read-only view and the manager confirm-registration view, controlled by the `readOnly` boolean extra.
 - **`PendingEventAdapter` reuse:** The same adapter powers both `AdminDashboardActivity` (live pending feed) and `EventsListActivity` (full database view).
 - **WorkManager reminder:** `RsvpActivity` uses `OneTimeWorkRequest` with a delay to schedule `ReminderWorker` to fire a push notification before the event.
-
-
 
 
 
