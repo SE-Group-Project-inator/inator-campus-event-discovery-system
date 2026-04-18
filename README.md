@@ -24,6 +24,7 @@
 
 
 - [Project Part 2 - Preparation](#project-part-2---preparation)
+- [Project Part 3](#project-part-3)
   
 ---
 
@@ -493,6 +494,8 @@ We surveyed 16 LUMS students (6–7 March 2026) to validate our assumptions.
 | US-33 | Student Profile | Student | 2 | Low | Halfway |
 | US-34 | Edit Event Manager Profile | Event Mgr | 2 | Low | Halfway |
 
+
+# Project Part 3 
 
 ***UML Code Diagram**
 <img width="1124" height="457" alt="image" src="https://github.com/user-attachments/assets/f767a743-0cd1-4f2e-a5de-2556fc500f47" />
