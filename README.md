@@ -510,8 +510,7 @@ We surveyed 16 LUMS students (6–7 March 2026) to validate our assumptions.
 
 # UML Class Diagram — Campus Event Discovery System
 
-> Paste the code block below into any Mermaid renderer (GitHub `.md` files render this automatically).  
-> Recommended viewer: https://mermaid.live
+
 
 ```mermaid
 classDiagram
