@@ -220,27 +220,42 @@ public class RsvpActivity extends AppCompatActivity {
         btnConfirmRsvp.setText("Processing...");
 
         Map<String, Object> rsvpData = new HashMap<>();
-        rsvpData.put("studentId", studentId);
+        rsvpData.put("userId", studentId);
+        rsvpData.put("eventId", eventId);
         rsvpData.put("eventName", tvEventTitle.getText().toString());
         rsvpData.put("isNameVisible", cbVisibleName != null && cbVisibleName.isChecked());
         rsvpData.put("isRollNoVisible", cbVisibleRollNo != null && cbVisibleRollNo.isChecked());
         rsvpData.put("optInWaitlist", cbWaitlist != null && cbWaitlist.isChecked());
-        rsvpData.put("status", "Registered");
-        rsvpData.put("timestamp", FieldValue.serverTimestamp());
+        rsvpData.put("status", "confirmed");
+        rsvpData.put("createdAt", FieldValue.serverTimestamp());
 
-        db.collection("events").document(eventId)
-                .collection("rsvps").document(studentId)
+        db.collection("rsvps")
+                .document(studentId + "_" + eventId)
                 .set(rsvpData)
                 .addOnSuccessListener(aVoid -> {
+                    // Increment registeredCount
+                    db.collection("events").document(eventId)
+                            .update("registeredCount", FieldValue.increment(1));
+
+                    // Populate success layout
+                    TextView tvDateSuccess  = findViewById(R.id.tvCardDateSuccess);
+                    TextView tvTimeSuccess  = findViewById(R.id.tvCardTimeSuccess);
+                    TextView tvVenueSuccess = findViewById(R.id.tvCardVenueSuccess);
+                    TextView tvTitleSuccess = findViewById(R.id.tvCardEventTitleSuccess);
+
+                    if (tvTitleSuccess != null) tvTitleSuccess.setText(tvEventTitle.getText());
+                    if (tvDateSuccess  != null) tvDateSuccess.setText(tvCardDate.getText());
+                    if (tvTimeSuccess  != null) tvTimeSuccess.setText(tvCardTime.getText());
+                    if (tvVenueSuccess != null) tvVenueSuccess.setText(tvCardVenue.getText());
+
                     if (layoutRsvpForm != null && layoutRsvpSuccess != null) {
                         layoutRsvpForm.setVisibility(View.GONE);
                         layoutRsvpSuccess.setVisibility(View.VISIBLE);
                     }
 
-                    String title = tvEventTitle.getText().toString();
+                    String title   = tvEventTitle.getText().toString();
                     String dateStr = tvCardDate.getText().toString();
                     String timeStr = tvCardTime.getText().toString();
-
                     scheduleReminders(title, dateStr, timeStr);
                 })
                 .addOnFailureListener(e -> {
