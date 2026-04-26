@@ -1,151 +1,174 @@
 package com.example.campuseventdiscoverysystem.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.campuseventdiscoverysystem.R;
+import com.example.campuseventdiscoverysystem.adapters.HistoryAdapter;
+import com.example.campuseventdiscoverysystem.models.HistoryItem;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import com.example.campuseventdiscoverysystem.R;
-import com.example.campuseventdiscoverysystem.adapters.HistoryAdapter;
-import com.example.campuseventdiscoverysystem.models.HistoryItem;
-
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Activity responsible for displaying the user's event participation history.
- * It retrieves RSVP data from Firebase Firestore and displays it in a list format,
- * while also calculating participation statistics.
- */
 public class EventHistoryActivity extends AppCompatActivity {
 
-    /** The RecyclerView used to display the list of history items. */
     private RecyclerView rvEventHistory;
-
-    /** The adapter used to bind the {@code HistoryItem} data to the RecyclerView. */
     private HistoryAdapter adapter;
-
-    /** The data source containing the list of events the user has interacted with. */
     private List<HistoryItem> historyList;
-
-    /** TextViews used to display calculated statistics for total and monthly attendance. */
     private TextView tvTotalAttended, tvThisMonth;
+    private FirebaseFirestore db;
 
-    /**
-     * Initializes the activity, sets up the UI components, and begins the data loading process.
-     * * @param savedInstanceState If the activity is being re-initialized after
-     * previously being shut down, this contains the most recent data.
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_history);
 
-        // 1. Initialize Views
-        rvEventHistory = findViewById(R.id.rvEventHistory);
-        ImageButton btnBack = findViewById(R.id.btnBack);
-        tvTotalAttended = findViewById(R.id.tvTotalAttended);
-        tvThisMonth = findViewById(R.id.tvThisMonth);
+        db = FirebaseFirestore.getInstance();
 
-        // 2. Setup Back Button
+        rvEventHistory  = findViewById(R.id.rvEventHistory);
+        tvTotalAttended = findViewById(R.id.tvTotalAttended);
+        tvThisMonth     = findViewById(R.id.tvThisMonth);
+
+        ImageButton btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
-        // 3. Setup RecyclerView
         rvEventHistory.setLayoutManager(new LinearLayoutManager(this));
         historyList = new ArrayList<>();
-
-        // 4. Load Dummy Data (Matching your Figma design exactly!)
-        loadHistoryData();
-
-        // 5. Attach Adapter
         adapter = new HistoryAdapter(historyList);
         rvEventHistory.setAdapter(adapter);
 
-        // 6. Update Header Stats
-        updateStats();
+        // Tap on a history card → open EventDisplayActivity (read-only details)
+        adapter.setOnItemClickListener(item -> {
+            Intent intent = new Intent(this, EventDisplayActivity.class);
+            intent.putExtra("eventId",          item.getEventId());
+            intent.putExtra("eventTitle",        item.getTitle());
+            intent.putExtra("eventVenue",        item.getVenue());
+            intent.putExtra("eventDescription",  item.getDescription());
+            intent.putExtra("eventCapacity",     item.getCapacity());
+            intent.putExtra("eventRegistered",   item.getRegistered());
+            intent.putExtra("eventDateMillis",   item.getDateMillis());
+            startActivity(intent);
+        });
+
+        loadHistoryData();
     }
 
-    /**
-     * Retrieves the logged-in student's ID and queries the Firebase Firestore "rsvps"
-     * collection group to fetch all associated event history.
-     * <p>
-     * On successful retrieval, it parses document fields into {@code HistoryItem}
-     * objects and triggers a UI refresh.
-     */
     private void loadHistoryData() {
-        // 1. Get the real logged-in student ID
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        String studentId = (currentUser != null) ? currentUser.getUid() : "unknown_student";
+        if (currentUser == null) return;
 
-        // 2. Query Firestore for this student's RSVPs
-        FirebaseFirestore.getInstance()
-                .collectionGroup("rsvps")
-                .whereEqualTo("studentId", studentId)
+        db.collection("rsvps")
+                .whereEqualTo("userId", currentUser.getUid())
+                .whereEqualTo("status", "confirmed")
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    historyList.clear(); // Clear out the list before adding real data
+                .addOnSuccessListener(rsvpQuery -> {
+                    historyList.clear();
 
-                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                        // Grab the data we saved in RsvpActivity
-                        String eventName = doc.getString("eventName");
-                        String status = doc.getString("status");
-
-                        // Fallbacks just in case data is missing
-                        if (eventName == null) eventName = "Unknown Event";
-                        if (status == null) status = "Registered";
-
-                        // Grab the timestamp and format it for your UI (Day and Month)
-                        String day = "--";
-                        String month = "---";
-                        com.google.firebase.Timestamp ts = doc.getTimestamp("timestamp");
-
-                        if (ts != null) {
-                            Date date = ts.toDate();
-                            day = new SimpleDateFormat("dd", Locale.getDefault()).format(date);
-                            month = new SimpleDateFormat("MMM", Locale.getDefault()).format(date).toUpperCase();
-                        }
-
-                        // Add the real Firebase data to your visual list!
-                        historyList.add(new HistoryItem(eventName, day, month, status));
+                    List<DocumentSnapshot> rsvpDocs = rsvpQuery.getDocuments();
+                    if (rsvpDocs.isEmpty()) {
+                        adapter.notifyDataSetChanged();
+                        updateStats();
+                        return;
                     }
 
-                    // Tell the UI to refresh with the newly downloaded data
-                    adapter.notifyDataSetChanged();
-                    updateStats();
+                    Date now = new Date();
+                    AtomicInteger remaining = new AtomicInteger(rsvpDocs.size());
+
+                    for (DocumentSnapshot rsvpDoc : rsvpDocs) {
+                        String eventId = rsvpDoc.getString("eventId");
+
+                        if (eventId == null) {
+                            if (remaining.decrementAndGet() == 0) {
+                                adapter.notifyDataSetChanged();
+                                updateStats();
+                            }
+                            continue;
+                        }
+
+                        db.collection("events")
+                                .document(eventId)
+                                .get()
+                                .addOnSuccessListener(eventDoc -> {
+
+                                    com.google.firebase.Timestamp ts =
+                                            eventDoc.getTimestamp("date");
+
+                                    // Only include events whose date has already passed
+                                    if (ts != null && ts.toDate().before(now)) {
+
+                                        String title = eventDoc.getString("title");
+                                        String venue = eventDoc.getString("venue");
+                                        String desc  = eventDoc.getString("description");
+                                        int cap = eventDoc.getLong("capacity") != null
+                                                ? eventDoc.getLong("capacity").intValue() : 0;
+                                        int reg = eventDoc.getLong("registeredCount") != null
+                                                ? eventDoc.getLong("registeredCount").intValue() : 0;
+                                        long millis = ts.toDate().getTime();
+
+                                        if (title == null) title = rsvpDoc.getString("eventName");
+                                        if (title == null) title = "Unknown Event";
+                                        if (venue == null) venue = "";
+
+                                        Date d = ts.toDate();
+                                        String day   = new SimpleDateFormat("dd",  Locale.getDefault()).format(d);
+                                        String month = new SimpleDateFormat("MMM", Locale.getDefault())
+                                                .format(d).toUpperCase();
+
+                                        HistoryItem item = new HistoryItem(title, day, month, "Attended");
+                                        item.setEventId(eventDoc.getId());
+                                        item.setVenue(venue);
+                                        item.setDescription(desc);
+                                        item.setCapacity(cap);
+                                        item.setRegistered(reg);
+                                        item.setDateMillis(millis);
+
+                                        historyList.add(item);
+                                    }
+
+                                    if (remaining.decrementAndGet() == 0) {
+                                        adapter.notifyDataSetChanged();
+                                        updateStats();
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    if (remaining.decrementAndGet() == 0) {
+                                        adapter.notifyDataSetChanged();
+                                        updateStats();
+                                    }
+                                });
+                    }
                 })
-                .addOnFailureListener(e -> {
-                    // If it fails to download, show an error (you can optionally add a Toast here)
-                    e.printStackTrace();
-                });
+                .addOnFailureListener(e -> e.printStackTrace());
     }
 
-    /**
-     * Iterates through the current {@code historyList} to calculate and update
-     * the "Total Attended" and "This Month" statistic counters on the UI.
-     */
     private void updateStats() {
-        int attendedCount = 0;
-        int marchCount = 0;
+        int thisMonthCount = 0;
+
+        String currentMonth = new SimpleDateFormat("MMM", Locale.getDefault())
+                .format(Calendar.getInstance().getTime()).toUpperCase();
 
         for (HistoryItem item : historyList) {
-            if (item.getStatus().equalsIgnoreCase("Attended")) {
-                attendedCount++;
-            }
-            // Count March events for the "This Month" stat
-            if (item.getMonth().equalsIgnoreCase("MAR")) {
-                marchCount++;
+            if (item.getMonth().equalsIgnoreCase(currentMonth)) {
+                thisMonthCount++;
             }
         }
 
-        tvTotalAttended.setText(String.valueOf(attendedCount));
-        tvThisMonth.setText(String.valueOf(marchCount));
+        // Every item in the list is a past attended event
+        tvTotalAttended.setText(String.valueOf(historyList.size()));
+        tvThisMonth.setText(String.valueOf(thisMonthCount));
     }
 }

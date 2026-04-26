@@ -91,8 +91,7 @@ public class StudentHomeActivity extends AppCompatActivity {
 
         // Tickets (not implemented yet)
         navTickets.setOnClickListener(v ->
-                Toast.makeText(this,
-                        "Tickets coming soon!", Toast.LENGTH_SHORT).show()
+                startActivity(new Intent(this, TicketsActivity.class))
         );
 
         // Navigate to Profile screen
