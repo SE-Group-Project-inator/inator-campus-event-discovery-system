@@ -53,10 +53,12 @@
         <!-- US-27 / US-32: Attendee List + Seat Confirmation -->
         <activity android:name=".activities.AttendeeListActivity"/>
 
-
-
-
-
+        <!-- Tickets screen -->
+        <activity android:name=".activities.TicketsActivity"/>
+        <!-- Ticket event detail (with Cancel RSVP) -->
+        <activity android:name=".activities.TicketEventDetailsActivity"/>
+        <!-- Read-only event display (from Attendance History) -->
+        <activity android:name=".activities.EventDisplayActivity"/>
 
     </application>
 </manifest>
