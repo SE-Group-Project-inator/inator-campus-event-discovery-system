@@ -52,8 +52,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@color/white"
         android:orientation="horizontal"
+        android:background="@color/white"
         android:elevation="8dp">
 
         <LinearLayout
@@ -61,10 +61,21 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🏠" android:textSize="18sp" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Home" android:textSize="10sp" android:textColor="@color/text_dark" />
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@android:drawable/ic_menu_compass"
+                app:tint="@color/text_dark" />
+
+            <TextView
+                android:text="Home"
+                android:textSize="10sp"
+                android:textColor="@color/text_dark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <LinearLayout
@@ -72,10 +83,21 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🔍" android:textSize="18sp" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Search" android:textSize="10sp" android:textColor="@color/text_dark" />
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@android:drawable/ic_menu_search"
+                app:tint="@color/text_dark" />
+
+            <TextView
+                android:text="Search"
+                android:textSize="10sp"
+                android:textColor="@color/text_dark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <LinearLayout
@@ -83,10 +105,22 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🎟️" android:textSize="18sp" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tickets" android:textSize="10sp" android:textColor="@color/btn_student" android:textStyle="bold" />
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@android:drawable/ic_menu_agenda"
+                app:tint="@color/btn_student" />
+
+            <TextView
+                android:text="Tickets"
+                android:textSize="10sp"
+                android:textColor="@color/btn_student"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <LinearLayout
@@ -94,10 +128,23 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="👤" android:textSize="18sp" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Profile" android:textSize="10sp" android:textColor="@color/text_dark" />
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@android:drawable/ic_menu_myplaces"
+                app:tint="@color/text_dark" />
+
+            <TextView
+                android:text="Profile"
+                android:textSize="10sp"
+                android:textColor="@color/text_dark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
+
     </LinearLayout>
+
 </LinearLayout>

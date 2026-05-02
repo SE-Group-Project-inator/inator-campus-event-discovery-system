@@ -95,44 +95,89 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center"
-            android:background="?attr/selectableItemBackground">
+            android:gravity="center">
+
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:src="@android:drawable/ic_menu_compass"
                 app:tint="@color/btn_student" />
+
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="Home"
                 android:textSize="10sp"
                 android:textColor="@color/btn_student"
                 android:textStyle="bold"
-                android:layout_marginTop="2dp" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/navSignOut"
+            android:id="@+id/navSearch"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center"
-            android:background="?attr/selectableItemBackground">
+            android:gravity="center">
+
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:src="@android:drawable/ic_menu_search"
                 app:tint="@color/text_dark" />
+
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sign out"
+                android:text="Search"
                 android:textSize="10sp"
                 android:textColor="@color/text_dark"
-                android:layout_marginTop="2dp" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/navTickets"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@android:drawable/ic_menu_agenda"
+                app:tint="@color/text_dark" />
+
+            <TextView
+                android:text="Tickets"
+                android:textSize="10sp"
+                android:textColor="@color/text_dark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/navProfile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@android:drawable/ic_menu_myplaces"
+                app:tint="@color/text_dark" />
+
+            <TextView
+                android:text="Profile"
+                android:textSize="10sp"
+                android:textColor="@color/text_dark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
     </LinearLayout>
+
 </LinearLayout>
