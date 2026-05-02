@@ -415,10 +415,61 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Consent Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="I consent to:"
+                android:layout_marginBottom="8dp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"/>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <CheckBox
+                        android:id="@+id/cbVisibleName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_dark"
+                        android:text="My name being visible to other participants" />
+
+                    <CheckBox
+                        android:id="@+id/cbVisibleRollNo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_dark"
+                        android:text="My roll number being visible to other participants" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <CheckBox
+                android:id="@+id/cbWaitlist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:textSize="12sp"
+                android:textColor="@color/text_grey"
+                android:textStyle="bold"
+                android:text="Add me to the waitlist if slots are full" />
+
         </LinearLayout>
     </ScrollView>
 
-    <!-- Fixed bottom: Confirm RSVP → RsvpActivity -->
+    <!-- Confirm RSVP → Payment Activity -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnConfirmRsvp"
         android:layout_width="match_parent"
