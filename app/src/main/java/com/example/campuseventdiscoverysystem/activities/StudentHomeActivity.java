@@ -16,6 +16,7 @@ import com.example.campuseventdiscoverysystem.activities.MyPaymentsActivity;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -92,7 +93,7 @@ public class StudentHomeActivity extends BaseSessionActivity {
                 startActivity(new Intent(this, SearchActivity.class)));
 
         navTickets.setOnClickListener(v ->
-                startActivity(new Intent(this, MyPaymentsActivity.class)));
+                startActivity(new Intent(this, TicketsActivity.class)));
 
         navProfile.setOnClickListener(v ->
                 startActivity(new Intent(this, StudentProfileActivity.class)));
@@ -102,6 +103,27 @@ public class StudentHomeActivity extends BaseSessionActivity {
     }
 
     private void listenToUpcomingEvents() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return;
+
+        // First get all eventIds this user has already RSVPd to
+        db.collection("rsvps")
+                .whereEqualTo("userId", user.getUid())
+                .whereEqualTo("status", "confirmed")
+                .get()
+                .addOnSuccessListener(rsvpQuery -> {
+                    // Build a set of already-RSVPd event IDs
+                    java.util.Set<String> rsvpdIds = new java.util.HashSet<>();
+                    for (DocumentSnapshot rsvp : rsvpQuery.getDocuments()) {
+                        String eid = rsvp.getString("eventId");
+                        if (eid != null) rsvpdIds.add(eid);
+                    }
+                    attachUpcomingListener(rsvpdIds);
+                })
+                .addOnFailureListener(e -> attachUpcomingListener(new java.util.HashSet<>()));
+    }
+
+    private void attachUpcomingListener(java.util.Set<String> rsvpdIds) {
         upcomingEventsListener = db.collection("events")
                 .whereEqualTo("status", "active")
                 .whereGreaterThanOrEqualTo("date", new Timestamp(new Date()))
@@ -116,80 +138,88 @@ public class StudentHomeActivity extends BaseSessionActivity {
 
                     upcomingEventsList.removeAllViews();
 
-                    if (query.isEmpty()) {
+                    // Filter out events already RSVPd to
+                    java.util.List<QueryDocumentSnapshot> filtered = new java.util.ArrayList<>();
+                    for (QueryDocumentSnapshot doc : query) {
+                        if (!rsvpdIds.contains(doc.getId())) {
+                            filtered.add(doc);
+                        }
+                    }
+
+                    if (filtered.isEmpty()) {
                         TextView empty = new TextView(this);
                         empty.setText("No upcoming events — check back soon!");
                         upcomingEventsList.addView(empty);
                         return;
                     }
 
-                    for (QueryDocumentSnapshot doc : query) {
-                        String title = doc.getString("title");
-                        String venue = doc.getString("venue");
-                        String desc  = doc.getString("description");
-                        Timestamp date = doc.getTimestamp("date");
-                        String startTime = doc.getString("startTime");
+                    for (QueryDocumentSnapshot doc : filtered) {
+                        String title     = doc.getString("title");
+                        String venue     = doc.getString("venue");
+                        String desc      = doc.getString("description");
+                        Timestamp date   = doc.getTimestamp("date");
 
-                        int cap = doc.getLong("capacity") != null ? doc.getLong("capacity").intValue() : 0;
+                        int cap = doc.getLong("capacity")       != null ? doc.getLong("capacity").intValue()       : 0;
                         int reg = doc.getLong("registeredCount") != null ? doc.getLong("registeredCount").intValue() : 0;
 
-                        long dateMillis = date != null ? date.toDate().getTime() : 0;
-
-                        String orgName = doc.getString("submittedByName");
-                        String orgEmail = doc.getString("submittedByEmail");
+                        long dateMillis  = date != null ? date.toDate().getTime() : 0;
+                        String orgName   = doc.getString("submittedByName");
+                        String orgEmail  = doc.getString("submittedByEmail");
 
                         final double ticketPrice =
-                                doc.getDouble("price") != null ? doc.getDouble("price") :
+                                doc.getDouble("price")       != null ? doc.getDouble("price") :
                                         doc.getDouble("ticketPrice") != null ? doc.getDouble("ticketPrice") : 0.0;
 
                         View itemView = LayoutInflater.from(this)
                                 .inflate(R.layout.item_upcoming, upcomingEventsList, false);
 
-                        TextView tvTitle = itemView.findViewById(R.id.tvTitle);
+                        TextView tvTitle    = itemView.findViewById(R.id.tvTitle);
                         TextView tvLocation = itemView.findViewById(R.id.tvLocation);
-                        TextView tvDay = itemView.findViewById(R.id.tvDay);
-                        TextView tvMonth = itemView.findViewById(R.id.tvMonth);
-                        TextView tvPrice = itemView.findViewById(R.id.tvPrice);
+                        TextView tvDay      = itemView.findViewById(R.id.tvDay);
+                        TextView tvMonth    = itemView.findViewById(R.id.tvMonth);
+                        TextView tvPrice    = itemView.findViewById(R.id.tvPrice);
 
-                        if (tvTitle != null) tvTitle.setText(title);
+                        if (tvTitle    != null) tvTitle.setText(title);
                         if (tvLocation != null) tvLocation.setText("📍 " + venue);
-                        if (tvPrice != null) {
-                            tvPrice.setText(ticketPrice > 0 ? "Rs. " + (int) ticketPrice : "FREE");
-                        }
+                        if (tvPrice    != null) tvPrice.setText(ticketPrice > 0 ? "Rs. " + (int) ticketPrice : "FREE");
 
                         if (date != null) {
                             Date d = date.toDate();
-                            if (tvDay != null)
-                                tvDay.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(d));
-                            if (tvMonth != null)
-                                tvMonth.setText(new SimpleDateFormat("MMM", Locale.getDefault()).format(d).toUpperCase());
+                            if (tvDay   != null) tvDay.setText(new SimpleDateFormat("dd",  Locale.getDefault()).format(d));
+                            if (tvMonth != null) tvMonth.setText(new SimpleDateFormat("MMM", Locale.getDefault()).format(d).toUpperCase());
                         }
 
-                        String finalTitle = title;
-                        String finalVenue = venue;
-                        String finalDesc = desc;
-                        String finalOrgName = orgName;
+                        String finalTitle    = title;
+                        String finalVenue    = venue;
+                        String finalDesc     = desc;
+                        String finalOrgName  = orgName;
                         String finalOrgEmail = orgEmail;
-                        String finalEventId = doc.getId();
+                        String finalEventId  = doc.getId();
 
                         itemView.setOnClickListener(v -> {
                             Intent intent = new Intent(this, EventDetailActivity.class);
-                            intent.putExtra("eventId", finalEventId);
-                            intent.putExtra("eventTitle", finalTitle);
-                            intent.putExtra("eventVenue", finalVenue);
-                            intent.putExtra("eventDescription", finalDesc);
-                            intent.putExtra("eventCapacity", cap);
-                            intent.putExtra("eventRegistered", reg);
-                            intent.putExtra("eventDateMillis", dateMillis);
-                            intent.putExtra("eventOrganizerName", finalOrgName);
-                            intent.putExtra("eventOrganizerEmail", finalOrgEmail);
-                            intent.putExtra("eventTicketPrice", ticketPrice);
+                            intent.putExtra("eventId",             finalEventId);
+                            intent.putExtra("eventTitle",           finalTitle);
+                            intent.putExtra("eventVenue",           finalVenue);
+                            intent.putExtra("eventDescription",     finalDesc);
+                            intent.putExtra("eventCapacity",        cap);
+                            intent.putExtra("eventRegistered",      reg);
+                            intent.putExtra("eventDateMillis",      dateMillis);
+                            intent.putExtra("eventOrganizerName",   finalOrgName);
+                            intent.putExtra("eventOrganizerEmail",  finalOrgEmail);
+                            intent.putExtra("eventTicketPrice",     ticketPrice);
                             startActivity(intent);
                         });
 
                         upcomingEventsList.addView(itemView);
                     }
                 });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (upcomingEventsListener != null) upcomingEventsListener.remove();
     }
 
     private void loadGreeting() {}
