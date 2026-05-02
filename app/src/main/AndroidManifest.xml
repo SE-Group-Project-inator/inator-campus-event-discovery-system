@@ -28,8 +28,10 @@
 
         <!-- Login — needed before we build it so app doesn't crash -->
         <activity android:name=".activities.LoginActivity"/>
-        <activity android:name=".activities.AdminDashboardActivity"/>
-        <activity android:name=".activities.EventsListActivity"/>
+        <activity android:name=".activities.AdminDashboardActivity"
+            android:theme="@style/Theme.Admin"/>
+        <activity android:name=".activities.EventsListActivity"
+            android:theme="@style/Theme.Admin"/>
         <activity android:name=".activities.PrivacySettingsActivity"/>
         <activity android:name=".activities.SignupActivity"/>
 

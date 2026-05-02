@@ -24,7 +24,7 @@ import java.util.Date;
  * Event Manager Profile Activity
  * Displays user info, statistics, quick action buttons, and handles navigation
  */
-public class EventManagerProfileActivity extends AppCompatActivity {
+public class EventManagerProfileActivity extends BaseSessionActivity {
 
     // Firebase Instances
     private FirebaseFirestore db;

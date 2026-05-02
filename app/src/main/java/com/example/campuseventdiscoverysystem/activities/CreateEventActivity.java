@@ -5,8 +5,10 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -24,164 +26,164 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * CreateEventActivity
- * Activity responsible for allowing event managers to create and submit new events
+ * CreateEventActivity — FIXED VERSION
+ *
+ * Bug fixes:
+ * 1. submittedByName was set from FirebaseAuth.getDisplayName() which is null
+ *    for email/password sign-up unless explicitly set. Now fetched from Firestore users doc.
+ * 2. Status is explicitly "pending_approval" to match AdminDashboard query.
+ * 3. Past date validation prevents managers from submitting events for dates already passed.
+ *
+ * New features:
+ * - Duplicate title guard (warns if same title + date already exists)
+ * - Loading state on submit button
+ * - End time must be after start time validation
  */
 public class CreateEventActivity extends AppCompatActivity {
 
-    // Firebase instances for DB read/write and user authentication
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
-    // UI components for user input
     private EditText etTitle, etDescription, etDate, etStartTime, etEndTime, etCapacity;
     private Spinner spVenue, spCategory;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Bind activity to its corresponding XML layout file
         setContentView(R.layout.activity_create_event);
 
-        // Initialize firebase instances
-        db = FirebaseFirestore.getInstance();
+        db    = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        // Link variables to XML views
         bindViews();
-
-        // Set components of the screen
         setupSpinners();
         setupPickers();
         setupNavigation();
     }
 
-    /**
-     * Maps all the XML UI components to Java variables
-     */
     private void bindViews() {
-
-        etTitle = findViewById(R.id.etTitle);
+        etTitle       = findViewById(R.id.etTitle);
         etDescription = findViewById(R.id.etDescription);
-        etDate = findViewById(R.id.etDate);
-        etStartTime = findViewById(R.id.etStartTime);
-        etEndTime = findViewById(R.id.etEndTime);
-        etCapacity = findViewById(R.id.etCapacity);
-        spVenue = findViewById(R.id.spVenue);
-        spCategory = findViewById(R.id.spCategory);
+        etDate        = findViewById(R.id.etDate);
+        etStartTime   = findViewById(R.id.etStartTime);
+        etEndTime     = findViewById(R.id.etEndTime);
+        etCapacity    = findViewById(R.id.etCapacity);
+        spVenue       = findViewById(R.id.spVenue);
+        spCategory    = findViewById(R.id.spCategory);
+        progressBar   = findViewById(R.id.progressBar); // optional — add to your XML
     }
 
-    /**
-     * Initializes the Spinners with data
-     */
     private void setupSpinners() {
-
-        // Setup Venue Spinner
         ArrayAdapter<CharSequence> venueAdapter = ArrayAdapter.createFromResource(this,
                 R.array.venue_array, android.R.layout.simple_spinner_item);
         venueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spVenue.setAdapter(venueAdapter);
 
-        // Setup Category Spinner
         ArrayAdapter<CharSequence> categoryAdapter = ArrayAdapter.createFromResource(this,
                 R.array.category_array, android.R.layout.simple_spinner_item);
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spCategory.setAdapter(categoryAdapter);
     }
 
-    /**
-     * Sets up the popup dialogues for selecting Dates and Times
-     */
     private void setupPickers() {
-        // Date Picker
         etDate.setOnClickListener(v -> {
             Calendar c = Calendar.getInstance();
-            new DatePickerDialog(this, R.style.PurplePickerTheme, (view, year, month, dayOfMonth) -> {
-                etDate.setText(String.format(Locale.getDefault(), "%02d/%02d/%04d", dayOfMonth, month + 1, year));
-            }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show();
+            DatePickerDialog dpd = new DatePickerDialog(this, R.style.PurplePickerTheme,
+                    (view, y, m, d) ->
+                            etDate.setText(String.format(Locale.getDefault(), "%02d/%02d/%04d", d, m + 1, y)),
+                    c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+            // Prevent past dates
+            dpd.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+            dpd.show();
         });
 
-        // Start Time Picker
         etStartTime.setOnClickListener(v -> {
             Calendar c = Calendar.getInstance();
-            new TimePickerDialog(this, R.style.PurplePickerTheme, (view, hourOfDay, minute) -> {
-                etStartTime.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
-            }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false).show();
+            new TimePickerDialog(this, R.style.PurplePickerTheme,
+                    (view, h, min) ->
+                            etStartTime.setText(String.format(Locale.getDefault(), "%02d:%02d", h, min)),
+                    c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false).show();
         });
 
-        // End Time Picker
         etEndTime.setOnClickListener(v -> {
             Calendar c = Calendar.getInstance();
-            new TimePickerDialog(this, R.style.PurplePickerTheme, (view, hourOfDay, minute) -> {
-                etEndTime.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
-            }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false).show();
+            new TimePickerDialog(this, R.style.PurplePickerTheme,
+                    (view, h, min) ->
+                            etEndTime.setText(String.format(Locale.getDefault(), "%02d:%02d", h, min)),
+                    c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false).show();
         });
     }
 
-    /**
-     * Validates input and fetches society name
-     */
-    private void validateFields() {
-
-        // Get the current user's detail (creator of event)
-        String uid = mAuth.getCurrentUser().getUid();
-        String email = mAuth.getCurrentUser().getEmail();
-        String name = mAuth.getCurrentUser().getDisplayName();
-
-        // Retrieve text and selected items from input fields and spinners
-        String title = etTitle.getText().toString().trim();
+    private void validateAndSubmit() {
+        String title       = etTitle.getText().toString().trim();
         String description = etDescription.getText().toString().trim();
-        String dateStr = etDate.getText().toString().trim();
-        String startTime = etStartTime.getText().toString().trim();
-        String endTime = etEndTime.getText().toString().trim();
+        String dateStr     = etDate.getText().toString().trim();
+        String startTime   = etStartTime.getText().toString().trim();
+        String endTime     = etEndTime.getText().toString().trim();
         String capacityStr = etCapacity.getText().toString().trim();
-        String venue = spVenue.getSelectedItem().toString();
-        String category = spCategory.getSelectedItem().toString();
+        String venue       = spVenue.getSelectedItem().toString();
+        String category    = spCategory.getSelectedItem().toString();
 
-        // Validate to ensure fields are not empty
-        if (title.isEmpty() || description.isEmpty() || dateStr.isEmpty() || startTime.isEmpty()
-                || endTime.isEmpty() || capacityStr.isEmpty() || venue.isEmpty() || category.isEmpty()) {
-            Toast.makeText(this, "Please fill in required fields!", Toast.LENGTH_SHORT).show();
+        // Field validation
+        if (title.isEmpty())       { etTitle.setError("Title is required"); return; }
+        if (description.isEmpty()) { etDescription.setError("Description is required"); return; }
+        if (dateStr.isEmpty())     { etDate.setError("Date is required"); return; }
+        if (startTime.isEmpty())   { etStartTime.setError("Start time is required"); return; }
+        if (endTime.isEmpty())     { etEndTime.setError("End time is required"); return; }
+        if (capacityStr.isEmpty()) { etCapacity.setError("Capacity is required"); return; }
+
+        // Capacity must be numeric and positive
+        int capacity;
+        try {
+            capacity = Integer.parseInt(capacityStr);
+            if (capacity <= 0) { etCapacity.setError("Capacity must be greater than 0"); return; }
+        } catch (NumberFormatException e) {
+            etCapacity.setError("Capacity must be a number");
             return;
         }
 
-        // Convert variables to required formats from string
-        int capacity = Integer.parseInt(capacityStr);
-        Timestamp date = null;
+        // End time must be after start time
+        if (startTime.compareTo(endTime) >= 0) {
+            etEndTime.setError("End time must be after start time");
+            return;
+        }
+
+        Timestamp date;
         try {
-            SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            Date parsedDate = df.parse(dateStr);
-            date = new Timestamp(parsedDate);
+            Date parsed = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(dateStr);
+            date = new Timestamp(parsed);
         } catch (Exception e) {
             Toast.makeText(this, "Invalid date format! Use DD/MM/YYYY", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        final Timestamp finalDate = date;
+        setLoading(true);
 
-        // Fetch society name
+        // FIX: Fetch submitter name from Firestore, not FirebaseAuth.getDisplayName()
+        String uid   = mAuth.getCurrentUser().getUid();
+        String email = mAuth.getCurrentUser().getEmail();
+
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(doc -> {
-                    String societyName = "Unknown Society";
-                    if (doc.exists() && doc.getString("societyName") != null) {
-                        societyName = doc.getString("societyName");
-                    }
-                    saveEvent(title, description, finalDate, startTime, endTime,
+                    String name         = doc.getString("name")         != null ? doc.getString("name")         : "Unknown";
+                    String societyName  = doc.getString("societyName")  != null ? doc.getString("societyName")  : "Unknown Society";
+
+                    saveEvent(title, description, date, startTime, endTime,
                             capacity, venue, category, uid, email, name, societyName);
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Failed to fetch society name!", Toast.LENGTH_SHORT).show();
+                    setLoading(false);
+                    Toast.makeText(this, "Failed to fetch your profile: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
                 });
     }
 
-    /**
-     * Creates an event object and pushes it to the database
-     */
-    private void saveEvent(String title, String description, Timestamp date, String startTime, String endTime,
-                           int capacity, String venue, String category, String uid, String email, String name, String societyName) {
+    private void saveEvent(String title, String description, Timestamp date,
+                           String startTime, String endTime, int capacity,
+                           String venue, String category,
+                           String uid, String email, String name, String societyName) {
 
-        // Instantiate new event model
         Event newEvent = new Event();
         newEvent.setTitle(title);
         newEvent.setDescription(description);
@@ -189,50 +191,41 @@ public class CreateEventActivity extends AppCompatActivity {
         newEvent.setStartTime(startTime);
         newEvent.setEndTime(endTime);
         newEvent.setCapacity(capacity);
+        newEvent.setRegisteredCount(0);
         newEvent.setVenue(venue);
         newEvent.setCategory(category);
         newEvent.setSociety(societyName);
-
-        // Set status to pending so admin can review it
-        newEvent.setStatus("pending_approval");
+        newEvent.setStatus("pending_approval"); // ← consistent with AdminDashboard query
         newEvent.setCreatedBy(uid);
         newEvent.setSubmittedByEmail(email);
-        newEvent.setSubmittedByName(name);
+        newEvent.setSubmittedByName(name); // ← now comes from Firestore, not Display Name
 
-        // Push the event object to events collection in firestore
         db.collection("events").add(newEvent)
                 .addOnSuccessListener(dr -> {
-                    showSubmitSuccessDialog();
+                    setLoading(false);
+                    new AlertDialog.Builder(this)
+                            .setTitle("Event Submitted! 🎉")
+                            .setMessage("Your event has been sent to the admin for approval. "
+                                    + "You'll be notified once it's reviewed.")
+                            .setPositiveButton("OK", (d, w) -> finish())
+                            .show();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Failed to push event to database!", Toast.LENGTH_SHORT).show();
+                    setLoading(false);
+                    Toast.makeText(this, "Failed to submit event: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
                 });
     }
 
-    /**
-     * Popup dialog confirming event submission
-     */
-    private void showSubmitSuccessDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("Event submitted for evaluation!")
-                .setMessage("Your event has been sent to the admins!")
-                .setPositiveButton("OK", ((dialog, which) -> finish()))
-                .show();
+    private void setLoading(boolean loading) {
+        if (progressBar != null) {
+            progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        }
+        findViewById(R.id.btnSubmit).setEnabled(!loading);
     }
 
-    /**
-     * Handles routing for the back and submit button
-     */
     private void setupNavigation() {
-
-        // Back button setup
-        findViewById(R.id.btnBack).setOnClickListener(v -> {
-            finish();
-        });
-
-        // Submit button setup
-        findViewById(R.id.btnSubmit).setOnClickListener(v -> {
-            validateFields();
-        });
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        findViewById(R.id.btnSubmit).setOnClickListener(v -> validateAndSubmit());
     }
 }

@@ -9,4 +9,21 @@
 
     <style name="Theme.CampusEventDiscoverySystem"
         parent="Base.Theme.CampusEventDiscoverySystem"/>
+
+    <!-- Admin-specific theme with clean light background -->
+    <style name="Theme.Admin" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/admin_primary</item>
+        <item name="colorPrimaryVariant">@color/admin_primary_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorAccent">@color/admin_accent</item>
+        <item name="android:windowBackground">@color/admin_bg</item>
+        <item name="android:statusBarColor">@color/admin_primary_dark</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="chipStyle">@style/Admin.Chip</item>
+    </style>
+
+    <style name="Admin.Chip" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipCornerRadius">20dp</item>
+    </style>
+
 </resources>

@@ -4,10 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -17,54 +18,82 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.campuseventdiscoverysystem.R;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 /**
- * Activity responsible for authenticating users based on their selected role.
- * This class handles Firebase Email/Password authentication, password resets,
- * and performs a secondary role-validation check against Firestore to ensure
- * users access the correct dashboard.
+ * LoginActivity — Production-ready version
+ *
+ * Fixes vs. original:
+ *   ✅ Email verification enforced — user cannot log in without verifying email
+ *   ✅ Resend verification email button shown when email is unverified
+ *   ✅ Loading spinner during network calls (replaces plain button text change)
+ *   ✅ Proper Firebase user reload before checking emailVerified flag
+ *   ✅ SessionManager.startSession() called after every successful login
+ *   ✅ Forgot password dialog fixed (null-safe, non-dismissing until send succeeds)
+ *   ✅ Role mismatch signs the user out cleanly before showing the error toast
+ *   ✅ Back stack cleared correctly on navigation (FLAG_ACTIVITY_NEW_TASK | CLEAR_TASK)
  */
 public class LoginActivity extends AppCompatActivity {
 
-    /** Instance of Firebase Auth used for sign-in and password reset operations. */
-    private FirebaseAuth mAuth;
-    /** Instance of Firebase Firestore used to verify user roles. */
-    private FirebaseFirestore db;
-    /** The role selected by the user in the previous activity (e.g., "admin", "student", "event_manager"). */
-    private String selectedRole;
+    private static final String TAG = "LoginActivity";
 
-    /**
-     * Initializes the activity, retrieves the intent data, and triggers UI styling.
-     * @param savedInstanceState If the activity is being re-initialized, this contains the most recent data.
-     */
+    private FirebaseAuth      mAuth;
+    private FirebaseFirestore db;
+    private String            selectedRole;
+
+    // UI references
+    private Button            btnLogin;
+    private TextInputEditText etEmail;
+    private TextInputEditText etPassword;
+    private ProgressBar       progressBar;
+
+    // ─── Lifecycle ────────────────────────────────────────────────────────────
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
+        mAuth        = FirebaseAuth.getInstance();
+        db           = FirebaseFirestore.getInstance();
         selectedRole = getIntent().getStringExtra("role");
 
-        Log.d("LOGIN_DEBUG", "Activity started. Selected role: " + selectedRole);
-
+        bindViews();
         applyRoleTheme();
         setupClickListeners();
+
+        // Show "session expired" banner if we were redirected here by SessionManager
+        if (getIntent().getBooleanExtra("session_expired", false)) {
+            Toast.makeText(this,
+                    "Your session expired due to inactivity. Please log in again.",
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
-    /**
-     * Dynamically updates the UI colors, text labels, and backgrounds based on
-     * the {@code selectedRole}. This ensures the login screen matches the branding
-     * of the specific user type (Admin, Student, or Event Manager).
-     */
+    // ─── View binding ─────────────────────────────────────────────────────────
+
+    private void bindViews() {
+        btnLogin     = findViewById(R.id.btnLogin);
+        etEmail      = findViewById(R.id.etEmail);
+        etPassword   = findViewById(R.id.etPassword);
+
+        // ProgressBar is optional — only present if you added it to activity_login.xml.
+        // If it doesn't exist yet, the spinner logic gracefully degrades.
+        progressBar  = findViewById(R.id.progressBar);
+    }
+
+    // ─── Role theming ─────────────────────────────────────────────────────────
+
     private void applyRoleTheme() {
         RelativeLayout topBar = findViewById(R.id.topBar);
-        TextView tvRole = findViewById(R.id.tvRoleTitle);
-        TextView tvSubtitle = findViewById(R.id.tvSubtitle);
-        TextView tvSignIn = findViewById(R.id.tvSignInLabel);
-        Button btnLogin = findViewById(R.id.btnLogin);
+        TextView tvRole       = findViewById(R.id.tvRoleTitle);
+        TextView tvSubtitle   = findViewById(R.id.tvSubtitle);
+        TextView tvSignIn     = findViewById(R.id.tvSignInLabel);
         ScrollView scrollView = findViewById(R.id.scrollView);
         androidx.cardview.widget.CardView loginCard = findViewById(R.id.loginCard);
 
@@ -74,27 +103,27 @@ public class LoginActivity extends AppCompatActivity {
             case "admin":
                 topBar.setBackgroundColor(getColor(R.color.btn_admin));
                 tvRole.setText("Admin");
-                tvRole.setTextColor(getColor(R.color.white));
                 scrollView.setBackgroundColor(getColor(R.color.bg_beige));
                 loginCard.setCardBackgroundColor(getColor(R.color.card_tan));
                 tvSubtitle.setText("Monitor and approve campus events.");
                 tvSignIn.setText("Sign in with your admin account");
                 btnLogin.setBackgroundTintList(getColorStateList(R.color.btn_admin));
                 break;
+
             case "event_manager":
                 topBar.setBackgroundColor(getColor(R.color.btn_eventmgr));
                 tvRole.setText("Event Manager");
-                tvRole.setTextColor(getColor(R.color.white));
                 scrollView.setBackgroundColor(getColor(R.color.bg_event));
                 loginCard.setCardBackgroundColor(getColor(R.color.card_event));
                 tvSubtitle.setText("Create and manage your own events!");
                 tvSignIn.setText("Sign in with your university account");
                 btnLogin.setBackgroundTintList(getColorStateList(R.color.btn_eventmgr));
                 break;
+
             case "student":
+            default:
                 topBar.setBackgroundColor(getColor(R.color.btn_student));
                 tvRole.setText("Student");
-                tvRole.setTextColor(getColor(R.color.white));
                 scrollView.setBackgroundColor(getColor(R.color.bg_student));
                 loginCard.setCardBackgroundColor(getColor(R.color.card_student));
                 tvSubtitle.setText("Browse and register for your favourite events!");
@@ -104,24 +133,17 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Sets up listeners for all interactive elements, including the login button,
-     * back button, forgot password text, and sign-up navigation.
-     */
+    // ─── Click listeners ──────────────────────────────────────────────────────
+
     private void setupClickListeners() {
-        Button btnLogin = findViewById(R.id.btnLogin);
-        EditText etEmail = findViewById(R.id.etEmail);
-        EditText etPassword = findViewById(R.id.etPassword);
-        ImageButton btnBack = findViewById(R.id.btnBack);
+        ImageButton btnBack       = findViewById(R.id.btnBack);
         TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
-        TextView tvSignUp = findViewById(R.id.tvSignUp);
+        TextView tvSignUp         = findViewById(R.id.tvSignUp);
 
         btnBack.setOnClickListener(v -> finish());
 
-        // Forgot Password
         tvForgotPassword.setOnClickListener(v -> showForgotPasswordDialog());
 
-        // Sign Up navigation
         if (tvSignUp != null) {
             tvSignUp.setOnClickListener(v -> {
                 Intent intent = new Intent(this, SignupActivity.class);
@@ -130,118 +152,172 @@ public class LoginActivity extends AppCompatActivity {
             });
         }
 
-        btnLogin.setOnClickListener(v -> {
-            String email = etEmail.getText().toString().trim();
-            String password = etPassword.getText().toString().trim();
+        btnLogin.setOnClickListener(v -> attemptLogin());
+    }
 
-            if (TextUtils.isEmpty(email)) {
-                etEmail.setError("Email is required");
-                etEmail.requestFocus();
-                return;
-            }
-            if (TextUtils.isEmpty(password)) {
-                etPassword.setError("Password is required");
-                etPassword.requestFocus();
-                return;
-            }
+    // ─── Login flow ───────────────────────────────────────────────────────────
 
-            btnLogin.setEnabled(false);
-            btnLogin.setText("Signing in...");
-            Log.d("LOGIN_DEBUG", "Attempting login for: " + email);
+    private void attemptLogin() {
+        String email    = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
 
-            mAuth.signInWithEmailAndPassword(email, password)
-                    .addOnSuccessListener(authResult -> {
-                        String uid = authResult.getUser().getUid();
-                        Log.d("LOGIN_DEBUG", "Auth success. UID: " + uid);
-                        verifyRoleAndNavigate(uid, btnLogin);
-                    })
-                    .addOnFailureListener(e -> {
-                        btnLogin.setEnabled(true);
-                        btnLogin.setText("Login");
-                        String msg = e.getMessage();
-                        Log.e("LOGIN_DEBUG", "Auth failed: " + msg);
-                        if (msg != null && msg.contains("no user record")) {
-                            msg = "No account found with this email.";
-                        } else if (msg != null && msg.contains("password is invalid")) {
-                            msg = "Incorrect password. Please try again.";
+        // ── Input validation ──────────────────────────────────────────────────
+        if (TextUtils.isEmpty(email)) {
+            etEmail.setError("Email is required");
+            etEmail.requestFocus();
+            return;
+        }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            etEmail.setError("Enter a valid email address");
+            etEmail.requestFocus();
+            return;
+        }
+        if (TextUtils.isEmpty(password)) {
+            etPassword.setError("Password is required");
+            etPassword.requestFocus();
+            return;
+        }
+
+        setLoading(true);
+
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnSuccessListener(authResult -> {
+                    FirebaseUser user = authResult.getUser();
+                    if (user == null) {
+                        setLoading(false);
+                        showError("Unexpected error. Please try again.");
+                        return;
+                    }
+
+                    // ── CRITICAL: Reload the user to get the latest emailVerified flag.
+                    // Without reload(), Firebase might return a cached (false) value
+                    // even after the user clicked the verification link.
+                    user.reload().addOnCompleteListener(reloadTask -> {
+                        FirebaseUser fresh = mAuth.getCurrentUser();
+                        if (fresh == null) {
+                            setLoading(false);
+                            showError("Session error. Please try again.");
+                            return;
                         }
-                        Toast.makeText(this, "Login failed: " + msg, Toast.LENGTH_LONG).show();
+
+                        if (!fresh.isEmailVerified()) {
+                            // ── Block login and prompt re-verification ───────────
+                            mAuth.signOut();
+                            setLoading(false);
+                            showUnverifiedEmailDialog(email, password);
+                        } else {
+                            // ── Email verified — check role in Firestore ─────────
+                            verifyRoleAndNavigate(fresh.getUid());
+                        }
                     });
-        });
+                })
+                .addOnFailureListener(e -> {
+                    setLoading(false);
+                    String msg;
+                    if (e instanceof FirebaseAuthInvalidUserException) {
+                        msg = "No account found with this email. Please sign up first.";
+                    } else if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                        msg = "Incorrect password. Please try again.";
+                    } else {
+                        msg = e.getMessage();
+                    }
+                    showError(msg);
+                    Log.e(TAG, "Login failed: " + e.getMessage());
+                });
     }
 
     /**
-     * Displays an AlertDialog that prompts the user for their email address
-     * to send a Firebase password reset link.
+     * Shown when Firebase confirms the credentials are correct but the email
+     * has not been verified yet.
+     *
+     * Gives the user two choices:
+     *   1. Resend verification email (in case the first one expired/got lost)
+     *   2. Dismiss and wait
      */
-    private void showForgotPasswordDialog() {
-        EditText emailInput = new EditText(this);
-        emailInput.setHint("Enter your email address");
-        emailInput.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-        int padding = (int) (16 * getResources().getDisplayMetrics().density);
-        emailInput.setPadding(padding, padding, padding, padding);
-
+    private void showUnverifiedEmailDialog(String email, String password) {
         new AlertDialog.Builder(this)
-                .setTitle("Reset Password")
-                .setMessage("We'll send a password reset link to your email.")
-                .setView(emailInput)
-                .setPositiveButton("Send Link", (dialog, which) -> {
-                    String email = emailInput.getText().toString().trim();
-                    if (TextUtils.isEmpty(email)) {
-                        Toast.makeText(this, "Please enter your email.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    mAuth.sendPasswordResetEmail(email)
-                            .addOnSuccessListener(unused ->
-                                    new AlertDialog.Builder(this)
-                                            .setTitle("Email Sent!")
-                                            .setMessage("A password reset link has been sent to " + email + ".")
-                                            .setPositiveButton("Got it", null)
-                                            .show()
-                            )
-                            .addOnFailureListener(e ->
-                                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show()
-                            );
-                })
-                .setNegativeButton("Cancel", null)
+                .setTitle("📧 Email Not Verified")
+                .setMessage("Your email address has not been verified yet.\n\n"
+                        + "Please check your inbox (and spam folder) for a verification link.\n\n"
+                        + "Would you like us to send a new verification email?")
+                .setPositiveButton("Resend Verification Email", (d, w) ->
+                        resendVerificationEmail(email, password))
+                .setNegativeButton("I'll Check My Email", null)
+                .setCancelable(true)
                 .show();
     }
 
     /**
-     * Cross-references the authenticated UID with the users collection in Firestore.
-     * If the role in the database does not match the role selected during login,
-     * the user is signed out to prevent unauthorized access to the wrong dashboard.
-     * * @param uid The unique Firebase Authentication ID of the user.
-     * @param btnLogin Reference to the login button to re-enable it if verification fails.
+     * Signs in silently (just to get a FirebaseUser object), sends the
+     * verification email, then signs out again.
      */
-    private void verifyRoleAndNavigate(String uid, Button btnLogin) {
-        Log.d("LOGIN_DEBUG", "Verifying role for UID: " + uid);
+    private void resendVerificationEmail(String email, String password) {
+        setLoading(true);
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnSuccessListener(authResult -> {
+                    FirebaseUser user = authResult.getUser();
+                    if (user == null) { setLoading(false); return; }
+
+                    user.sendEmailVerification()
+                            .addOnSuccessListener(unused -> {
+                                mAuth.signOut();
+                                setLoading(false);
+                                new AlertDialog.Builder(this)
+                                        .setTitle("Verification Email Sent")
+                                        .setMessage("A new verification link has been sent to:\n\n"
+                                                + email
+                                                + "\n\nPlease check your inbox and spam folder. "
+                                                + "The link expires in 1 hour.")
+                                        .setPositiveButton("Got it", null)
+                                        .show();
+                            })
+                            .addOnFailureListener(e -> {
+                                mAuth.signOut();
+                                setLoading(false);
+                                showError("Failed to send email: " + e.getMessage());
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    setLoading(false);
+                    showError("Could not resend email: " + e.getMessage());
+                });
+    }
+
+    // ─── Role verification + navigation ──────────────────────────────────────
+
+    /**
+     * Fetches the user's Firestore document to confirm their role matches
+     * the portal they are trying to log in through.
+     *
+     * On success: starts the correct dashboard and clears the back stack.
+     * On role mismatch: shows a friendly error and signs the user out.
+     */
+    private void verifyRoleAndNavigate(String uid) {
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(doc -> {
+                    setLoading(false);
+
                     if (!doc.exists()) {
-                        Log.e("LOGIN_DEBUG", "No Firestore document for UID: " + uid);
-                        Toast.makeText(this,
-                                "Account not found in database. Please sign up first.",
-                                Toast.LENGTH_LONG).show();
+                        showError("Account not found. Please sign up first.");
                         mAuth.signOut();
-                        btnLogin.setEnabled(true);
-                        btnLogin.setText("Login");
                         return;
                     }
 
                     String dbRole = doc.getString("role");
-                    Log.d("LOGIN_DEBUG", "Found role in DB: " + dbRole + ". Expected: " + selectedRole);
 
                     if (dbRole == null || !dbRole.equals(selectedRole)) {
-                        Toast.makeText(this,
-                                "Wrong role selected! Your account is registered as: " + dbRole,
-                                Toast.LENGTH_LONG).show();
+                        String friendly = dbRole != null
+                                ? dbRole.replace("_", " ").toUpperCase()
+                                : "UNKNOWN";
+                        showError("Wrong portal! Your account is registered as: " + friendly);
                         mAuth.signOut();
-                        btnLogin.setEnabled(true);
-                        btnLogin.setText("Login");
                         return;
                     }
 
+                    // ── Start the session clock ───────────────────────────────
+                    SessionManager.startSession(this);
+
+                    // ── Navigate to the correct dashboard ─────────────────────
                     Intent intent;
                     switch (dbRole) {
                         case "admin":
@@ -254,23 +330,108 @@ public class LoginActivity extends AppCompatActivity {
                             intent = new Intent(this, EventManagerDashboardActivity.class);
                             break;
                         default:
-                            Log.e("LOGIN_DEBUG", "Unknown role string: " + dbRole);
-                            Toast.makeText(this, "Unknown role. Contact admin.", Toast.LENGTH_SHORT).show();
+                            showError("Unknown role. Please contact the admin.");
                             mAuth.signOut();
-                            btnLogin.setEnabled(true);
-                            btnLogin.setText("Login");
                             return;
                     }
 
-                    Log.d("LOGIN_DEBUG", "Navigating to: " + intent.getComponent().getClassName());
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     finish();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("LOGIN_DEBUG", "Firestore error: " + e.getMessage());
-                    Toast.makeText(this, "Database error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    btnLogin.setEnabled(true);
-                    btnLogin.setText("Login");
+                    setLoading(false);
+                    showError("Database error: " + e.getMessage());
+                    Log.e(TAG, "Firestore error: " + e.getMessage());
                 });
+    }
+
+    // ─── Forgot password dialog ───────────────────────────────────────────────
+
+    /**
+     * Forgot-password flow.
+     * Positive button is null at dialog creation (prevents auto-dismiss).
+     * We override the click listener in setOnShowListener so the dialog only
+     * closes AFTER Firebase confirms the reset email was actually sent.
+     */
+    private void showForgotPasswordDialog() {
+        final TextInputEditText emailInput = new TextInputEditText(this);
+        emailInput.setHint("Enter your @lums.edu.pk email");
+        emailInput.setInputType(
+                android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                        | android.text.InputType.TYPE_CLASS_TEXT);
+        int dp16 = (int) (16 * getResources().getDisplayMetrics().density);
+        emailInput.setPadding(dp16, dp16, dp16, dp16);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Reset Password")
+                .setMessage("Enter the email linked to your account "
+                        + "and we'll send a reset link.")
+                .setView(emailInput)
+                .setPositiveButton("Send Reset Link", null) // null prevents auto-dismiss
+                .setNegativeButton("Cancel", null)
+                .create();
+
+        dialog.setOnShowListener(d -> {
+            Button sendBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            sendBtn.setOnClickListener(v -> {
+                String email = emailInput.getText().toString().trim();
+
+                if (TextUtils.isEmpty(email)) {
+                    emailInput.setError("Please enter your email address");
+                    return;
+                }
+                if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    emailInput.setError("Enter a valid email address");
+                    return;
+                }
+
+                sendBtn.setEnabled(false);
+                sendBtn.setText("Sending…");
+
+                mAuth.sendPasswordResetEmail(email)
+                        .addOnSuccessListener(unused -> {
+                            dialog.dismiss();
+                            new AlertDialog.Builder(this)
+                                    .setTitle("Reset Link Sent!")
+                                    .setMessage("A password reset link has been sent to:\n\n"
+                                            + email
+                                            + "\n\nCheck your inbox (and spam folder). "
+                                            + "The link expires in 1 hour.")
+                                    .setPositiveButton("Got it", null)
+                                    .show();
+                        })
+                        .addOnFailureListener(e -> {
+                            sendBtn.setEnabled(true);
+                            sendBtn.setText("Send Reset Link");
+                            String errMsg = (e instanceof FirebaseAuthInvalidUserException)
+                                    ? "No account found with this email address."
+                                    : "Failed to send: " + e.getMessage();
+                            emailInput.setError(errMsg);
+                            Log.e(TAG, "Password reset failed: " + e.getMessage());
+                        });
+            });
+        });
+
+        dialog.show();
+    }
+
+    // ─── UI helpers ───────────────────────────────────────────────────────────
+
+    /**
+     * Toggles the loading state:
+     *   true  → disable button, show spinner
+     *   false → re-enable button, hide spinner
+     */
+    private void setLoading(boolean loading) {
+        btnLogin.setEnabled(!loading);
+        btnLogin.setText(loading ? "Signing in…" : "LOGIN");
+        if (progressBar != null) {
+            progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void showError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }
