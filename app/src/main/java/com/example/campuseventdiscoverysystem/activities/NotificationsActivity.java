@@ -1,7 +1,6 @@
 package com.example.campuseventdiscoverysystem.activities;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -14,40 +13,25 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.campuseventdiscoverysystem.R;
 import com.example.campuseventdiscoverysystem.adapters.NotificationAdapter;
 import com.example.campuseventdiscoverysystem.models.NotificationItem;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Activity responsible for displaying a list of notifications for a specific student.
- * It listens for real-time updates from a Firebase Firestore sub-collection and
- * updates the UI dynamically as new notifications arrive.
- */
 public class NotificationsActivity extends AppCompatActivity {
 
-    /** The RecyclerView used to display the notification items. */
     private RecyclerView rvNotifications;
-
-    /** The adapter used to bind {@code NotificationItem} data to the RecyclerView. */
     private NotificationAdapter adapter;
-
-    /** The data source list containing notification items retrieved from the database. */
     private List<NotificationItem> notificationList;
-
-    /** Instance of Firebase Firestore for database operations. */
+    private TextView tvEmpty;
     private FirebaseFirestore db;
+    private ListenerRegistration listener;
 
-    /** The unique identifier for the student whose notifications are being retrieved. */
-    private String studentId = "student_123"; // Our hardcoded test user
-
-    /**
-     * Initializes the activity, sets up the RecyclerView and adapter,
-     * and triggers the database listener.
-     * @param savedInstanceState If the activity is being re-initialized, this
-     * contains the most recent data.
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,51 +39,64 @@ public class NotificationsActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
-        // 1. Initialize Views
         rvNotifications = findViewById(R.id.rvNotifications);
+        tvEmpty         = findViewById(R.id.tvEmptyNotifications);
         ImageButton btnBack = findViewById(R.id.btnBack);
-
-        // 2. Setup Back Button
         btnBack.setOnClickListener(v -> finish());
 
-        // 3. Setup RecyclerView (Empty by default now!)
         rvNotifications.setLayoutManager(new LinearLayoutManager(this));
         notificationList = new ArrayList<>();
         adapter = new NotificationAdapter(notificationList);
         rvNotifications.setAdapter(adapter);
 
-        // 4. Fetch Real Data from Firestore
         listenForNotifications();
     }
 
-    /**
-     * Establishes a real-time listener on the Firestore "notifications" sub-collection
-     * for the current student. When data changes in the database, the local list is
-     * cleared and repopulated, and the adapter is notified to refresh the UI.
-     */
     private void listenForNotifications() {
-        // We look inside: users -> student_123 -> notifications
-        db.collection("users").document(studentId).collection("notifications")
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            Toast.makeText(this, "Please log in to see notifications.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        listener = db.collection("users")
+                .document(user.getUid())
+                .collection("notifications")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
                         Toast.makeText(this, "Failed to load notifications", Toast.LENGTH_SHORT).show();
                         return;
                     }
-
                     if (value != null) {
-                        notificationList.clear(); // Clear old data
-
-                        // Loop through everything in the database
+                        notificationList.clear();
                         for (DocumentSnapshot doc : value.getDocuments()) {
                             NotificationItem item = doc.toObject(NotificationItem.class);
                             if (item != null) {
+                                item.setId(doc.getId());
                                 notificationList.add(item);
                             }
                         }
-
-                        // Tell the screen to redraw the list
                         adapter.notifyDataSetChanged();
+
+                        // Mark all as read
+                        for (DocumentSnapshot doc : value.getDocuments()) {
+                            Boolean read = doc.getBoolean("read");
+                            if (read == null || !read) {
+                                doc.getReference().update("read", true);
+                            }
+                        }
+
+                        if (tvEmpty != null) {
+                            tvEmpty.setVisibility(notificationList.isEmpty() ? View.VISIBLE : View.GONE);
+                        }
                     }
                 });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (listener != null) listener.remove();
     }
 }

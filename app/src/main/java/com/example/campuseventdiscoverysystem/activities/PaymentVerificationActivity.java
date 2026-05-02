@@ -190,8 +190,8 @@ public class PaymentVerificationActivity extends AppCompatActivity {
                 .addOnSuccessListener(v -> {
                     Toast.makeText(this, "Payment approved ✅", Toast.LENGTH_SHORT).show();
 
-                    // Increment registeredCount on the event
                     if (payment.getEventId() != null) {
+                        // Increment registeredCount
                         db.collection("events").document(payment.getEventId())
                                 .update("registeredCount",
                                         com.google.firebase.firestore.FieldValue.increment(1));
@@ -209,6 +209,33 @@ public class PaymentVerificationActivity extends AppCompatActivity {
                                     .collection("attendees")
                                     .document(payment.getStudentId())
                                     .set(attendee);
+
+                            // Create / update RSVP so it shows in student's Tickets tab
+                            String rsvpId = payment.getStudentId() + "_" + payment.getEventId();
+                            java.util.Map<String, Object> rsvp = new java.util.HashMap<>();
+                            rsvp.put("userId",        payment.getStudentId());
+                            rsvp.put("eventId",       payment.getEventId());
+                            rsvp.put("eventName",     payment.getEventName());
+                            rsvp.put("status",        "confirmed");
+                            rsvp.put("paymentId",     payment.getPaymentId());
+                            rsvp.put("paymentStatus", Payment.STATUS_APPROVED);
+                            rsvp.put("paymentMethod", payment.getPaymentMethod());
+                            rsvp.put("paidBadge",     true);
+                            rsvp.put("createdAt",     com.google.firebase.firestore.FieldValue.serverTimestamp());
+                            db.collection("rsvps").document(rsvpId)
+                                    .set(rsvp, com.google.firebase.firestore.SetOptions.merge());
+
+                            // Send notification to student
+                            java.util.Map<String, Object> notif = new java.util.HashMap<>();
+                            notif.put("title",     "✅ Payment Approved — You're In!");
+                            notif.put("message",   "Your " + payment.getPaymentMethodLabel() + " payment for \"" + payment.getEventName() + "\" has been approved. You are now registered!");
+                            notif.put("type",      "payment_approved");
+                            notif.put("eventId",   payment.getEventId());
+                            notif.put("eventName", payment.getEventName());
+                            notif.put("read",      false);
+                            notif.put("timestamp", com.google.firebase.firestore.FieldValue.serverTimestamp());
+                            db.collection("users").document(payment.getStudentId())
+                                    .collection("notifications").add(notif);
                         }
                     }
                 })
