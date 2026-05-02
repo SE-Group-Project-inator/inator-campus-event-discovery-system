@@ -19,6 +19,8 @@ public class Event {
     private String endTime;
     private String category;
     private String society;
+    private double price;       // ticket price in PKR; 0 = free
+    private String imageUrl;    // optional banner image URL
 
     public Event() {}
 
@@ -55,4 +57,16 @@ public class Event {
     public void setCategory(String category) { this.category = category; }
 
     public void setSociety(String society) { this.society = society; }
+
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    /** Returns "Rs. X" or "FREE" for display */
+    public String getPriceDisplay() {
+        if (price <= 0) return "FREE";
+        return "Rs. " + (int) price;
+    }
 }

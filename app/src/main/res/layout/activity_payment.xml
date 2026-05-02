@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8F9FF"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- ══ Header ══════════════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#4F46E5"
+            android:orientation="vertical"
+            android:paddingTop="48dp"
+            android:paddingBottom="24dp"
+            android:paddingHorizontal="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <ImageButton
+                    android:id="@+id/btnPaymentBack"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_arrow_back"
+                    android:tint="#FFFFFF"
+                    android:contentDescription="Back"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="Complete Payment"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- Event summary card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvPaymentEventName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Event Name"
+                        android:textColor="#0F172A"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/tvPaymentEventDate"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="📅 Date TBD"
+                            android:textColor="#64748B"
+                            android:textSize="13sp"/>
+
+                        <TextView
+                            android:id="@+id/tvPaymentTicketPrice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="PKR 500"
+                            android:textColor="#4F46E5"
+                            android:textSize="18sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+
+        <!-- ══ Payment Method ══════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="💳 Select Payment Method"
+                android:textColor="#0F172A"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- Radio group wrapped in a card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardElevation="2dp"
+                android:layout_marginBottom="16dp">
+
+                <RadioGroup
+                    android:id="@+id/rgPaymentMethod"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <RadioButton
+                        android:id="@+id/rbCash"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="💵  Cash on Event"
+                        android:textColor="#0F172A"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="12dp"
+                        android:checked="true"
+                        android:buttonTint="#4F46E5"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#F1F5F9"
+                        android:layout_marginHorizontal="12dp"/>
+
+                    <RadioButton
+                        android:id="@+id/rbJazzCash"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="📱  JazzCash"
+                        android:textColor="#0F172A"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="12dp"
+                        android:buttonTint="#4F46E5"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#F1F5F9"
+                        android:layout_marginHorizontal="12dp"/>
+
+                    <RadioButton
+                        android:id="@+id/rbEasypaisa"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="💚  Easypaisa"
+                        android:textColor="#0F172A"
+                        android:textSize="15sp"
+                        android:paddingHorizontal="12dp"
+                        android:buttonTint="#4F46E5"/>
+                </RadioGroup>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ── Cash Info Card ──────────────────────────────────── -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardCashInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#D1FAE5"
+                app:cardElevation="0dp"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="💵 Cash Payment Selected"
+                        android:textColor="#065F46"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Pay at the event entrance. Please bring exact change and your student ID for verification."
+                        android:textColor="#065F46"
+                        android:textSize="14sp"
+                        android:lineSpacingExtra="4dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ── Online Instructions Card ────────────────────────── -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardOnlineInstructions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardElevation="2dp"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:id="@+id/tvPaymentMethodName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📱 Payment Instructions"
+                        android:textColor="#0F172A"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:background="#F1F5F9"
+                        android:padding="14dp"
+                        android:layout_marginBottom="12dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Send to Number"
+                                android:textColor="#64748B"
+                                android:textSize="12sp"
+                                android:layout_marginBottom="4dp"/>
+
+                            <TextView
+                                android:id="@+id/tvAccountNumber"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0300-1234567"
+                                android:textColor="#0F172A"
+                                android:textSize="18sp"
+                                android:textStyle="bold"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="end">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Amount"
+                                android:textColor="#64748B"
+                                android:textSize="12sp"
+                                android:layout_marginBottom="4dp"/>
+
+                            <TextView
+                                android:id="@+id/tvInstructionAmount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="PKR 500"
+                                android:textColor="#4F46E5"
+                                android:textSize="18sp"
+                                android:textStyle="bold"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="⚠️ After sending payment, upload a screenshot of the transaction below. Your registration will be confirmed once the Event Manager verifies it."
+                        android:textColor="#64748B"
+                        android:textSize="13sp"
+                        android:lineSpacingExtra="4dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ── Screenshot Upload Card ──────────────────────────── -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardScreenshot"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardElevation="2dp"
+                android:layout_marginBottom="24dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="📎 Upload Payment Screenshot"
+                        android:textColor="#0F172A"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- Preview -->
+                    <ImageView
+                        android:id="@+id/ivScreenshotPreview"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:scaleType="centerCrop"
+                        android:background="#F1F5F9"
+                        android:visibility="gone"
+                        android:layout_marginBottom="12dp"
+                        android:contentDescription="Screenshot preview"/>
+
+                    <TextView
+                        android:id="@+id/tvUploadHint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="No screenshot selected yet"
+                        android:textColor="#94A3B8"
+                        android:textSize="13sp"
+                        android:layout_marginBottom="12dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnUploadScreenshot"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="📷 Choose Screenshot"
+                        android:textColor="#4F46E5"
+                        app:backgroundTint="#EEF2FF"
+                        app:cornerRadius="12dp"
+                        app:strokeColor="#4F46E5"
+                        app:strokeWidth="1dp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ── Progress + Submit ───────────────────────────────── -->
+            <ProgressBar
+                android:id="@+id/progressBarPayment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:layout_marginBottom="12dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSubmitPayment"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Submit Payment"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="#4F46E5"
+                app:cornerRadius="16dp"
+                android:layout_marginBottom="32dp"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

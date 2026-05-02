@@ -11,27 +11,48 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * PrivacySettingsActivity
+ *
+ * Allows users to manage their privacy preferences.
+ * Settings are stored in Firebase Firestore under the user's document.
+ *
+ * Features:
+ * - Toggle-based privacy controls
+ * - Real-time saving of settings
+ * - Firestore integration for persistent user preferences
+ */
 public class PrivacySettingsActivity extends AppCompatActivity {
 
+    // Firebase instances
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private String uid;
 
+    // UI switches for privacy settings
     private Switch switchShowProfile;
     private Switch switchShareAttendance;
     private Switch switchEmailNotifs;
     private Switch switchRecommendations;
     private Switch switchLocation;
 
+    // Flag to prevent saving while initial data is loading
     private boolean isLoading = true;
 
+    /**
+     * Called when the activity is created.
+     * Initializes Firebase, binds UI elements, and loads saved settings.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_privacy_settings);
 
+        // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+
+        // Get current user ID
         uid = mAuth.getCurrentUser() != null
                 ? mAuth.getCurrentUser().getUid() : null;
 
@@ -42,15 +63,19 @@ public class PrivacySettingsActivity extends AppCompatActivity {
         switchRecommendations = findViewById(R.id.switchRecommendations);
         switchLocation = findViewById(R.id.switchLocation);
 
+        // Back button closes activity
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
+        // Load saved settings from Firestore
         loadPrivacySettings();
+
+        // Setup toggle listeners for real-time saving
         setupToggleListeners();
     }
 
     /**
      * Loads existing privacy settings from Firestore
-     * and sets toggles accordingly.
+     * and applies them to the UI switches.
      */
     private void loadPrivacySettings() {
         if (uid == null) return;
@@ -59,7 +84,7 @@ public class PrivacySettingsActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
-                        // Default to true if field doesn't exist yet
+                        // Apply saved values or defaults if null
                         switchShowProfile.setChecked(
                                 getBool(doc.getBoolean("privacyShowProfile"), true));
                         switchShareAttendance.setChecked(
@@ -71,6 +96,8 @@ public class PrivacySettingsActivity extends AppCompatActivity {
                         switchLocation.setChecked(
                                 getBool(doc.getBoolean("privacyLocation"), false));
                     }
+
+                    // Loading complete → allow updates
                     isLoading = false;
                 })
                 .addOnFailureListener(e -> {
@@ -82,13 +109,13 @@ public class PrivacySettingsActivity extends AppCompatActivity {
     }
 
     /**
-     * Sets up listeners on all toggles.
-     * Each toggle saves immediately to Firestore when changed.
+     * Attaches listeners to all switches.
+     * Any change triggers an immediate save to Firestore.
      */
     private void setupToggleListeners() {
         CompoundButton.OnCheckedChangeListener listener =
                 (buttonView, isChecked) -> {
-                    if (isLoading) return; // don't save while loading
+                    if (isLoading) return; // prevent saving during initialization
                     savePrivacySettings();
                 };
 
@@ -100,8 +127,8 @@ public class PrivacySettingsActivity extends AppCompatActivity {
     }
 
     /**
-     * Saves all toggle states to Firestore instantly.
-     * Uses update() so other user fields are not overwritten.
+     * Saves all privacy settings to Firestore.
+     * Uses update() to avoid overwriting other user fields.
      */
     private void savePrivacySettings() {
         if (uid == null) return;
@@ -123,6 +150,10 @@ public class PrivacySettingsActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show());
     }
 
+    /**
+     * Utility method to safely extract boolean values from Firestore.
+     * Returns default value if the field is null.
+     */
     private boolean getBool(Boolean value, boolean defaultVal) {
         return value != null ? value : defaultVal;
     }

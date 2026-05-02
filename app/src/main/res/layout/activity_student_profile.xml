@@ -487,15 +487,13 @@
         android:background="@color/white"
         android:elevation="8dp">
 
-        <!-- Home -->
         <LinearLayout
             android:id="@+id/navHome"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center"
-            android:background="?attr/selectableItemBackground">
+            android:gravity="center">
 
             <ImageView
                 android:layout_width="22dp"
@@ -504,24 +502,20 @@
                 app:tint="@color/text_dark" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="Home"
                 android:textSize="10sp"
                 android:textColor="@color/text_dark"
-                android:layout_marginTop="2dp" />
-
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
-        <!-- Search -->
         <LinearLayout
             android:id="@+id/navSearch"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center"
-            android:background="?attr/selectableItemBackground">
+            android:gravity="center">
 
             <ImageView
                 android:layout_width="22dp"
@@ -530,24 +524,20 @@
                 app:tint="@color/text_dark" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="Search"
                 android:textSize="10sp"
                 android:textColor="@color/text_dark"
-                android:layout_marginTop="2dp" />
-
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
-        <!-- Tickets -->
         <LinearLayout
             android:id="@+id/navTickets"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center"
-            android:background="?attr/selectableItemBackground">
+            android:gravity="center">
 
             <ImageView
                 android:layout_width="22dp"
@@ -556,24 +546,20 @@
                 app:tint="@color/text_dark" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="Tickets"
                 android:textSize="10sp"
                 android:textColor="@color/text_dark"
-                android:layout_marginTop="2dp" />
-
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
-        <!-- Profile (active) -->
         <LinearLayout
             android:id="@+id/navProfile"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center"
-            android:background="?attr/selectableItemBackground">
+            android:gravity="center">
 
             <ImageView
                 android:layout_width="22dp"
@@ -582,14 +568,12 @@
                 app:tint="@color/btn_student" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="Profile"
                 android:textSize="10sp"
                 android:textColor="@color/btn_student"
                 android:textStyle="bold"
-                android:layout_marginTop="2dp" />
-
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
 
     </LinearLayout>

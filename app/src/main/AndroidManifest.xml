@@ -28,32 +28,46 @@
 
         <!-- Login — needed before we build it so app doesn't crash -->
         <activity android:name=".activities.LoginActivity"/>
-        <activity android:name=".activities.AdminDashboardActivity"/>
-        <activity android:name=".activities.EventsListActivity"/>
+        <activity android:name=".activities.AdminDashboardActivity"
+            android:theme="@style/Theme.Admin"/>
+        <activity android:name=".activities.EventsListActivity"
+            android:theme="@style/Theme.Admin"/>
         <activity android:name=".activities.PrivacySettingsActivity"/>
         <activity android:name=".activities.SignupActivity"/>
 
         <activity android:name=".activities.EventManagerDashboardActivity"/>
-        <activity android:name=".activities.CreateEventActivity"/>
-        <activity android:name=".activities.EditEventActivity"/>
+        <activity android:name=".activities.ManageEventActivity"/>
+<!--        <activity android:name=".activities.EditEventActivity"/>-->
         <activity android:name=".activities.RsvpActivity"/>
         <activity android:name=".activities.NotificationsActivity"/>
         <activity android:name=".activities.EventHistoryActivity"/>
         <activity android:name=".activities.EventManagerProfileActivity"/>
         <activity android:name=".activities.EventManagerEventsActivity"/>
 
-        <activity android:name=".activities.StudentProfileActivity"/>
-        <activity android:name=".activities.StudentHomeActivity"/>
-        <activity android:name=".activities.SearchActivity"/>
+        <activity android:name=".activities.StudentProfileActivity" android:theme="@style/Theme.Student"/>
+        <activity android:name=".activities.StudentHomeActivity" android:theme="@style/Theme.Student"/>
+        <activity android:name=".activities.SearchActivity" android:theme="@style/Theme.Student"/>
 
         <!-- US-10: Trending Events (Student home) -->
         <activity android:name=".activities.TrendingEventsActivity"/>
         <!-- US-21: Event Detail + Calendar Export -->
-        <activity android:name=".activities.EventDetailActivity"/>
+        <activity android:name=".activities.EventDetailActivity" android:theme="@style/Theme.Student"/>
         <!-- US-27 / US-32: Attendee List + Seat Confirmation -->
         <activity android:name=".activities.AttendeeListActivity"/>
 
+        <!-- Payment Module -->
+        <activity android:name=".activities.PaymentActivity" android:theme="@style/Theme.Student"/>
+        <activity android:name=".activities.PaymentStatusActivity" android:theme="@style/Theme.Student"/>
+        <activity android:name=".activities.PaymentVerificationActivity"/>
+        <activity android:name=".activities.MyPaymentsActivity" android:theme="@style/Theme.Student"/>
 
+        <!-- Tickets / History -->
+        <activity android:name=".activities.TicketsActivity"/>
+        <activity android:name=".activities.TicketEventDetailsActivity"/>
+        <activity android:name=".activities.EventDisplayActivity"/>
+
+        <activity android:name=".activities.AttendeesRosterActivity"/>
+        <activity android:name=".activities.EventAnalyticsActivity"/>
 
 
 

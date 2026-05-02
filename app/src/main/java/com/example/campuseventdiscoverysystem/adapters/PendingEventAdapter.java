@@ -24,8 +24,8 @@ public class PendingEventAdapter extends
     public PendingEventAdapter(List<Event> events,
                                ActionListener onAccept,
                                ActionListener onDecline) {
-        this.events = events;
-        this.onAccept = onAccept;
+        this.events   = events;
+        this.onAccept  = onAccept;
         this.onDecline = onDecline;
     }
 
@@ -42,63 +42,88 @@ public class PendingEventAdapter extends
         Event event = events.get(position);
 
         // Title
-        h.tvTitle.setText(event.getTitle() != null
-                ? event.getTitle() : "Untitled Event");
+        h.tvTitle.setText(event.getTitle() != null ? event.getTitle() : "Untitled Event");
 
         // Venue
-        h.tvVenue.setText(event.getVenue() != null
-                ? event.getVenue() : "TBD");
+        h.tvVenue.setText(event.getVenue() != null ? event.getVenue() : "TBD");
 
         // Submitted by
-        h.tvSubmittedBy.setText(event.getSubmittedByName() != null
-                ? "Submitted by " + event.getSubmittedByName()
-                : "Submitted by Unknown");
+        String submitterName = event.getSubmittedByName();
+        h.tvSubmittedBy.setText(submitterName != null
+                ? "Submitted by " + submitterName : "Submitted by Unknown");
 
         // Email
         h.tvEmail.setText(event.getSubmittedByEmail() != null
                 ? event.getSubmittedByEmail() : "");
 
+        // Submitter initial in avatar
+        if (h.tvSubmitterInitial != null) {
+            String initial = "?";
+            if (submitterName != null && !submitterName.isEmpty()) {
+                initial = submitterName.substring(0, 1).toUpperCase();
+            } else if (event.getSubmittedByEmail() != null && !event.getSubmittedByEmail().isEmpty()) {
+                initial = event.getSubmittedByEmail().substring(0, 1).toUpperCase();
+            }
+            h.tvSubmitterInitial.setText(initial);
+        }
+
         // Date
         if (event.getDate() != null) {
             Date d = event.getDate().toDate();
             h.tvDay.setText(new SimpleDateFormat("dd", Locale.US).format(d));
-            h.tvMonth.setText(new SimpleDateFormat("MMM", Locale.US)
-                    .format(d).toUpperCase(Locale.US));
+            h.tvMonth.setText(new SimpleDateFormat("MMM", Locale.US).format(d).toUpperCase(Locale.US));
+        } else {
+            h.tvDay.setText("—");
+            h.tvMonth.setText("TBD");
         }
 
-        // If already approved — show Accepted, hide Decline
-        if ("active".equals(event.getStatus())) {
-            h.btnAccept.setText("Accepted");
+        // Status-based button rendering
+        String status = event.getStatus();
+        if ("active".equals(status)) {
+            h.btnAccept.setText("Approved ✓");
             h.btnAccept.setEnabled(false);
             h.btnDecline.setVisibility(View.GONE);
+        } else if ("rejected".equals(status)) {
+            h.btnDecline.setText("Declined");
+            h.btnDecline.setEnabled(false);
+            h.btnAccept.setVisibility(View.GONE);
         } else {
-            h.btnAccept.setText("Accept");
+            // pending_approval — default
+            h.btnAccept.setText("Approve ✓");
             h.btnAccept.setEnabled(true);
+            h.btnAccept.setVisibility(View.VISIBLE);
+            h.btnDecline.setText("Decline");
+            h.btnDecline.setEnabled(true);
             h.btnDecline.setVisibility(View.VISIBLE);
-            h.btnAccept.setOnClickListener(v ->
-                    onAccept.onAction(event.getId()));
-            h.btnDecline.setOnClickListener(v ->
-                    onDecline.onAction(event.getId()));
+
+            h.btnAccept.setOnClickListener(v -> onAccept.onAction(event.getId()));
+            h.btnDecline.setOnClickListener(v -> onDecline.onAction(event.getId()));
         }
+
+        // Subtle entry animation
+        h.itemView.setAlpha(0f);
+        h.itemView.animate().alpha(1f).setDuration(200)
+                .setStartDelay(position * 40L).start();
     }
 
     @Override
     public int getItemCount() { return events.size(); }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTitle, tvSubmittedBy, tvEmail, tvVenue, tvDay, tvMonth;
+        TextView tvTitle, tvSubmittedBy, tvEmail, tvVenue, tvDay, tvMonth, tvSubmitterInitial;
         MaterialButton btnAccept, btnDecline;
 
         public ViewHolder(@NonNull View v) {
             super(v);
-            tvTitle = v.findViewById(R.id.tvEventTitle);
-            tvSubmittedBy = v.findViewById(R.id.tvSubmittedBy);
-            tvEmail = v.findViewById(R.id.tvEmail);
-            tvVenue = v.findViewById(R.id.tvVenue);
-            tvDay = v.findViewById(R.id.tvDay);
-            tvMonth = v.findViewById(R.id.tvMonth);
-            btnAccept = v.findViewById(R.id.btnAccept);
-            btnDecline = v.findViewById(R.id.btnDecline);
+            tvTitle            = v.findViewById(R.id.tvEventTitle);
+            tvSubmittedBy      = v.findViewById(R.id.tvSubmittedBy);
+            tvEmail            = v.findViewById(R.id.tvEmail);
+            tvVenue            = v.findViewById(R.id.tvVenue);
+            tvDay              = v.findViewById(R.id.tvDay);
+            tvMonth            = v.findViewById(R.id.tvMonth);
+            tvSubmitterInitial = v.findViewById(R.id.tvSubmitterInitial);
+            btnAccept          = v.findViewById(R.id.btnAccept);
+            btnDecline         = v.findViewById(R.id.btnDecline);
         }
     }
 }

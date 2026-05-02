@@ -93,6 +93,17 @@
                 android:paddingBottom="2dp"
                 android:layout_marginTop="6dp" />
 
+            <!-- Price Badge -->
+            <TextView
+                android:id="@+id/tvPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FREE"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="#4F46E5"
+                android:layout_marginTop="4dp" />
+
         </LinearLayout>
 
         <!-- Arrow Button -->

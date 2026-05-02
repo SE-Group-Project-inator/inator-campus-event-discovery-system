@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_beige"
+    android:background="@drawable/bg_gradient"
     android:fillViewport="true">
 
     <LinearLayout
@@ -12,120 +12,144 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:paddingLeft="28dp"
-        android:paddingRight="28dp"
-        android:paddingTop="60dp"
-        android:paddingBottom="40dp">
+        android:padding="24dp">
 
-        <ImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/lums_logo"
-            android:contentDescription="LUMS Logo"
-            android:scaleType="fitCenter"/>
-
-        <!-- App Name -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Campus-Inator"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_dark"
-            android:layout_marginTop="16dp"/>
-
-        <!-- Subtitle -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Browse, create or register for your favourite events!"
-            android:textSize="14sp"
-            android:textColor="@color/text_dark"
-            android:gravity="center"
-            android:alpha="0.7"
-            android:layout_marginTop="8dp"/>
-
-        <!-- Welcome Card -->
+        <!-- 🔥 HERO CARD -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            app:cardBackgroundColor="@color/card_tan"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="8dp">
+            android:layout_marginTop="50dp"
+            app:cardCornerRadius="30dp"
+            app:cardElevation="12dp"
+            app:cardBackgroundColor="#F8FFFFFF">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="28dp">
+                android:gravity="center"
+                android:padding="32dp">
+
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/app_logo"
+                    android:scaleType="fitCenter"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Welcome!"
-                    android:textSize="24sp"
+                    android:text="Luminite-Link"
+                    android:textSize="34sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_dark"
+                    android:layout_marginTop="14dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Don't miss the vibe."
+                    android:textSize="13sp"
+                    android:textColor="@color/text_dark"
+                    android:alpha="0.6"
+                    android:layout_marginTop="6dp"/>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- ✨ TAGLINE -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Browse. Create. Experience events like never before."
+            android:textSize="15sp"
+            android:textColor="@color/text_dark"
+            android:gravity="center"
+            android:alpha="0.75"
+            android:layout_marginTop="20dp"
+            android:lineSpacingExtra="6dp"/>
+
+        <!-- 💎 ACTION CARD -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="35dp"
+            app:cardCornerRadius="28dp"
+            app:cardElevation="10dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="26dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Choose your role"
+                    android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_dark"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Are you a..."
-                    android:textSize="14sp"
+                    android:text="Continue as"
+                    android:textSize="13sp"
                     android:textColor="@color/text_dark"
                     android:alpha="0.6"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="28dp"/>
+                    android:layout_marginBottom="22dp"/>
 
-                <!-- Student Button -->
+                <!-- 🎯 BUTTONS -->
                 <Button
                     android:id="@+id/btnStudent"
                     android:layout_width="match_parent"
-                    android:layout_height="54dp"
+                    android:layout_height="58dp"
                     android:text="Student"
-                    android:textColor="@color/white"
+                    android:textAllCaps="false"
                     android:textSize="16sp"
-                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
                     android:backgroundTint="@color/btn_student"
-                    android:layout_marginBottom="12dp"/>
+                    android:layout_marginBottom="14dp"
+                    android:stateListAnimator="@null"/>
 
-                <!-- Event Manager Button -->
                 <Button
                     android:id="@+id/btnEventManager"
                     android:layout_width="match_parent"
-                    android:layout_height="54dp"
+                    android:layout_height="58dp"
                     android:text="Event Manager"
-                    android:textColor="@color/white"
+                    android:textAllCaps="false"
                     android:textSize="16sp"
-                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
                     android:backgroundTint="@color/btn_eventmgr"
-                    android:layout_marginBottom="12dp"/>
+                    android:layout_marginBottom="14dp"
+                    android:stateListAnimator="@null"/>
 
-                <!-- Admin Button -->
                 <Button
                     android:id="@+id/btnAdmin"
                     android:layout_width="match_parent"
-                    android:layout_height="54dp"
+                    android:layout_height="58dp"
                     android:text="Admin"
-                    android:textColor="@color/white"
+                    android:textAllCaps="false"
                     android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:backgroundTint="@color/btn_admin"/>
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="@color/btn_admin"
+                    android:stateListAnimator="@null"/>
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Terms -->
+        <!-- 📄 FOOTER -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="By signing in, you agree to the Terms of Use &amp; Privacy Policy."
+            android:text="By continuing, you agree to Terms &amp; Privacy Policy"
             android:textSize="11sp"
             android:textColor="@color/text_dark"
-            android:alpha="0.6"
+            android:alpha="0.5"
             android:gravity="center"
-            android:layout_marginTop="28dp"/>
+            android:layout_marginTop="30dp"/>
 
     </LinearLayout>
 </ScrollView>
