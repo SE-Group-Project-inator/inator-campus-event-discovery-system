@@ -44,7 +44,7 @@ public class CreateEventActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
-    private EditText etTitle, etDescription, etDate, etStartTime, etEndTime, etCapacity, etPrice;
+    private EditText etTitle, etDescription, etDate, etStartTime, etEndTime, etCapacity, etPrice, etSocietyName;
     private Spinner spVenue, spCategory;
     private ProgressBar progressBar;
 
@@ -72,6 +72,7 @@ public class CreateEventActivity extends AppCompatActivity {
         etPrice       = findViewById(R.id.etPrice);
         spVenue       = findViewById(R.id.spVenue);
         spCategory    = findViewById(R.id.spCategory);
+        etSocietyName = findViewById(R.id.etSocietyName);
         progressBar   = findViewById(R.id.progressBar); // optional — add to your XML
     }
 
@@ -176,7 +177,11 @@ public class CreateEventActivity extends AppCompatActivity {
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(doc -> {
                     String name         = doc.getString("name")         != null ? doc.getString("name")         : "Unknown";
-                    String societyName  = doc.getString("societyName")  != null ? doc.getString("societyName")  : "Unknown Society";
+                    // Use what the manager typed in the form first, then fall back to profile
+                    String typedSociety = etSocietyName != null ? etSocietyName.getText().toString().trim() : "";
+                    String profileSociety = doc.getString("societyName") != null ? doc.getString("societyName") : "";
+                    String societyName  = !typedSociety.isEmpty() ? typedSociety
+                            : (!profileSociety.isEmpty() ? profileSociety : "Unknown Society");
 
                     saveEvent(title, description, date, startTime, endTime,
                             capacity, venue, category, uid, email, name, societyName, finalPrice);

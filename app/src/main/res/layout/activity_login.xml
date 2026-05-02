@@ -1,97 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- activity_login.xml — All Java-required IDs restored. Premium redesign. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/bg_beige">
+    android:background="@drawable/bg_auth_background"
+    android:fitsSystemWindows="true">
 
-    <!-- Top Bar — OUTSIDE ScrollView so it goes full width -->
+    <!-- ══════════════════════════════════════════
+         HERO HEADER — gradient with logo + title
+         ══════════════════════════════════════════ -->
     <RelativeLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/btn_admin"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp">
+        android:layout_height="210dp"
+        android:background="@drawable/bg_auth_header">
 
+        <!-- Back Button -->
         <ImageButton
             android:id="@+id/btnBack"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_centerVertical="true"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:layout_alignParentStart="true"
-            android:src="@drawable/ic_arrow_back"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Back"
+            android:padding="10dp"
+            android:src="@drawable/ic_arrow_back"
             app:tint="@color/white"/>
 
+        <!-- App logo circle -->
+        <FrameLayout
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="44dp"
+            android:background="@drawable/bg_auth_logo_circle">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:contentDescription="Logo"
+                android:scaleType="fitCenter"
+                android:src="@drawable/app_logo"/>
+        </FrameLayout>
+
+        <!-- Welcome Back title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="130dp"
+            android:text="Welcome Back 👋"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:letterSpacing="-0.01"/>
+
+        <!-- Role chip label — set dynamically in Java (tvRoleTitle) -->
         <TextView
             android:id="@+id/tvRoleTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Admin"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/white"/>
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="162dp"
+            android:text="Admin Portal"
+            android:textColor="#C7D2FE"
+            android:textSize="13sp"
+            android:alpha="0.92"/>
+
     </RelativeLayout>
 
-    <!-- Rest of content in ScrollView -->
+    <!-- ══════════════════════════════════════════
+         SCROLLABLE FORM CONTENT
+         ══════════════════════════════════════════ -->
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:overScrollMode="never">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:paddingLeft="28dp"
-            android:paddingRight="28dp"
-            android:paddingTop="32dp"
-            android:paddingBottom="40dp">
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingTop="28dp"
+            android:paddingBottom="48dp">
 
-            <!-- Logo -->
-            <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/lums_logo"
-                android:contentDescription="Logo"/>
-
-            <!-- App Name -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Campus-Inator"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_dark"
-                android:layout_marginTop="12dp"/>
-
-            <!-- Subtitle -->
-            <TextView
-                android:id="@+id/tvSubtitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Monitor and approve campus events."
-                android:textSize="13sp"
-                android:textColor="@color/text_dark"
-                android:alpha="0.7"
-                android:layout_marginTop="6dp"/>
-
-            <!-- Login Card -->
+            <!-- ══════════════════════════════════════════
+                 MAIN FORM CARD
+                 ══════════════════════════════════════════ -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/loginCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:id="@+id/loginCard"
-                app:cardBackgroundColor="@color/card_tan"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="10dp">
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="8dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -99,111 +112,196 @@
                     android:orientation="vertical"
                     android:padding="28dp">
 
+                    <!-- Card title -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Welcome Back!"
-                        android:textSize="22sp"
+                        android:text="Sign In"
+                        android:textSize="24sp"
                         android:textStyle="bold"
-                        android:textColor="@color/text_dark"/>
+                        android:textColor="@color/admin_text_primary"/>
 
+                    <!-- Subtitle (role-specific description) -->
+                    <TextView
+                        android:id="@+id/tvSubtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Monitor and approve campus events."
+                        android:textSize="13sp"
+                        android:textColor="@color/admin_text_secondary"
+                        android:layout_marginTop="4dp"/>
+
+                    <!-- Sign-in label — required by LoginActivity.applyRoleTheme() -->
                     <TextView
                         android:id="@+id/tvSignInLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Sign in with your admin account"
-                        android:textSize="13sp"
-                        android:textColor="@color/text_dark"
-                        android:alpha="0.6"
-                        android:layout_marginTop="4dp"
+                        android:textSize="12sp"
+                        android:textColor="@color/admin_text_hint"
+                        android:layout_marginTop="2dp"
                         android:layout_marginBottom="24dp"/>
 
-                    <!-- Email Field -->
+                    <!-- ── Email Field ── -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="14dp"
-                        app:boxBackgroundColor="@color/white"
+                        android:layout_marginBottom="16dp"
+                        android:hint="Email address"
+                        app:startIconDrawable="@android:drawable/ic_dialog_email"
+                        app:startIconTint="@color/admin_primary"
+                        app:boxStrokeColor="@color/admin_primary"
+                        app:hintTextColor="@color/admin_primary"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxBackgroundColor="#FAFBFF"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etEmail"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Enter your email"
                             android:inputType="textEmailAddress"
-                            android:textSize="14sp"/>
+                            android:textSize="15sp"
+                            android:textColor="@color/admin_text_primary"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Password Field -->
+                    <!-- ── Password Field ── -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="24dp"
-                        app:boxBackgroundColor="@color/white"
+                        android:layout_marginBottom="8dp"
+                        android:hint="Password"
+                        app:startIconDrawable="@android:drawable/ic_lock_lock"
+                        app:startIconTint="@color/admin_primary"
+                        app:boxStrokeColor="@color/admin_primary"
+                        app:hintTextColor="@color/admin_primary"
                         app:passwordToggleEnabled="true"
+                        app:passwordToggleTint="@color/admin_text_hint"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxBackgroundColor="#FAFBFF"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etPassword"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Password"
                             android:inputType="textPassword"
-                            android:textSize="14sp"/>
+                            android:textSize="15sp"
+                            android:textColor="@color/admin_text_primary"/>
                     </com.google.android.material.textfield.TextInputLayout>
-
-                    <!-- LOGIN BUTTON (was missing from original layout in some cases) -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnLogin"
-                        android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:text="LOGIN"
-                        android:textColor="@color/white"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:backgroundTint="@color/btn_admin"
-                        app:cornerRadius="12dp"/>
 
                     <!-- Forgot Password -->
                     <TextView
                         android:id="@+id/tvForgotPassword"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="end"
                         android:text="Forgot password?"
-                        android:textColor="@color/text_link"
+                        android:textColor="@color/admin_primary"
                         android:textSize="13sp"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="14dp"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="8dp"
+                        android:textStyle="bold"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:layout_marginBottom="24dp"
                         android:clickable="true"
                         android:focusable="true"/>
 
-                    <!-- ── FIX: Sign Up link ── -->
+                    <!-- Loading indicator — required by LoginActivity.setLoading() -->
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="12dp"
+                        android:visibility="gone"
+                        android:indeterminateTint="@color/admin_primary"/>
+
+                    <!-- LOGIN BUTTON
+                         NOTE: background is set by LoginActivity.applyRoleTheme()
+                         via setBackgroundTintList, so we use a solid shape base
+                         and let Java control the color. -->
+                    <Button
+                        android:id="@+id/btnLogin"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="Sign In"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        android:background="@drawable/bg_auth_button"
+                        android:stateListAnimator="@null"
+                        android:elevation="4dp"
+                        android:letterSpacing="0.01"/>
+
+                    <!-- Divider OR -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginBottom="20dp">
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1"
+                            android:background="#E2E8F0"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="  or  "
+                            android:textSize="12sp"
+                            android:textColor="@color/admin_text_hint"/>
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1"
+                            android:background="#E2E8F0"/>
+                    </LinearLayout>
+
+                    <!-- SSO placeholder button (UI only) -->
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:text="🔒  Continue with University SSO"
+                        android:textColor="@color/admin_text_primary"
+                        android:textSize="14sp"
+                        android:textAllCaps="false"
+                        android:backgroundTint="#F1F5F9"
+                        android:stateListAnimator="@null"
+                        app:cornerRadius="12dp"
+                        android:elevation="0dp"/>
+
+                    <!-- Sign Up link -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:layout_gravity="center"
-                        android:layout_marginTop="8dp">
+                        android:layout_marginTop="20dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Don't have an account? "
-                            android:textSize="13sp"
-                            android:textColor="@color/text_dark"
-                            android:alpha="0.7"/>
+                            android:textSize="14sp"
+                            android:textColor="@color/admin_text_secondary"/>
 
                         <TextView
                             android:id="@+id/tvSignUp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Sign Up"
-                            android:textSize="13sp"
+                            android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/text_link"
+                            android:textColor="@color/admin_primary"
                             android:clickable="true"
                             android:focusable="true"/>
                     </LinearLayout>
@@ -211,17 +309,18 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Terms -->
+            <!-- Footer note -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="By signing in, you agree to the Terms of Use &amp; Privacy Policy."
                 android:textSize="11sp"
-                android:textColor="@color/text_dark"
-                android:alpha="0.6"
+                android:textColor="@color/admin_text_hint"
                 android:gravity="center"
-                android:layout_marginTop="24dp"/>
+                android:layout_marginTop="24dp"
+                android:layout_gravity="center_horizontal"/>
 
         </LinearLayout>
     </ScrollView>
+
 </LinearLayout>

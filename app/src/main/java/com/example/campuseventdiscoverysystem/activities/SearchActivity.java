@@ -41,7 +41,7 @@ public class SearchActivity extends AppCompatActivity {
     private TextView tvDateValue;
     private TextView tvPriceValue;
     private TextView chipAll, chipSports, chipAcademic, chipCultural;
-    private CardView btnDateRange, btnPriceRange, btnSort;
+    private LinearLayout btnDateRange, btnPriceRange, btnSort;
     private LinearLayout navHome, navSearch, navTickets, navProfile;
 
     private FirebaseFirestore db;
@@ -502,8 +502,8 @@ public class SearchActivity extends AppCompatActivity {
             btn.setText(labels[i]);
             btn.setTextSize(11f);
             android.widget.LinearLayout.LayoutParams lp =
-                new android.widget.LinearLayout.LayoutParams(0,
-                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+                    new android.widget.LinearLayout.LayoutParams(0,
+                            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
             lp.setMargins(4, 0, 4, 0);
             btn.setLayoutParams(lp);
             final int min = mins[i], max = maxs[i];
@@ -516,29 +516,29 @@ public class SearchActivity extends AppCompatActivity {
         root.addView(presets);
 
         androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(this)
-            .setView(root)
-            .setPositiveButton("Apply", (d, w) -> {
-                try {
-                    String minStr = etMin.getText().toString().trim();
-                    String maxStr = etMax.getText().toString().trim();
-                    filterMinPrice = minStr.isEmpty() ? -1 : Double.parseDouble(minStr);
-                    filterMaxPrice = maxStr.isEmpty() ? -1 : Double.parseDouble(maxStr);
-                    if (filterMinPrice >= 0 && filterMaxPrice >= 0) {
-                        tvPriceValue.setText("Rs." + (int)filterMinPrice + "–" + (int)filterMaxPrice);
-                    } else if (filterMinPrice == 0 && filterMaxPrice == 0) {
-                        tvPriceValue.setText("Free only");
-                    } else if (filterMaxPrice >= 0) {
-                        tvPriceValue.setText("< Rs." + (int)filterMaxPrice);
-                    } else {
-                        tvPriceValue.setText("≥ Rs." + (int)filterMinPrice);
+                .setView(root)
+                .setPositiveButton("Apply", (d, w) -> {
+                    try {
+                        String minStr = etMin.getText().toString().trim();
+                        String maxStr = etMax.getText().toString().trim();
+                        filterMinPrice = minStr.isEmpty() ? -1 : Double.parseDouble(minStr);
+                        filterMaxPrice = maxStr.isEmpty() ? -1 : Double.parseDouble(maxStr);
+                        if (filterMinPrice >= 0 && filterMaxPrice >= 0) {
+                            tvPriceValue.setText("Rs." + (int)filterMinPrice + "–" + (int)filterMaxPrice);
+                        } else if (filterMinPrice == 0 && filterMaxPrice == 0) {
+                            tvPriceValue.setText("Free only");
+                        } else if (filterMaxPrice >= 0) {
+                            tvPriceValue.setText("< Rs." + (int)filterMaxPrice);
+                        } else {
+                            tvPriceValue.setText("≥ Rs." + (int)filterMinPrice);
+                        }
+                        filterAndDisplay(etSearch.getText().toString().trim());
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(this, "Please enter valid numbers", Toast.LENGTH_SHORT).show();
                     }
-                    filterAndDisplay(etSearch.getText().toString().trim());
-                } catch (NumberFormatException e) {
-                    Toast.makeText(this, "Please enter valid numbers", Toast.LENGTH_SHORT).show();
-                }
-            })
-            .setNegativeButton("Cancel", null)
-            .create();
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
         dialog.show();
     }
 

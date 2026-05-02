@@ -6,9 +6,10 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -25,7 +26,9 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SignupActivity extends AppCompatActivity {
@@ -34,23 +37,19 @@ public class SignupActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private String selectedRole;
 
-    // Created programmatically — not in XML (fixes "cannot find symbol passwordStrengthBar")
-    private ProgressBar strengthBar;
-    private TextView tvStrengthLabel;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        mAuth = FirebaseAuth.getInstance();
-        db    = FirebaseFirestore.getInstance();
+        mAuth        = FirebaseAuth.getInstance();
+        db           = FirebaseFirestore.getInstance();
         selectedRole = getIntent().getStringExtra("role");
         if (selectedRole == null) selectedRole = "student";
 
         applyRoleTheme();
-        injectStrengthMeterBelowPassword();
         setupPasswordStrengthMeter();
+        setupDropdowns();
         setupClickListeners();
     }
 
@@ -59,15 +58,18 @@ public class SignupActivity extends AppCompatActivity {
     private void applyRoleTheme() {
         RelativeLayout topBar = findViewById(R.id.topBar);
         TextView tvRoleTitle  = findViewById(R.id.tvRoleTitle);
-        Button btnSignUp      = findViewById(R.id.btnSignUp);
+        Button   btnSignUp    = findViewById(R.id.btnSignUp);
         androidx.cardview.widget.CardView signupCard = findViewById(R.id.signupCard);
+
+        ScrollView scrollView = findViewById(R.id.scrollView);
 
         switch (selectedRole) {
             case "admin":
                 topBar.setBackgroundColor(getColor(R.color.btn_admin));
                 tvRoleTitle.setText("Admin Sign Up");
                 btnSignUp.setBackgroundTintList(getColorStateList(R.color.btn_admin));
-                signupCard.setCardBackgroundColor(getColor(R.color.card_tan));
+                signupCard.setCardBackgroundColor(getColor(R.color.card_admin_login));
+                if (scrollView != null) scrollView.setBackgroundColor(getColor(R.color.bg_admin_login));
                 findViewById(R.id.sectionAdmin).setVisibility(View.VISIBLE);
                 break;
             case "event_manager":
@@ -88,68 +90,64 @@ public class SignupActivity extends AppCompatActivity {
         }
     }
 
-    // ─── Strength meter (injected at runtime) ─────────────────────────────────
+    // ─── Dropdowns ────────────────────────────────────────────────────────────
 
-    /**
-     * ROOT CAUSE FIX:
-     * The XML layout (activity_signup.xml) has R.id.tvPasswordStrength but NO
-     * ProgressBar with id "passwordStrengthBar". Calling findViewById() on a
-     * missing ID returns null — but the old code stored it and called methods on
-     * it, causing a NullPointerException at runtime (and the compile error you saw
-     * was because the ID was never declared in R.java).
-     *
-     * Solution: create the ProgressBar entirely in Java and insert it into the
-     * layout right after the password TextInputLayout — no XML change needed.
-     */
-    private void injectStrengthMeterBelowPassword() {
-
-        EditText etPassword = findViewById(R.id.etPassword);
-        if (etPassword == null) return;
-
-        View passwordLayout = (View) etPassword.getParent();
-        if (!(passwordLayout.getParent() instanceof LinearLayout)) return;
-
-        LinearLayout parent = (LinearLayout) passwordLayout.getParent();
-
-        // 🔥 FIX 1: prevent duplicate injection
-        if (strengthBar != null && strengthBar.getParent() != null) {
-            ((ViewGroup) strengthBar.getParent()).removeView(strengthBar);
+    private void setupDropdowns() {
+        // School picker (students only)
+        AutoCompleteTextView spinnerSchool = findViewById(R.id.spinnerSchool);
+        if (spinnerSchool != null) {
+            List<String> schools = Arrays.asList("SDSB", "SSE", "MGHSS", "SHASOL");
+            ArrayAdapter<String> schoolAdapter = new ArrayAdapter<>(this,
+                    android.R.layout.simple_dropdown_item_1line, schools);
+            spinnerSchool.setAdapter(schoolAdapter);
+            spinnerSchool.setOnItemClickListener((parent, view, pos, id) ->
+                    spinnerSchool.clearFocus());
         }
 
-        if (tvStrengthLabel != null && tvStrengthLabel.getParent() != null) {
-            ((ViewGroup) tvStrengthLabel.getParent()).removeView(tvStrengthLabel);
+        // Batch year 2020-2030
+        AutoCompleteTextView spinnerBatch = findViewById(R.id.spinnerBatchYear);
+        if (spinnerBatch != null) {
+            String[] batches = new String[11];
+            for (int i = 0; i <= 10; i++) batches[i] = String.valueOf(2020 + i);
+            ArrayAdapter<String> batchAdapter = new ArrayAdapter<>(this,
+                    android.R.layout.simple_dropdown_item_1line, batches);
+            spinnerBatch.setAdapter(batchAdapter);
+            spinnerBatch.setOnItemClickListener((parent, view, pos, id) ->
+                    spinnerBatch.clearFocus());
         }
 
-        // Build ProgressBar
-        strengthBar = new ProgressBar(this, null,
-                android.R.attr.progressBarStyleHorizontal);
+        // Society position (event managers only)
+        AutoCompleteTextView spinnerPosition = findViewById(R.id.spinnerSocietyPosition);
+        if (spinnerPosition != null) {
+            List<String> positions = Arrays.asList(
+                    "President", "Vice President", "Secretary General",
+                    "Event Head", "Marketing Head", "Member");
+            ArrayAdapter<String> posAdapter = new ArrayAdapter<>(this,
+                    android.R.layout.simple_dropdown_item_1line, positions);
+            spinnerPosition.setAdapter(posAdapter);
+        }
 
-        strengthBar.setMax(100);
-        strengthBar.setProgress(0);
-        strengthBar.setVisibility(View.GONE);
-
-        int dp8 = (int) (8 * getResources().getDisplayMetrics().density);
-
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, 20);
-        lp.setMargins(0, dp8, 0, 0);
-
-        strengthBar.setLayoutParams(lp);
-
-        int idx = parent.indexOfChild(passwordLayout);
-
-        // 🔥 FIX 2: safe insert
-        parent.addView(strengthBar, idx + 1);
-
-        if (tvStrengthLabel != null) {
-            parent.addView(tvStrengthLabel, idx + 2);
-            tvStrengthLabel.setVisibility(View.GONE);
+        // Admin department
+        AutoCompleteTextView spinnerAdminDept = findViewById(R.id.spinnerAdminDepartment);
+        if (spinnerAdminDept != null) {
+            List<String> depts = Arrays.asList(
+                    "Student Affairs", "Academic Affairs", "IT Department",
+                    "Finance", "Administration");
+            ArrayAdapter<String> deptAdapter = new ArrayAdapter<>(this,
+                    android.R.layout.simple_dropdown_item_1line, depts);
+            spinnerAdminDept.setAdapter(deptAdapter);
         }
     }
 
+    // ─── Password Strength Meter ──────────────────────────────────────────────
+
     private void setupPasswordStrengthMeter() {
         EditText etPassword = findViewById(R.id.etPassword);
-        if (etPassword == null || strengthBar == null) return;
+        TextView tvStrength = findViewById(R.id.tvPasswordStrength);
+        if (etPassword == null || tvStrength == null) return;
+
+        // Start hidden — only shown after user types
+        tvStrength.setVisibility(View.GONE);
 
         etPassword.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
@@ -158,30 +156,27 @@ public class SignupActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 String pwd = s.toString();
                 if (pwd.isEmpty()) {
-                    strengthBar.setVisibility(View.GONE);
-                    if (tvStrengthLabel != null) tvStrengthLabel.setVisibility(View.GONE);
+                    tvStrength.setVisibility(View.GONE);
                     return;
                 }
-                strengthBar.setVisibility(View.VISIBLE);
-                if (tvStrengthLabel != null) tvStrengthLabel.setVisibility(View.VISIBLE);
+                tvStrength.setVisibility(View.VISIBLE);
 
                 int score = calculatePasswordStrength(pwd);
-                strengthBar.setProgress(score);
-
-                if (score <= 25)      applyStrengthUI("Weak",     android.R.color.holo_red_dark);
-                else if (score <= 50) applyStrengthUI("Fair",     android.R.color.holo_orange_dark);
-                else if (score <= 75) applyStrengthUI("Good",     android.R.color.holo_blue_dark);
-                else                  applyStrengthUI("Strong ✓", android.R.color.holo_green_dark);
+                if (score <= 25) {
+                    tvStrength.setText("Strength: Weak");
+                    tvStrength.setTextColor(getColor(android.R.color.holo_red_dark));
+                } else if (score <= 50) {
+                    tvStrength.setText("Strength: Fair");
+                    tvStrength.setTextColor(getColor(android.R.color.holo_orange_dark));
+                } else if (score <= 75) {
+                    tvStrength.setText("Strength: Good");
+                    tvStrength.setTextColor(getColor(android.R.color.holo_blue_dark));
+                } else {
+                    tvStrength.setText("Strength: Strong ✓");
+                    tvStrength.setTextColor(getColor(android.R.color.holo_green_dark));
+                }
             }
         });
-    }
-
-    private void applyStrengthUI(String label, int colorRes) {
-        strengthBar.setProgressTintList(getColorStateList(colorRes));
-        if (tvStrengthLabel != null) {
-            tvStrengthLabel.setText(label);
-            tvStrengthLabel.setTextColor(getColor(colorRes));
-        }
     }
 
     private int calculatePasswordStrength(String p) {
@@ -190,31 +185,37 @@ public class SignupActivity extends AppCompatActivity {
         if (p.length() >= 10) s += 15;
         if (p.matches(".*[A-Z].*")) s += 20;
         if (p.matches(".*[0-9].*")) s += 20;
-        if (p.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*")) s += 20;
+        if (p.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\\\"\\\\|,.<>/?].*")) s += 20;
         return Math.min(s, 100);
     }
 
     // ─── Click Listeners ─────────────────────────────────────────────────────
 
     private void setupClickListeners() {
-        ImageButton btnBack   = findViewById(R.id.btnBack);
-        Button btnSignUp      = findViewById(R.id.btnSignUp);
-        TextView tvGoToLogin  = findViewById(R.id.tvLogin);
-        CheckBox cbTerms      = findViewById(R.id.cbAgreeTerms);
+        ImageButton btnBack  = findViewById(R.id.btnBack);
+        Button btnSignUp     = findViewById(R.id.btnSignUp);
+        TextView tvGoToLogin = findViewById(R.id.tvLogin);
+        CheckBox cbTerms     = findViewById(R.id.cbAgreeTerms);
 
         EditText etName            = findViewById(R.id.etFullName);
         EditText etEmail           = findViewById(R.id.etEmail);
         EditText etPassword        = findViewById(R.id.etPassword);
         EditText etConfirmPassword = findViewById(R.id.etConfirmPassword);
 
-        EditText etStudentId                  = findViewById(R.id.etStudentId);
-        AutoCompleteTextView spinnerDept      = findViewById(R.id.spinnerDepartment);
-        AutoCompleteTextView spinnerBatch     = findViewById(R.id.spinnerBatchYear);
-        EditText etSocietyName                = findViewById(R.id.etSocietyName);
-        AutoCompleteTextView spinnerPosition  = findViewById(R.id.spinnerSocietyPosition);
-        EditText etPhone                      = findViewById(R.id.etPhone);
-        EditText etEmployeeId                 = findViewById(R.id.etEmployeeId);
-        AutoCompleteTextView spinnerAdminDept = findViewById(R.id.spinnerAdminDepartment);
+        // Student fields
+        EditText etStudentId            = findViewById(R.id.etStudentId);
+        AutoCompleteTextView spinnerSchool = findViewById(R.id.spinnerSchool);
+        AutoCompleteTextView spinnerBatch  = findViewById(R.id.spinnerBatchYear);
+        EditText etProgram              = findViewById(R.id.etProgram);
+
+        // Event manager fields
+        EditText etSocietyName               = findViewById(R.id.etSocietyName);
+        AutoCompleteTextView spinnerPosition = findViewById(R.id.spinnerSocietyPosition);
+        EditText etPhone                     = findViewById(R.id.etPhone);
+
+        // Admin fields
+        EditText etEmployeeId                    = findViewById(R.id.etEmployeeId);
+        AutoCompleteTextView spinnerAdminDept    = findViewById(R.id.spinnerAdminDepartment);
 
         btnBack.setOnClickListener(v -> finish());
         tvGoToLogin.setOnClickListener(v -> finish());
@@ -243,26 +244,45 @@ public class SignupActivity extends AppCompatActivity {
                 etConfirmPassword.setError("Passwords do not match"); return;
             }
             if (!cbTerms.isChecked()) {
-                Toast.makeText(this, "Please agree to the terms & conditions",
-                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please agree to the terms & conditions", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             Map<String, Object> extraData = new HashMap<>();
+
             if ("student".equals(selectedRole)) {
-                String sid = etStudentId.getText().toString().trim();
+                String sid = etStudentId != null ? etStudentId.getText().toString().trim() : "";
                 if (TextUtils.isEmpty(sid)) { etStudentId.setError("Student ID required"); return; }
-                extraData.put("studentId",  sid);
-                extraData.put("department", spinnerDept  != null ? spinnerDept.getText().toString()  : "");
-                extraData.put("batch",      spinnerBatch != null ? spinnerBatch.getText().toString() : "");
+
+                String school  = spinnerSchool != null ? spinnerSchool.getText().toString().trim() : "";
+                String batch   = spinnerBatch  != null ? spinnerBatch.getText().toString().trim()  : "";
+                String program = etProgram     != null ? etProgram.getText().toString().trim()     : "";
+
+                if (TextUtils.isEmpty(school)) {
+                    Toast.makeText(this, "Please select your school", Toast.LENGTH_SHORT).show(); return;
+                }
+                if (TextUtils.isEmpty(batch)) {
+                    Toast.makeText(this, "Please select your batch year", Toast.LENGTH_SHORT).show(); return;
+                }
+                if (TextUtils.isEmpty(program)) {
+                    etProgram.setError("Program is required"); return;
+                }
+
+                extraData.put("studentId", sid);
+                extraData.put("school",    school);
+                extraData.put("batch",     batch);
+                extraData.put("program",   program);
+                extraData.put("department", school + " — " + program); // backward compat
+
             } else if ("event_manager".equals(selectedRole)) {
-                String sname = etSocietyName.getText().toString().trim();
+                String sname = etSocietyName != null ? etSocietyName.getText().toString().trim() : "";
                 if (TextUtils.isEmpty(sname)) { etSocietyName.setError("Society name required"); return; }
                 extraData.put("societyName", sname);
                 extraData.put("position",    spinnerPosition != null ? spinnerPosition.getText().toString() : "");
                 extraData.put("phone",       etPhone != null ? etPhone.getText().toString().trim() : "");
+
             } else if ("admin".equals(selectedRole)) {
-                String eid = etEmployeeId.getText().toString().trim();
+                String eid = etEmployeeId != null ? etEmployeeId.getText().toString().trim() : "";
                 if (TextUtils.isEmpty(eid)) { etEmployeeId.setError("Employee ID required"); return; }
                 extraData.put("employeeId",  eid);
                 extraData.put("department",  spinnerAdminDept != null ? spinnerAdminDept.getText().toString() : "");
@@ -273,10 +293,8 @@ public class SignupActivity extends AppCompatActivity {
 
             mAuth.createUserWithEmailAndPassword(email, pwd)
                     .addOnSuccessListener(authResult -> {
-                        // ── STEP 1: Send verification email ──────────────────────────────
                         authResult.getUser().sendEmailVerification()
                                 .addOnCompleteListener(emailTask -> {
-                                    // ── STEP 2: Save Firestore profile ───────────────────
                                     Map<String, Object> userMap = new HashMap<>();
                                     userMap.put("name",           name);
                                     userMap.put("email",          email);
@@ -290,14 +308,11 @@ public class SignupActivity extends AppCompatActivity {
                                             .document(authResult.getUser().getUid())
                                             .set(userMap)
                                             .addOnSuccessListener(unused -> {
-                                                // Sign out immediately — force them to verify first
                                                 mAuth.signOut();
-
                                                 Toast.makeText(this,
                                                         "Account created! 📧 A verification link has been sent to "
                                                                 + email + ". Please verify before logging in.",
                                                         Toast.LENGTH_LONG).show();
-
                                                 Intent i = new Intent(this, LoginActivity.class);
                                                 i.putExtra("role", selectedRole);
                                                 i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
