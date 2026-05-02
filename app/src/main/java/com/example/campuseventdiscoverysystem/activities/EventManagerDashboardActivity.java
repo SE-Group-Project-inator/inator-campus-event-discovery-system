@@ -208,6 +208,13 @@ public class EventManagerDashboardActivity extends BaseSessionActivity {
         findViewById(R.id.fabCreate).setOnClickListener(v -> {
             startActivity(new Intent(this, CreateEventActivity.class));
         });
+
+        // Payment Verification button (in dashboard quick-actions or header)
+        android.view.View btnPaymentVerification = findViewById(R.id.btnPaymentVerification);
+        if (btnPaymentVerification != null) {
+            btnPaymentVerification.setOnClickListener(v ->
+                    startActivity(new Intent(this, PaymentVerificationActivity.class)));
+        }
     }
 
     // Top-right logout button hook (added to XML)

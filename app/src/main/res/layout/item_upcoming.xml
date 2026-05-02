@@ -1,61 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="70dp"
-    android:layout_marginBottom="12dp"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
     app:cardCornerRadius="16dp"
-    app:cardElevation="3dp">
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="#FFFFFF">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp"
+        android:padding="14dp"
         android:gravity="center_vertical">
 
-        <!-- DATE BOX -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="50dp"
-            android:layout_height="match_parent"
-            app:cardCornerRadius="10dp"
-            android:backgroundTint="@color/card_student"
-            app:cardElevation="0dp">
+        <!-- DATE BOX — teal style -->
+        <LinearLayout
+            android:layout_width="52dp"
+            android:layout_height="56dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="#E6FAF8">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center">
+            <TextView
+                android:id="@+id/tvDay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="15"
+                android:textStyle="bold"
+                android:textColor="#0D9488"
+                android:textSize="20sp"/>
 
-                <TextView
-                    android:id="@+id/tvDay"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="15"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_dark"
-                    android:textSize="16sp"/>
+            <TextView
+                android:id="@+id/tvMonth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MAY"
+                android:textSize="10sp"
+                android:textColor="#0F766E"
+                android:textStyle="bold"/>
+        </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tvMonth"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="MAR"
-                    android:textSize="10sp"
-                    android:textColor="@color/text_dark"/>
-
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
+        <!-- Divider line -->
+        <View
+            android:layout_width="1dp"
+            android:layout_height="44dp"
+            android:background="#E2E8F0"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"/>
 
         <!-- EVENT DETAILS -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginStart="12dp">
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tvTitle"
@@ -63,18 +67,46 @@
                 android:layout_height="wrap_content"
                 android:text="Event Title"
                 android:textStyle="bold"
-                android:textColor="@color/text_dark"/>
+                android:textColor="#0F172A"
+                android:textSize="14sp"
+                android:maxLines="1"
+                android:ellipsize="end"/>
 
             <TextView
                 android:id="@+id/tvLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Location"
+                android:text="📍 Location"
                 android:textSize="12sp"
-                android:textColor="@color/text_dark"/>
+                android:textColor="#64748B"
+                android:layout_marginTop="3dp"
+                android:maxLines="1"
+                android:ellipsize="end"/>
 
+            <!-- Price badge -->
+            <TextView
+                android:id="@+id/tvPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FREE"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="#0D9488"
+                android:background="#E6FAF8"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:layout_marginTop="5dp"/>
         </LinearLayout>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="›"
+            android:textColor="#CBD5E1"
+            android:textSize="22sp"
+            android:layout_marginStart="6dp"/>
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

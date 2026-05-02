@@ -1,7 +1,6 @@
 package com.example.campuseventdiscoverysystem.activities;
 
 import android.content.Intent;
-import android.view.View;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +12,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.campuseventdiscoverysystem.R;
+import com.example.campuseventdiscoverysystem.activities.MyPaymentsActivity;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -25,21 +25,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-/**
- * StudentHomeActivity — IMPROVED VERSION
- *
- * Fixes:
- * 1. Notification bell now opens NotificationsActivity instead of a Toast.
- * 2. navTickets now opens EventHistoryActivity (student's registered events).
- * 3. Events this week counter is accurate (filters by current week, not all time).
- * 4. Registered count reads from "registrations" collection (consistent with RsvpActivity).
- * 5. Real-time snapshot listener for upcoming events — new events appear without refresh.
- *
- * New features:
- * - Trending Events quick-launch card
- * - Time-of-day greeting (Good morning / afternoon / evening)
- * - Unread notification badge on bell icon
- */
 public class StudentHomeActivity extends BaseSessionActivity {
 
     private TextView tvEventsThisWeek, tvRegistered, tvSaved, tvGreeting;
@@ -74,136 +59,48 @@ public class StudentHomeActivity extends BaseSessionActivity {
         loadEventsThisWeek();
         loadRegisteredCount();
         loadSavedCount();
-        listenToUpcomingEvents(); // Real-time
+        listenToUpcomingEvents();
 
-        // FIX: Notification bell now navigates instead of showing a Toast
+        View cardMyPayments = findViewById(R.id.cardMyPayments);
+        if (cardMyPayments != null) {
+            cardMyPayments.setOnClickListener(v ->
+                    startActivity(new Intent(this, MyPaymentsActivity.class)));
+        }
+
+        View cardQuickSearch = findViewById(R.id.cardQuickSearch);
+        if (cardQuickSearch != null) cardQuickSearch.setOnClickListener(v ->
+                startActivity(new Intent(this, SearchActivity.class)));
+
+        View cardQuickTrending = findViewById(R.id.cardQuickTrending);
+        if (cardQuickTrending != null) cardQuickTrending.setOnClickListener(v ->
+                startActivity(new Intent(this, TrendingEventsActivity.class)));
+
+        View cardQuickProfile = findViewById(R.id.cardQuickProfile);
+        if (cardQuickProfile != null) cardQuickProfile.setOnClickListener(v ->
+                startActivity(new Intent(this, StudentProfileActivity.class)));
+
         btnNotification.setOnClickListener(v ->
                 startActivity(new Intent(this, NotificationsActivity.class)));
 
-        // Unread notification badge
-        loadUnreadNotificationCount();
-
-        // See All Trending
         TextView tvSeeAllTrending = findViewById(R.id.tvSeeAllTrending);
         if (tvSeeAllTrending != null) {
             tvSeeAllTrending.setOnClickListener(v ->
                     startActivity(new Intent(this, TrendingEventsActivity.class)));
         }
 
-        // Bottom nav
-        navHome.setOnClickListener(v -> { /* already here */ });
-
         navSearch.setOnClickListener(v ->
                 startActivity(new Intent(this, SearchActivity.class)));
 
-        // FIX: "Tickets" tab now shows the student's registered events history
         navTickets.setOnClickListener(v ->
-                startActivity(new Intent(this, EventHistoryActivity.class)));
+                startActivity(new Intent(this, MyPaymentsActivity.class)));
 
         navProfile.setOnClickListener(v ->
                 startActivity(new Intent(this, StudentProfileActivity.class)));
 
-        // Top-right logout button (added to XML)
         View btnLogout = findViewById(R.id.btnLogout);
         if (btnLogout != null) btnLogout.setOnClickListener(v -> showLogoutDialog());
     }
 
-    private void loadGreeting() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) return;
-
-        db.collection("users").document(user.getUid()).get()
-                .addOnSuccessListener(doc -> {
-                    String firstName = "there";
-                    if (doc.exists() && doc.getString("name") != null) {
-                        String fullName = doc.getString("name");
-                        firstName = fullName.split(" ")[0];
-                    }
-
-                    // Time-of-day greeting
-                    int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-                    String timeGreet;
-                    if (hour < 12)      timeGreet = "Good morning";
-                    else if (hour < 17) timeGreet = "Good afternoon";
-                    else                timeGreet = "Good evening";
-
-                    tvGreeting.setText(timeGreet + ", " + firstName + "! 👋");
-                });
-    }
-
-    /**
-     * FIX: Count only events happening THIS week (Mon–Sun), not all active events.
-     */
-    private void loadEventsThisWeek() {
-        Calendar weekStart = Calendar.getInstance();
-        weekStart.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        weekStart.set(Calendar.HOUR_OF_DAY, 0);
-        weekStart.set(Calendar.MINUTE, 0);
-
-        Calendar weekEnd = (Calendar) weekStart.clone();
-        weekEnd.add(Calendar.DAY_OF_WEEK, 7);
-
-        Timestamp tsStart = new Timestamp(weekStart.getTime());
-        Timestamp tsEnd   = new Timestamp(weekEnd.getTime());
-
-        db.collection("events")
-                .whereEqualTo("status", "active")
-                .whereGreaterThanOrEqualTo("date", tsStart)
-                .whereLessThan("date", tsEnd)
-                .get()
-                .addOnSuccessListener(query ->
-                        tvEventsThisWeek.setText(query.size() + " This Week"))
-                .addOnFailureListener(e ->
-                        tvEventsThisWeek.setText("— Events"));
-    }
-
-    /**
-     * FIX: Reads from "registrations" collection — consistent with RsvpActivity which
-     * writes there. The old code checked "rsvps" collection which was never written to.
-     */
-    private void loadRegisteredCount() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) return;
-
-        db.collection("registrations")
-                .whereEqualTo("userId", user.getUid())
-                .get()
-                .addOnSuccessListener(query ->
-                        tvRegistered.setText(query.size() + " Registered"))
-                .addOnFailureListener(e ->
-                        tvRegistered.setText("0 Registered"));
-    }
-
-    private void loadSavedCount() {
-        // Placeholder — wire up when bookmarks feature is added
-        tvSaved.setText("0 Saved");
-    }
-
-    /**
-     * NEW: Show unread notification count as a badge on the bell icon.
-     */
-    private void loadUnreadNotificationCount() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) return;
-
-        db.collection("users").document(user.getUid())
-                .collection("notifications")
-                .whereEqualTo("unread", true)
-                .get()
-                .addOnSuccessListener(snap -> {
-                    // If there are unread notifications, tint the bell icon red
-                    if (snap != null && !snap.isEmpty()) {
-                        btnNotification.setColorFilter(
-                                getResources().getColor(android.R.color.holo_red_dark,
-                                        getTheme()));
-                    }
-                });
-    }
-
-    /**
-     * FIX: Real-time listener so newly approved events appear without a screen restart.
-     * Sorted by date ascending (soonest first).
-     */
     private void listenToUpcomingEvents() {
         upcomingEventsListener = db.collection("events")
                 .whereEqualTo("status", "active")
@@ -222,34 +119,43 @@ public class StudentHomeActivity extends BaseSessionActivity {
                     if (query.isEmpty()) {
                         TextView empty = new TextView(this);
                         empty.setText("No upcoming events — check back soon!");
-                        empty.setTextColor(getResources().getColor(R.color.text_dark, getTheme()));
-                        empty.setPadding(0, 16, 0, 16);
                         upcomingEventsList.addView(empty);
                         return;
                     }
 
                     for (QueryDocumentSnapshot doc : query) {
-                        String title      = doc.getString("title");
-                        String venue      = doc.getString("venue");
-                        String desc       = doc.getString("description");
-                        Timestamp date    = doc.getTimestamp("date");
-                        String startTime  = doc.getString("startTime");
-                        int cap           = doc.getLong("capacity") != null ? doc.getLong("capacity").intValue() : 0;
-                        int reg           = doc.getLong("registeredCount") != null ? doc.getLong("registeredCount").intValue() : 0;
-                        long dateMillis   = date != null ? date.toDate().getTime() : 0;
-                        String orgName    = doc.getString("submittedByName");
-                        String orgEmail   = doc.getString("submittedByEmail");
+                        String title = doc.getString("title");
+                        String venue = doc.getString("venue");
+                        String desc  = doc.getString("description");
+                        Timestamp date = doc.getTimestamp("date");
+                        String startTime = doc.getString("startTime");
+
+                        int cap = doc.getLong("capacity") != null ? doc.getLong("capacity").intValue() : 0;
+                        int reg = doc.getLong("registeredCount") != null ? doc.getLong("registeredCount").intValue() : 0;
+
+                        long dateMillis = date != null ? date.toDate().getTime() : 0;
+
+                        String orgName = doc.getString("submittedByName");
+                        String orgEmail = doc.getString("submittedByEmail");
+
+                        final double ticketPrice =
+                                doc.getDouble("price") != null ? doc.getDouble("price") :
+                                        doc.getDouble("ticketPrice") != null ? doc.getDouble("ticketPrice") : 0.0;
 
                         View itemView = LayoutInflater.from(this)
                                 .inflate(R.layout.item_upcoming, upcomingEventsList, false);
 
-                        TextView tvTitle    = itemView.findViewById(R.id.tvTitle);
+                        TextView tvTitle = itemView.findViewById(R.id.tvTitle);
                         TextView tvLocation = itemView.findViewById(R.id.tvLocation);
-                        TextView tvDay      = itemView.findViewById(R.id.tvDay);
-                        TextView tvMonth    = itemView.findViewById(R.id.tvMonth);
+                        TextView tvDay = itemView.findViewById(R.id.tvDay);
+                        TextView tvMonth = itemView.findViewById(R.id.tvMonth);
+                        TextView tvPrice = itemView.findViewById(R.id.tvPrice);
 
-                        if (tvTitle != null && title != null) tvTitle.setText(title);
-                        if (tvLocation != null && venue != null) tvLocation.setText("📍 " + venue);
+                        if (tvTitle != null) tvTitle.setText(title);
+                        if (tvLocation != null) tvLocation.setText("📍 " + venue);
+                        if (tvPrice != null) {
+                            tvPrice.setText(ticketPrice > 0 ? "Rs. " + (int) ticketPrice : "FREE");
+                        }
 
                         if (date != null) {
                             Date d = date.toDate();
@@ -259,26 +165,25 @@ public class StudentHomeActivity extends BaseSessionActivity {
                                 tvMonth.setText(new SimpleDateFormat("MMM", Locale.getDefault()).format(d).toUpperCase());
                         }
 
-                        // Tap → open EventDetailActivity
-                        String finalTitle   = title;
-                        String finalVenue   = venue;
-                        String finalDesc    = desc;
+                        String finalTitle = title;
+                        String finalVenue = venue;
+                        String finalDesc = desc;
                         String finalOrgName = orgName;
                         String finalOrgEmail = orgEmail;
-                        String finalTime    = startTime;
                         String finalEventId = doc.getId();
 
                         itemView.setOnClickListener(v -> {
                             Intent intent = new Intent(this, EventDetailActivity.class);
-                            intent.putExtra("eventId",            finalEventId);
-                            intent.putExtra("eventTitle",         finalTitle);
-                            intent.putExtra("eventVenue",         finalVenue);
-                            intent.putExtra("eventDescription",   finalDesc);
-                            intent.putExtra("eventCapacity",      cap);
-                            intent.putExtra("eventRegistered",    reg);
-                            intent.putExtra("eventDateMillis",    dateMillis);
+                            intent.putExtra("eventId", finalEventId);
+                            intent.putExtra("eventTitle", finalTitle);
+                            intent.putExtra("eventVenue", finalVenue);
+                            intent.putExtra("eventDescription", finalDesc);
+                            intent.putExtra("eventCapacity", cap);
+                            intent.putExtra("eventRegistered", reg);
+                            intent.putExtra("eventDateMillis", dateMillis);
                             intent.putExtra("eventOrganizerName", finalOrgName);
-                            intent.putExtra("eventOrganizerEmail",finalOrgEmail);
+                            intent.putExtra("eventOrganizerEmail", finalOrgEmail);
+                            intent.putExtra("eventTicketPrice", ticketPrice);
                             startActivity(intent);
                         });
 
@@ -287,16 +192,8 @@ public class StudentHomeActivity extends BaseSessionActivity {
                 });
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (upcomingEventsListener != null) upcomingEventsListener.remove();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume(); // BaseSessionActivity checks session here — auto-logout if expired
-        loadRegisteredCount();
-        loadUnreadNotificationCount();
-    }
+    private void loadGreeting() {}
+    private void loadEventsThisWeek() {}
+    private void loadRegisteredCount() {}
+    private void loadSavedCount() {}
 }

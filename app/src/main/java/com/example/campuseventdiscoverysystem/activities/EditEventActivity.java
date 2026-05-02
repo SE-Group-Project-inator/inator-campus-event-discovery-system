@@ -204,6 +204,13 @@ public class EditEventActivity extends AppCompatActivity {
 
         setLoading(true);
 
+        // Read price (optional)
+        double price = 0.0;
+        EditText etPrice = findViewById(R.id.etPrice);
+        if (etPrice != null && !etPrice.getText().toString().trim().isEmpty()) {
+            try { price = Double.parseDouble(etPrice.getText().toString().trim()); } catch (Exception ignored) {}
+        }
+
         Map<String, Object> updates = new HashMap<>();
         updates.put("title",       title);
         updates.put("description", description);
@@ -213,6 +220,7 @@ public class EditEventActivity extends AppCompatActivity {
         updates.put("capacity",    capacity);
         updates.put("venue",       venue);
         updates.put("category",    category);
+        updates.put("price",       price);
         // FIX: Reset to pending so admin must re-approve any edited event
         updates.put("status",      "pending_approval");
         updates.put("updatedAt",   Timestamp.now());

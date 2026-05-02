@@ -1,6 +1,7 @@
 package com.example.campuseventdiscoverysystem.activities;
 
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -26,6 +27,18 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * AdminDashboardActivity
+ *
+ * This activity handles the admin dashboard functionality for the Campus Event Discovery System.
+ * It allows admins to:
+ * - View pending events
+ * - Approve or reject events
+ * - View event statistics
+ * - Filter events (all, urgent, newest)
+ * - Manage admin profile UI
+ * - Listen to real-time Firestore updates
+ */
 public class AdminDashboardActivity extends BaseSessionActivity {
 
     private FirebaseFirestore db;
@@ -46,6 +59,10 @@ public class AdminDashboardActivity extends BaseSessionActivity {
     private ListenerRegistration pendingListener;
     private ListenerRegistration statsListenerApproved;
 
+    /**
+     * Called when activity is created.
+     * Initializes Firebase, UI, and listeners.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +82,9 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         loadAdminProfile();
     }
 
+    /**
+     * Binds all UI components from XML to Java variables.
+     */
     private void bindViews() {
         tvPendingCount  = findViewById(R.id.tvPendingCount);
         tvApprovedCount = findViewById(R.id.tvApprovedCount);
@@ -79,6 +99,9 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         profileSheetScrim = findViewById(R.id.profileSheetScrim);
     }
 
+    /**
+     * Sets greeting message based on current time of day.
+     */
     private void setupWelcomeMessage() {
         int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
         String greeting;
@@ -88,6 +111,9 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         tvWelcome.setText(greeting);
     }
 
+    /**
+     * Loads admin profile information from Firebase Authentication and Firestore.
+     */
     private void loadAdminProfile() {
         if (mAuth.getCurrentUser() != null) {
             String email = mAuth.getCurrentUser().getEmail();
@@ -97,7 +123,8 @@ public class AdminDashboardActivity extends BaseSessionActivity {
                 tvSheetAvatar.setText(initial);
                 tvSheetEmail.setText(email);
             }
-            // Try to get display name from Firestore
+
+            // Fetch admin name from Firestore
             db.collection("users").document(mAuth.getCurrentUser().getUid())
                     .get()
                     .addOnSuccessListener(doc -> {
@@ -114,6 +141,9 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         }
     }
 
+    /**
+     * Sets up RecyclerView and adapter for pending events list.
+     */
     private void setupRecyclerView() {
         RecyclerView rv = findViewById(R.id.rvPendingEvents);
         adapter = new PendingEventAdapter(
@@ -127,17 +157,17 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         rv.setAdapter(adapter);
     }
 
+    /**
+     * Sets up navigation buttons and quick actions.
+     */
     private void setupNavigation() {
-        // Top avatar button → open profile sheet
         findViewById(R.id.btnAdminAvatar).setOnClickListener(v -> toggleProfileSheet());
 
-        // Bottom nav
         findViewById(R.id.navHome).setOnClickListener(v -> { /* already here */ });
         findViewById(R.id.navEvents).setOnClickListener(v ->
                 startActivity(new Intent(this, EventsListActivity.class)));
         findViewById(R.id.navProfile).setOnClickListener(v -> toggleProfileSheet());
 
-        // Quick actions
         View qaEvents = findViewById(R.id.quickActionEvents);
         if (qaEvents != null) qaEvents.setOnClickListener(v -> {
             Intent i = new Intent(this, EventsListActivity.class);
@@ -159,12 +189,14 @@ public class AdminDashboardActivity extends BaseSessionActivity {
             startActivity(i);
         });
 
-        // See all
         TextView tvSeeAll = findViewById(R.id.tvSeeAll);
         if (tvSeeAll != null) tvSeeAll.setOnClickListener(v ->
                 startActivity(new Intent(this, EventsListActivity.class)));
     }
 
+    /**
+     * Sets up filter chips for event filtering.
+     */
     private void setupFilters() {
         TextView chipAll    = findViewById(R.id.chipAll);
         TextView chipUrgent = findViewById(R.id.chipUrgent);
@@ -187,22 +219,30 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         });
     }
 
+    /**
+     * Updates UI state of filter chips.
+     */
     private void updateChipUI(String active) {
         setChipState(findViewById(R.id.chipAll),    "all".equals(active));
         setChipState(findViewById(R.id.chipUrgent), "urgent".equals(active));
         setChipState(findViewById(R.id.chipNewest), "newest".equals(active));
     }
 
+    /**
+     * Sets visual state of a chip (active/inactive).
+     */
     private void setChipState(TextView chip, boolean isActive) {
         if (chip == null) return;
         chip.setBackgroundResource(isActive ? R.drawable.bg_chip_active : R.drawable.bg_chip_inactive);
         chip.setTextColor(getColor(isActive ? R.color.white : R.color.admin_text_secondary));
     }
 
+    /**
+     * Sets up profile bottom sheet UI.
+     */
     private void setupProfileSheet() {
-        // Tapping scrim closes sheet
         profileSheetScrim.setOnClickListener(v -> hideProfileSheet());
-        // Logout from sheet
+
         View btnSheetLogout = findViewById(R.id.btnSheetLogout);
         if (btnSheetLogout != null) btnSheetLogout.setOnClickListener(v -> {
             hideProfileSheet();
@@ -210,11 +250,17 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         });
     }
 
+    /**
+     * Toggles profile sheet visibility.
+     */
     private void toggleProfileSheet() {
         if (sheetVisible) hideProfileSheet();
         else              showProfileSheet();
     }
 
+    /**
+     * Shows profile bottom sheet with animation.
+     */
     private void showProfileSheet() {
         sheetVisible = true;
         profileSheetScrim.setVisibility(View.VISIBLE);
@@ -233,6 +279,9 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         });
     }
 
+    /**
+     * Hides profile bottom sheet with animation.
+     */
     private void hideProfileSheet() {
         sheetVisible = false;
         profileSheetScrim.animate().alpha(0f).setDuration(200)
@@ -248,6 +297,9 @@ public class AdminDashboardActivity extends BaseSessionActivity {
                 .start();
     }
 
+    /**
+     * Applies selected filter to event list.
+     */
     private void applyFilter() {
         List<Event> filtered = new ArrayList<>();
         Date today = new Date();
@@ -261,7 +313,6 @@ public class AdminDashboardActivity extends BaseSessionActivity {
                 }
             }
         } else if ("newest".equals(currentFilter)) {
-            // Sort by submission date descending (most recently submitted first)
             filtered.addAll(allPendingList);
             filtered.sort((a, b) -> {
                 if (a.getDate() == null && b.getDate() == null) return 0;
@@ -277,9 +328,9 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         pendingList.addAll(filtered);
         adapter.notifyDataSetChanged();
 
-        // Show/hide empty state
         View emptyState = findViewById(R.id.emptyState);
         RecyclerView rv = findViewById(R.id.rvPendingEvents);
+
         if (emptyState != null && rv != null) {
             if (pendingList.isEmpty()) {
                 emptyState.setVisibility(View.VISIBLE);
@@ -290,7 +341,6 @@ public class AdminDashboardActivity extends BaseSessionActivity {
             }
         }
 
-        // Update insight text
         if (tvInsight != null) {
             int count = allPendingList.size();
             if (count == 0) tvInsight.setText("All events reviewed ✅");
@@ -298,6 +348,9 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         }
     }
 
+    /**
+     * Listens to Firestore stats in real-time.
+     */
     private void listenToStats() {
         db.collection("events")
                 .whereEqualTo("status", "pending_approval")
@@ -320,6 +373,9 @@ public class AdminDashboardActivity extends BaseSessionActivity {
                 });
     }
 
+    /**
+     * Animates counter updates in dashboard.
+     */
     private void animateCounter(TextView tv, int target) {
         if (tv == null) return;
 
@@ -342,6 +398,9 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         }
     }
 
+    /**
+     * Listens for pending events in real-time.
+     */
     private void listenToPendingEvents() {
         pendingListener = db.collection("events")
                 .whereEqualTo("status", "pending_approval")
@@ -364,6 +423,9 @@ public class AdminDashboardActivity extends BaseSessionActivity {
                 });
     }
 
+    /**
+     * Shows confirmation dialog before approving/rejecting event.
+     */
     private void confirmAction(String eventId, String newStatus, String title, String message) {
         new AlertDialog.Builder(this)
                 .setTitle(title)
@@ -373,6 +435,9 @@ public class AdminDashboardActivity extends BaseSessionActivity {
                 .show();
     }
 
+    /**
+     * Updates event status in Firestore.
+     */
     private void updateEventStatus(String eventId, String status) {
         db.collection("events").document(eventId)
                 .update("status", status)
@@ -384,7 +449,10 @@ public class AdminDashboardActivity extends BaseSessionActivity {
                         Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-
+    /**
+     * Handles back press (closes sheet first if open).
+     */
+    @SuppressLint("GestureBackNavigation")
     @Override
     public void onBackPressed() {
         if (sheetVisible) {
@@ -394,6 +462,9 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         }
     }
 
+    /**
+     * Cleans up Firestore listeners to avoid memory leaks.
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();

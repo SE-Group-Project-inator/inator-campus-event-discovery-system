@@ -44,7 +44,7 @@ public class CreateEventActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
-    private EditText etTitle, etDescription, etDate, etStartTime, etEndTime, etCapacity;
+    private EditText etTitle, etDescription, etDate, etStartTime, etEndTime, etCapacity, etPrice;
     private Spinner spVenue, spCategory;
     private ProgressBar progressBar;
 
@@ -69,6 +69,7 @@ public class CreateEventActivity extends AppCompatActivity {
         etStartTime   = findViewById(R.id.etStartTime);
         etEndTime     = findViewById(R.id.etEndTime);
         etCapacity    = findViewById(R.id.etCapacity);
+        etPrice       = findViewById(R.id.etPrice);
         spVenue       = findViewById(R.id.spVenue);
         spCategory    = findViewById(R.id.spCategory);
         progressBar   = findViewById(R.id.progressBar); // optional — add to your XML
@@ -122,6 +123,7 @@ public class CreateEventActivity extends AppCompatActivity {
         String startTime   = etStartTime.getText().toString().trim();
         String endTime     = etEndTime.getText().toString().trim();
         String capacityStr = etCapacity.getText().toString().trim();
+        String priceStr    = etPrice != null ? etPrice.getText().toString().trim() : "0";
         String venue       = spVenue.getSelectedItem().toString();
         String category    = spCategory.getSelectedItem().toString();
 
@@ -158,11 +160,18 @@ public class CreateEventActivity extends AppCompatActivity {
             return;
         }
 
+        // Parse price (0 = free)
+        double price = 0.0;
+        if (!priceStr.isEmpty()) {
+            try { price = Double.parseDouble(priceStr); } catch (NumberFormatException ignored) {}
+        }
+
         setLoading(true);
 
         // FIX: Fetch submitter name from Firestore, not FirebaseAuth.getDisplayName()
         String uid   = mAuth.getCurrentUser().getUid();
         String email = mAuth.getCurrentUser().getEmail();
+        final double finalPrice = price;
 
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(doc -> {
@@ -170,7 +179,7 @@ public class CreateEventActivity extends AppCompatActivity {
                     String societyName  = doc.getString("societyName")  != null ? doc.getString("societyName")  : "Unknown Society";
 
                     saveEvent(title, description, date, startTime, endTime,
-                            capacity, venue, category, uid, email, name, societyName);
+                            capacity, venue, category, uid, email, name, societyName, finalPrice);
                 })
                 .addOnFailureListener(e -> {
                     setLoading(false);
@@ -182,7 +191,7 @@ public class CreateEventActivity extends AppCompatActivity {
     private void saveEvent(String title, String description, Timestamp date,
                            String startTime, String endTime, int capacity,
                            String venue, String category,
-                           String uid, String email, String name, String societyName) {
+                           String uid, String email, String name, String societyName, double price) {
 
         Event newEvent = new Event();
         newEvent.setTitle(title);
@@ -195,10 +204,11 @@ public class CreateEventActivity extends AppCompatActivity {
         newEvent.setVenue(venue);
         newEvent.setCategory(category);
         newEvent.setSociety(societyName);
-        newEvent.setStatus("pending_approval"); // ← consistent with AdminDashboard query
+        newEvent.setPrice(price);
+        newEvent.setStatus("pending_approval");
         newEvent.setCreatedBy(uid);
         newEvent.setSubmittedByEmail(email);
-        newEvent.setSubmittedByName(name); // ← now comes from Firestore, not Display Name
+        newEvent.setSubmittedByName(name);
 
         db.collection("events").add(newEvent)
                 .addOnSuccessListener(dr -> {

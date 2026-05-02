@@ -100,13 +100,13 @@
                         android:layout_height="match_parent"
                         android:background="@null" />
                     <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="12dp"
-                    android:src="@android:drawable/arrow_down_float"
-                    app:tint="@color/text_dark" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="12dp"
+                        android:src="@android:drawable/arrow_down_float"
+                        app:tint="@color/text_dark" />
                 </RelativeLayout>
 
                 <TextView android:text="Date" android:textColor="@color/text_dark" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
@@ -194,6 +194,17 @@
                     android:background="@android:drawable/editbox_background"
                     android:inputType="number"
                     android:hint="e.g. 500"
+                    android:paddingHorizontal="12dp"
+                    android:layout_marginBottom="16dp"/>
+
+                <TextView android:text="Ticket Price (Rs.) — leave 0 for FREE" android:textColor="@color/text_dark" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <EditText
+                    android:id="@+id/etPrice"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="@android:drawable/editbox_background"
+                    android:inputType="numberDecimal"
+                    android:hint="e.g. 500 (or 0 for free)"
                     android:paddingHorizontal="12dp"
                     android:layout_marginBottom="24dp"/>
 

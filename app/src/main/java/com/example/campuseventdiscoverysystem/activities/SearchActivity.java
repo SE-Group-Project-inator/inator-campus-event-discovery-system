@@ -49,6 +49,8 @@ public class SearchActivity extends AppCompatActivity {
     private String sortOrder = "Latest";
     private Timestamp filterDateStart = null;
     private Timestamp filterDateEnd = null;
+    private double filterMinPrice = -1;
+    private double filterMaxPrice = -1;
     private List<QueryDocumentSnapshot> allEvents = new ArrayList<>();
 
     @Override
@@ -121,9 +123,17 @@ public class SearchActivity extends AppCompatActivity {
             }
         });
 
-        btnPriceRange.setOnClickListener(v ->
-                Toast.makeText(this, "Price filter coming soon!", Toast.LENGTH_SHORT).show()
-        );
+        btnPriceRange.setOnClickListener(v -> {
+            if (filterMinPrice >= 0 || filterMaxPrice >= 0) {
+                // Clear price filter
+                filterMinPrice = -1;
+                filterMaxPrice = -1;
+                tvPriceValue.setText("Any Price");
+                filterAndDisplay(etSearch.getText().toString().trim());
+            } else {
+                showPriceFilterDialog();
+            }
+        });
 
         btnSort.setOnClickListener(v -> {
             if (sortOrder.equals("Latest")) {
@@ -141,7 +151,7 @@ public class SearchActivity extends AppCompatActivity {
             finish();
         });
         navTickets.setOnClickListener(v ->
-                startActivity(new Intent(this, TicketsActivity.class))
+                startActivity(new Intent(this, MyPaymentsActivity.class))
         );
         navProfile.setOnClickListener(v ->
                 startActivity(new Intent(this, StudentProfileActivity.class))
@@ -184,13 +194,16 @@ public class SearchActivity extends AppCompatActivity {
             String venue    = doc.getString("venue");
             Timestamp date  = doc.getTimestamp("date");
 
-            // Text search
+            // Text search — title, venue, description
             if (!query.isEmpty()) {
+                String desc = doc.getString("description");
                 boolean matchesTitle = title != null &&
                         title.toLowerCase().contains(query.toLowerCase());
                 boolean matchesVenue = venue != null &&
                         venue.toLowerCase().contains(query.toLowerCase());
-                if (!matchesTitle && !matchesVenue) continue;
+                boolean matchesDesc  = desc != null &&
+                        desc.toLowerCase().contains(query.toLowerCase());
+                if (!matchesTitle && !matchesVenue && !matchesDesc) continue;
             }
 
             // Category filter
@@ -205,6 +218,15 @@ public class SearchActivity extends AppCompatActivity {
             }
             if (filterDateEnd != null && date != null) {
                 if (date.compareTo(filterDateEnd) > 0) continue;
+            }
+
+            // Price filter
+            if (filterMinPrice >= 0 || filterMaxPrice >= 0) {
+                double price = 0.0;
+                if (doc.getDouble("price") != null) price = doc.getDouble("price");
+                else if (doc.getDouble("ticketPrice") != null) price = doc.getDouble("ticketPrice");
+                if (filterMinPrice >= 0 && price < filterMinPrice) continue;
+                if (filterMaxPrice >= 0 && price > filterMaxPrice) continue;
             }
 
             filtered.add(doc);
@@ -234,12 +256,18 @@ public class SearchActivity extends AppCompatActivity {
             String title       = doc.getString("title");
             String venue       = doc.getString("venue");
             String description = doc.getString("description");
+            String orgName     = doc.getString("submittedByName");
+            String orgEmail    = doc.getString("submittedByEmail");
             Timestamp date     = doc.getTimestamp("date");
             int capacity       = doc.getLong("capacity") != null
                     ? doc.getLong("capacity").intValue() : 0;
             int registered     = doc.getLong("registeredCount") != null
                     ? doc.getLong("registeredCount").intValue() : 0;
             long dateMillis    = date != null ? date.toDate().getTime() : 0;
+            double price       = 0.0;
+            if (doc.getDouble("price") != null) price = doc.getDouble("price");
+            else if (doc.getDouble("ticketPrice") != null) price = doc.getDouble("ticketPrice");
+            final double priceFinal = price;
 
             View itemView = LayoutInflater.from(this)
                     .inflate(R.layout.item_search_result, searchResultsList, false);
@@ -274,10 +302,15 @@ public class SearchActivity extends AppCompatActivity {
             if (tvAvailability != null) {
                 if (capacity > 0 && registered >= capacity) {
                     tvAvailability.setText("Full");
-                    // Optionally tint red: tvAvailability.setTextColor(...)
                 } else {
                     tvAvailability.setText("Available");
                 }
+            }
+
+            // Price
+            TextView tvPriceResult = itemView.findViewById(R.id.tvPrice);
+            if (tvPriceResult != null) {
+                tvPriceResult.setText(priceFinal > 0 ? "Rs. " + (int) priceFinal : "FREE");
             }
 
             // Click → EventDetailActivity
@@ -285,19 +318,24 @@ public class SearchActivity extends AppCompatActivity {
             String titleFinal     = title;
             String venueFinal     = venue;
             String descFinal      = description;
+            String orgNameFinal   = orgName;
+            String orgEmailFinal  = orgEmail;
             int    capFinal       = capacity;
             int    regFinal       = registered;
             long   dateMillisFinal = dateMillis;
 
             itemView.setOnClickListener(v -> {
                 Intent intent = new Intent(this, EventDetailActivity.class);
-                intent.putExtra("eventId",          eventIdFinal);
-                intent.putExtra("eventTitle",        titleFinal);
-                intent.putExtra("eventVenue",        venueFinal);
-                intent.putExtra("eventDescription",  descFinal);
-                intent.putExtra("eventCapacity",     capFinal);
-                intent.putExtra("eventRegistered",   regFinal);
-                intent.putExtra("eventDateMillis",   dateMillisFinal);
+                intent.putExtra("eventId",             eventIdFinal);
+                intent.putExtra("eventTitle",           titleFinal);
+                intent.putExtra("eventVenue",           venueFinal);
+                intent.putExtra("eventDescription",     descFinal);
+                intent.putExtra("eventCapacity",        capFinal);
+                intent.putExtra("eventRegistered",      regFinal);
+                intent.putExtra("eventDateMillis",      dateMillisFinal);
+                intent.putExtra("eventOrganizerName",   orgNameFinal);
+                intent.putExtra("eventOrganizerEmail",  orgEmailFinal);
+                intent.putExtra("eventTicketPrice",     priceFinal);
                 startActivity(intent);
             });
 
@@ -426,6 +464,81 @@ public class SearchActivity extends AppCompatActivity {
             clearDateFilter(); // resets both dates and goes back to showing all events
         });
 
+        dialog.show();
+    }
+
+    /** Shows a simple price range filter dialog. */
+    private void showPriceFilterDialog() {
+        android.widget.LinearLayout root = new android.widget.LinearLayout(this);
+        root.setOrientation(android.widget.LinearLayout.VERTICAL);
+        root.setPadding(48, 32, 48, 16);
+
+        TextView tvTitle = new TextView(this);
+        tvTitle.setText("Filter by Price (Rs.)");
+        tvTitle.setTextSize(18f);
+        tvTitle.setTypeface(null, android.graphics.Typeface.BOLD);
+        tvTitle.setPadding(0, 0, 0, 16);
+        root.addView(tvTitle);
+
+        final android.widget.EditText etMin = new android.widget.EditText(this);
+        etMin.setHint("Min price (0 for free)");
+        etMin.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        root.addView(etMin);
+
+        final android.widget.EditText etMax = new android.widget.EditText(this);
+        etMax.setHint("Max price (leave blank for no limit)");
+        etMax.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        root.addView(etMax);
+
+        // Quick preset buttons
+        android.widget.LinearLayout presets = new android.widget.LinearLayout(this);
+        presets.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+        presets.setPadding(0, 16, 0, 8);
+        String[] labels = {"Free only", "< Rs. 500", "< Rs. 1000"};
+        int[] mins      = {0,   0,   0};
+        int[] maxs      = {0, 499, 999};
+        for (int i = 0; i < labels.length; i++) {
+            Button btn = new Button(this);
+            btn.setText(labels[i]);
+            btn.setTextSize(11f);
+            android.widget.LinearLayout.LayoutParams lp =
+                new android.widget.LinearLayout.LayoutParams(0,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+            lp.setMargins(4, 0, 4, 0);
+            btn.setLayoutParams(lp);
+            final int min = mins[i], max = maxs[i];
+            btn.setOnClickListener(v -> {
+                etMin.setText(String.valueOf(min));
+                etMax.setText(String.valueOf(max));
+            });
+            presets.addView(btn);
+        }
+        root.addView(presets);
+
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setView(root)
+            .setPositiveButton("Apply", (d, w) -> {
+                try {
+                    String minStr = etMin.getText().toString().trim();
+                    String maxStr = etMax.getText().toString().trim();
+                    filterMinPrice = minStr.isEmpty() ? -1 : Double.parseDouble(minStr);
+                    filterMaxPrice = maxStr.isEmpty() ? -1 : Double.parseDouble(maxStr);
+                    if (filterMinPrice >= 0 && filterMaxPrice >= 0) {
+                        tvPriceValue.setText("Rs." + (int)filterMinPrice + "–" + (int)filterMaxPrice);
+                    } else if (filterMinPrice == 0 && filterMaxPrice == 0) {
+                        tvPriceValue.setText("Free only");
+                    } else if (filterMaxPrice >= 0) {
+                        tvPriceValue.setText("< Rs." + (int)filterMaxPrice);
+                    } else {
+                        tvPriceValue.setText("≥ Rs." + (int)filterMinPrice);
+                    }
+                    filterAndDisplay(etSearch.getText().toString().trim());
+                } catch (NumberFormatException e) {
+                    Toast.makeText(this, "Please enter valid numbers", Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton("Cancel", null)
+            .create();
         dialog.show();
     }
 

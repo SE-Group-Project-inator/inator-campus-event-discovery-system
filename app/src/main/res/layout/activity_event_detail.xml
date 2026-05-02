@@ -215,6 +215,17 @@
                         </LinearLayout>
                     </LinearLayout>
 
+                    <!-- Price row -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="12dp">
+                        <androidx.cardview.widget.CardView android:layout_width="38dp" android:layout_height="38dp" android:layout_marginEnd="12dp" app:cardCornerRadius="8dp" app:cardBackgroundColor="#D5F5E3" app:cardElevation="0dp">
+                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:text="💰" android:textSize="18sp" />
+                        </androidx.cardview.widget.CardView>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ticket Price" android:textSize="11sp" android:textColor="#888888" />
+                            <TextView android:id="@+id/tvTicketPrice" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="FREE" android:textColor="@color/green_accept" android:textSize="14sp" android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -324,6 +335,15 @@
             </androidx.cardview.widget.CardView>
 
             <!-- SEE WHO'S ATTENDING -->
+            <TextView
+                android:id="@+id/tvAttendeeCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 attending"
+                android:textColor="#0D9488"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSeeAttendees"
                 android:layout_width="match_parent"

@@ -10,6 +10,17 @@
     <style name="Theme.CampusEventDiscoverySystem"
         parent="Base.Theme.CampusEventDiscoverySystem"/>
 
+    <!-- Student theme — teal/emerald, distinct from admin -->
+    <style name="Theme.Student" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">#0D9488</item>
+        <item name="colorPrimaryVariant">#0F766E</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorAccent">#14B8A6</item>
+        <item name="android:windowBackground">#EBF8F5</item>
+        <item name="android:statusBarColor">#0F766E</item>
+        <item name="android:navigationBarColor">@color/white</item>
+    </style>
+
     <!-- Admin-specific theme with clean light background -->
     <style name="Theme.Admin" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">@color/admin_primary</item>

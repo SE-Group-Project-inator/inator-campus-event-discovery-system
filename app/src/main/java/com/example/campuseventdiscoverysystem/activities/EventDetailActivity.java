@@ -8,6 +8,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.campuseventdiscoverysystem.R;
+import com.example.campuseventdiscoverysystem.activities.PaymentActivity;
+import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -19,6 +21,25 @@ import java.util.Locale;
  */
 public class EventDetailActivity extends AppCompatActivity {
 
+    /** Loads real attendee count from event_attendees sub-collection */
+    private void loadAttendeeCount() {
+        String eventId = getIntent().getStringExtra("eventId");
+        if (eventId == null) return;
+
+        FirebaseFirestore.getInstance()
+                .collection("event_attendees")
+                .document(eventId)
+                .collection("attendees")
+                .get()
+                .addOnSuccessListener(snap -> {
+                    int count = snap.size();
+                    TextView tvAttendeeCount = findViewById(R.id.tvAttendeeCount);
+                    if (tvAttendeeCount != null) {
+                        tvAttendeeCount.setText(count + " attending");
+                    }
+                });
+    }
+
     private boolean aboutExpanded = true;
 
     @Override
@@ -28,6 +49,7 @@ public class EventDetailActivity extends AppCompatActivity {
 
         populateDetails();
         setupButtons();
+        loadAttendeeCount();
     }
 
     private void populateDetails() {
@@ -87,6 +109,16 @@ public class EventDetailActivity extends AppCompatActivity {
             ((TextView) findViewById(R.id.tvCapacity)).setText(registered + " registered");
         }
 
+        // Price display
+        double ticketPrice = in.getDoubleExtra("eventTicketPrice", 0.0);
+        TextView tvPrice = findViewById(R.id.tvTicketPrice);
+        if (tvPrice != null) {
+            tvPrice.setText(ticketPrice > 0 ? "Rs. " + (int) ticketPrice : "FREE");
+            tvPrice.setTextColor(ticketPrice > 0
+                    ? getResources().getColor(android.R.color.holo_orange_dark, getTheme())
+                    : getResources().getColor(R.color.green_accept, getTheme()));
+        }
+
         ((TextView) findViewById(R.id.tvDescription)).setText(
                 (description != null && !description.isEmpty())
                         ? description : "No description provided.");
@@ -99,6 +131,13 @@ public class EventDetailActivity extends AppCompatActivity {
         String eventVenue = in.getStringExtra("eventVenue");
         String eventDate  = in.getStringExtra("eventDate");
         String eventTime  = in.getStringExtra("eventTime");
+        long   dateMillisBtn = in.getLongExtra("eventDateMillis", 0);
+
+        // Format date for payment screen if not already passed
+        if ((eventDate == null || eventDate.isEmpty()) && dateMillisBtn > 0) {
+            eventDate = new java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault())
+                .format(new java.util.Date(dateMillisBtn));
+        }
 
         // Back
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
@@ -128,15 +167,17 @@ public class EventDetailActivity extends AppCompatActivity {
             startActivity(attendeesIntent);
         });
 
-        // Confirm RSVP → RsvpActivity
+        // Register → PaymentActivity (handles both free and paid events)
+        double ticketPrice = getIntent().getDoubleExtra("eventTicketPrice", 0.0);
+        String formattedDate = eventDate != null ? eventDate : "";
+
         findViewById(R.id.btnConfirmRsvp).setOnClickListener(v -> {
-            Intent rsvpIntent = new Intent(this, RsvpActivity.class);
-            rsvpIntent.putExtra("EVENT_ID", eventId);
-            rsvpIntent.putExtra("EVENT_TITLE", eventTitle);
-            rsvpIntent.putExtra("EVENT_VENUE", eventVenue);
-            if (eventDate != null) rsvpIntent.putExtra("EVENT_DATE", eventDate);
-            if (eventTime != null) rsvpIntent.putExtra("EVENT_TIME", eventTime);
-            startActivity(rsvpIntent);
+            Intent payIntent = new Intent(this, PaymentActivity.class);
+            payIntent.putExtra(PaymentActivity.KEY_EVENT_ID,     eventId);
+            payIntent.putExtra(PaymentActivity.KEY_EVENT_TITLE,  eventTitle);
+            payIntent.putExtra(PaymentActivity.KEY_EVENT_DATE,   formattedDate);
+            payIntent.putExtra(PaymentActivity.KEY_TICKET_PRICE, ticketPrice);
+            startActivity(payIntent);
         });
     }
 }
