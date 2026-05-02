@@ -18,7 +18,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Calendar;
 
-public class StudentProfileActivity extends AppCompatActivity {
+public class StudentProfileActivity extends BaseSessionActivity {
 
     // UI elements
     private TextView tvStudentName, tvStudentEmail;
@@ -90,7 +90,7 @@ public class StudentProfileActivity extends AppCompatActivity {
         );
 
         // Sign Out
-        btnSignOut.setOnClickListener(v -> signOut());
+        btnSignOut.setOnClickListener(v -> showLogoutDialog());
 
         // Bottom Navigation
         navHome.setOnClickListener(v -> {
@@ -190,10 +190,5 @@ public class StudentProfileActivity extends AppCompatActivity {
     }
 
     // ── Sign out ──
-    private void signOut() {
-        mAuth.signOut();
-        Intent intent = new Intent(this, RoleSelectActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-    }
+    // signOut() removed — handled by BaseSessionActivity.showLogoutDialog()
 }

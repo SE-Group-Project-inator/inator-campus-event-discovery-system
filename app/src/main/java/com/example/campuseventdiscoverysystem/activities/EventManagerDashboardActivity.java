@@ -1,6 +1,7 @@
 package com.example.campuseventdiscoverysystem.activities;
 
 import android.content.Intent;
+import android.view.View;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.CalendarView;
@@ -33,7 +34,7 @@ import java.util.Locale;
  * Features a calendar view allowing the user to select specific dates,
  * which in turn fetches and displays all active/approved campus events for that day
  */
-public class EventManagerDashboardActivity extends AppCompatActivity {
+public class EventManagerDashboardActivity extends BaseSessionActivity {
 
     // Firebase instances for database operations
     private FirebaseFirestore db;
@@ -207,5 +208,12 @@ public class EventManagerDashboardActivity extends AppCompatActivity {
         findViewById(R.id.fabCreate).setOnClickListener(v -> {
             startActivity(new Intent(this, CreateEventActivity.class));
         });
+    }
+
+    // Top-right logout button hook (added to XML)
+    // Called from setupNavigation after base class is initialised
+    private void wireLogout() {
+        View btnLogout = findViewById(R.id.btnLogout);
+        if (btnLogout != null) btnLogout.setOnClickListener(v -> showLogoutDialog());
     }
 }

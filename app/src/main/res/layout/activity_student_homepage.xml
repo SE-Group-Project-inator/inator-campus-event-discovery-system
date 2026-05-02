@@ -40,6 +40,19 @@
                 android:gravity="center"
                 android:layout_centerInParent="true" />
 
+            <!-- LOGOUT BUTTON — top-right of header bar -->
+            <ImageButton
+                android:id="@+id/btnLogout"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:src="@android:drawable/ic_lock_power_off"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Sign Out"
+                android:scaleType="fitCenter"
+                app:tint="@color/white" />
+
         </RelativeLayout>
 
         <TextView

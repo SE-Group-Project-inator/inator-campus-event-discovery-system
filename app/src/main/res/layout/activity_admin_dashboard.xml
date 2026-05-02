@@ -15,6 +15,7 @@
         android:paddingLeft="16dp"
         android:paddingRight="16dp">
 
+        <!-- Notification bell (left) -->
         <ImageButton
             android:id="@+id/btnBack"
             android:layout_width="30dp"
@@ -23,11 +24,10 @@
             android:layout_alignParentStart="true"
             android:src="@drawable/notificaiton"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="Notifications"
             android:scaleType="fitCenter" />
 
-
-
+        <!-- Title (centre) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -36,6 +36,19 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/white"/>
+
+        <!-- LOGOUT BUTTON (right) -->
+        <ImageButton
+            android:id="@+id/btnLogout"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            android:src="@android:drawable/ic_lock_power_off"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Sign Out"
+            android:scaleType="fitCenter"
+            app:tint="@color/white" />
 
     </RelativeLayout>
 
