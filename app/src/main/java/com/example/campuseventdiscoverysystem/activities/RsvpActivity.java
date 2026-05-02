@@ -216,26 +216,34 @@ public class RsvpActivity extends AppCompatActivity {
     /**
      * Stores RSVP data in Firestore and updates UI on success.
      */
+    /**
+     * Stores RSVP data in Firestore and updates registeredCount ONLY if not on waitlist.
+     */
     private void proceedWithRegistration() {
         btnConfirmRsvp.setText("Processing...");
 
+        boolean isWaitlist = cbWaitlist != null && cbWaitlist.isChecked();
+
         Map<String, Object> rsvpData = new HashMap<>();
-        rsvpData.put("userId", studentId);
-        rsvpData.put("eventId", eventId);
-        rsvpData.put("eventName", tvEventTitle.getText().toString());
-        rsvpData.put("isNameVisible", cbVisibleName != null && cbVisibleName.isChecked());
+        rsvpData.put("userId",          studentId);
+        rsvpData.put("eventId",         eventId);
+        rsvpData.put("eventName",       tvEventTitle.getText().toString());
+        rsvpData.put("isNameVisible",   cbVisibleName   != null && cbVisibleName.isChecked());
         rsvpData.put("isRollNoVisible", cbVisibleRollNo != null && cbVisibleRollNo.isChecked());
-        rsvpData.put("optInWaitlist", cbWaitlist != null && cbWaitlist.isChecked());
-        rsvpData.put("status", "confirmed");
-        rsvpData.put("createdAt", FieldValue.serverTimestamp());
+        rsvpData.put("optInWaitlist",   isWaitlist);
+        rsvpData.put("status",          "confirmed");
+        rsvpData.put("createdAt",       FieldValue.serverTimestamp());
 
         db.collection("rsvps")
                 .document(studentId + "_" + eventId)
                 .set(rsvpData)
                 .addOnSuccessListener(aVoid -> {
-                    // Increment registeredCount
-                    db.collection("events").document(eventId)
-                            .update("registeredCount", FieldValue.increment(1));
+
+                    // Only increment capacity count if NOT on waitlist
+                    if (!isWaitlist) {
+                        db.collection("events").document(eventId)
+                                .update("registeredCount", FieldValue.increment(1));
+                    }
 
                     // Populate success layout
                     TextView tvDateSuccess  = findViewById(R.id.tvCardDateSuccess);
@@ -248,10 +256,8 @@ public class RsvpActivity extends AppCompatActivity {
                     if (tvTimeSuccess  != null) tvTimeSuccess.setText(tvCardTime.getText());
                     if (tvVenueSuccess != null) tvVenueSuccess.setText(tvCardVenue.getText());
 
-                    if (layoutRsvpForm != null && layoutRsvpSuccess != null) {
-                        layoutRsvpForm.setVisibility(View.GONE);
-                        layoutRsvpSuccess.setVisibility(View.VISIBLE);
-                    }
+                    if (layoutRsvpForm    != null) layoutRsvpForm.setVisibility(View.GONE);
+                    if (layoutRsvpSuccess != null) layoutRsvpSuccess.setVisibility(View.VISIBLE);
 
                     String title   = tvEventTitle.getText().toString();
                     String dateStr = tvCardDate.getText().toString();
@@ -267,6 +273,8 @@ public class RsvpActivity extends AppCompatActivity {
 
     /**
      * Displays RSVP cancellation confirmation dialog.
+     * Deletes from the correct top-level rsvps collection and decrements
+     * registeredCount ONLY if the RSVP was not a waitlist entry.
      */
     private void showCancelRsvpQuestion() {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
@@ -275,8 +283,8 @@ public class RsvpActivity extends AppCompatActivity {
 
         android.app.AlertDialog dialog = builder.create();
 
-        MaterialButton btnDontCancel = dialogView.findViewById(R.id.btnDontCancel);
-        MaterialButton btnYesCancel = dialogView.findViewById(R.id.btnYesCancel);
+        MaterialButton btnDontCancel    = dialogView.findViewById(R.id.btnDontCancel);
+        MaterialButton btnYesCancel     = dialogView.findViewById(R.id.btnYesCancel);
         android.widget.ProgressBar progressBar = dialogView.findViewById(R.id.progressBarCancel);
         LinearLayout layoutCancelButtons = dialogView.findViewById(R.id.layoutCancelButtons);
 
@@ -286,17 +294,39 @@ public class RsvpActivity extends AppCompatActivity {
             layoutCancelButtons.setVisibility(View.GONE);
             progressBar.setVisibility(View.VISIBLE);
 
-            db.collection("events").document(eventId)
-                    .collection("rsvps").document(studentId)
-                    .delete()
-                    .addOnSuccessListener(aVoid -> {
-                        dialog.dismiss();
-                        layoutRsvpSuccess.setVisibility(View.GONE);
-                        layoutRsvpForm.setVisibility(View.VISIBLE);
-                        showCancelSuccessDialog();
+            String rsvpDocId = studentId + "_" + eventId;
+
+            // First read the RSVP to check if it was a waitlist entry
+            db.collection("rsvps").document(rsvpDocId)
+                    .get()
+                    .addOnSuccessListener(rsvpDoc -> {
+                        boolean wasWaitlist = Boolean.TRUE.equals(rsvpDoc.getBoolean("optInWaitlist"));
+
+                        // Delete from the correct top-level rsvps collection
+                        db.collection("rsvps").document(rsvpDocId)
+                                .delete()
+                                .addOnSuccessListener(aVoid -> {
+                                    // Decrement only if they were NOT on the waitlist
+                                    if (!wasWaitlist) {
+                                        db.collection("events").document(eventId)
+                                                .update("registeredCount",
+                                                        FieldValue.increment(-1));
+                                    }
+                                    dialog.dismiss();
+                                    layoutRsvpSuccess.setVisibility(View.GONE);
+                                    layoutRsvpForm.setVisibility(View.VISIBLE);
+                                    showCancelSuccessDialog();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(this, "Failed to cancel: " + e.getMessage(),
+                                            Toast.LENGTH_SHORT).show();
+                                    layoutCancelButtons.setVisibility(View.VISIBLE);
+                                    progressBar.setVisibility(View.GONE);
+                                });
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(this, "Failed to cancel: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Failed to cancel: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
                         layoutCancelButtons.setVisibility(View.VISIBLE);
                         progressBar.setVisibility(View.GONE);
                     });
@@ -304,6 +334,7 @@ public class RsvpActivity extends AppCompatActivity {
 
         dialog.show();
     }
+
 
     /**
      * Shows success dialog after cancellation.

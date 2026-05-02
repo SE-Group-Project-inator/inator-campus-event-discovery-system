@@ -73,6 +73,9 @@ public class TrendingEventsActivity extends AppCompatActivity {
     }
 
     private void setupNavigation() {
+        View btnBack = findViewById(R.id.btnBack);
+        if (btnBack != null) btnBack.setOnClickListener(v -> finish());
+
         findViewById(R.id.navHome).setOnClickListener(v -> {
             Intent intent = new Intent(this, StudentHomeActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

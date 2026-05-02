@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat;
 
 import com.example.campuseventdiscoverysystem.R;
 import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -41,7 +42,7 @@ public class SearchActivity extends AppCompatActivity {
     private TextView tvDateValue;
     private TextView tvPriceValue;
     private TextView chipAll, chipSports, chipAcademic, chipCultural;
-    private CardView btnDateRange, btnPriceRange, btnSort;
+    private LinearLayout btnDateRange, btnPriceRange, btnSort;
     private LinearLayout navHome, navSearch, navTickets, navProfile;
 
     private FirebaseFirestore db;
@@ -158,14 +159,46 @@ public class SearchActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Loads all active events then removes any the current user has already RSVPd to.
+     */
     private void loadAllEvents() {
+        FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user == null) {
+            fetchEventsExcluding(new java.util.HashSet<>());
+            return;
+        }
+
+        db.collection("rsvps")
+                .whereEqualTo("userId", user.getUid())
+                .whereEqualTo("status", "confirmed")
+                .get()
+                .addOnSuccessListener(rsvpQuery -> {
+                    java.util.Set<String> rsvpdIds = new java.util.HashSet<>();
+                    for (com.google.firebase.firestore.DocumentSnapshot rsvp : rsvpQuery.getDocuments()) {
+                        String eid = rsvp.getString("eventId");
+                        if (eid != null) rsvpdIds.add(eid);
+                    }
+                    fetchEventsExcluding(rsvpdIds);
+                })
+                .addOnFailureListener(e -> fetchEventsExcluding(new java.util.HashSet<>()));
+    }
+
+    private void fetchEventsExcluding(java.util.Set<String> rsvpdIds) {
+        // Only fetch events from now onwards — same as StudentHomeActivity
+        Timestamp now = new Timestamp(new java.util.Date());
+
         db.collection("events")
                 .whereEqualTo("status", "active")
+                .whereGreaterThanOrEqualTo("date", now)
                 .get()
                 .addOnSuccessListener(query -> {
                     allEvents.clear();
                     for (QueryDocumentSnapshot doc : query) {
-                        allEvents.add(doc);
+                        if (!rsvpdIds.contains(doc.getId())) {
+                            allEvents.add(doc);
+                        }
                     }
                     filterAndDisplay("");
                 })
@@ -502,8 +535,8 @@ public class SearchActivity extends AppCompatActivity {
             btn.setText(labels[i]);
             btn.setTextSize(11f);
             android.widget.LinearLayout.LayoutParams lp =
-                new android.widget.LinearLayout.LayoutParams(0,
-                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+                    new android.widget.LinearLayout.LayoutParams(0,
+                            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
             lp.setMargins(4, 0, 4, 0);
             btn.setLayoutParams(lp);
             final int min = mins[i], max = maxs[i];
@@ -516,29 +549,29 @@ public class SearchActivity extends AppCompatActivity {
         root.addView(presets);
 
         androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(this)
-            .setView(root)
-            .setPositiveButton("Apply", (d, w) -> {
-                try {
-                    String minStr = etMin.getText().toString().trim();
-                    String maxStr = etMax.getText().toString().trim();
-                    filterMinPrice = minStr.isEmpty() ? -1 : Double.parseDouble(minStr);
-                    filterMaxPrice = maxStr.isEmpty() ? -1 : Double.parseDouble(maxStr);
-                    if (filterMinPrice >= 0 && filterMaxPrice >= 0) {
-                        tvPriceValue.setText("Rs." + (int)filterMinPrice + "–" + (int)filterMaxPrice);
-                    } else if (filterMinPrice == 0 && filterMaxPrice == 0) {
-                        tvPriceValue.setText("Free only");
-                    } else if (filterMaxPrice >= 0) {
-                        tvPriceValue.setText("< Rs." + (int)filterMaxPrice);
-                    } else {
-                        tvPriceValue.setText("≥ Rs." + (int)filterMinPrice);
+                .setView(root)
+                .setPositiveButton("Apply", (d, w) -> {
+                    try {
+                        String minStr = etMin.getText().toString().trim();
+                        String maxStr = etMax.getText().toString().trim();
+                        filterMinPrice = minStr.isEmpty() ? -1 : Double.parseDouble(minStr);
+                        filterMaxPrice = maxStr.isEmpty() ? -1 : Double.parseDouble(maxStr);
+                        if (filterMinPrice >= 0 && filterMaxPrice >= 0) {
+                            tvPriceValue.setText("Rs." + (int)filterMinPrice + "–" + (int)filterMaxPrice);
+                        } else if (filterMinPrice == 0 && filterMaxPrice == 0) {
+                            tvPriceValue.setText("Free only");
+                        } else if (filterMaxPrice >= 0) {
+                            tvPriceValue.setText("< Rs." + (int)filterMaxPrice);
+                        } else {
+                            tvPriceValue.setText("≥ Rs." + (int)filterMinPrice);
+                        }
+                        filterAndDisplay(etSearch.getText().toString().trim());
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(this, "Please enter valid numbers", Toast.LENGTH_SHORT).show();
                     }
-                    filterAndDisplay(etSearch.getText().toString().trim());
-                } catch (NumberFormatException e) {
-                    Toast.makeText(this, "Please enter valid numbers", Toast.LENGTH_SHORT).show();
-                }
-            })
-            .setNegativeButton("Cancel", null)
-            .create();
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
         dialog.show();
     }
 
