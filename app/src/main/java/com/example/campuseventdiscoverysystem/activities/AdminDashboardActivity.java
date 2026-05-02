@@ -1,8 +1,10 @@
 package com.example.campuseventdiscoverysystem.activities;
 
+import android.animation.ObjectAnimator;
 import android.content.Intent;
-import android.view.View;
 import android.os.Bundle;
+import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,38 +22,27 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-/**
- * AdminDashboardActivity — FIXED VERSION
- *
- * Bug fixes:
- * 1. Status mismatch: CreateEventActivity saves status = "pending_approval"
- *    but AdminDashboard was querying for "pending". Now both use "pending_approval".
- * 2. Deleted events not disappearing: addSnapshotListener() gives DocumentChange events.
- *    We now use DocumentChange.Type.REMOVED to remove events from the list when deleted
- *    by event managers, so the admin list stays in sync with no app restart needed.
- * 3. Stats counters now update in real time via snapshot listeners.
- *
- * New features:
- * - Urgent filter (events within 7 days)
- * - Real-time pending count badge
- * - Confirm dialog before approve/decline
- */
 public class AdminDashboardActivity extends BaseSessionActivity {
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private TextView tvPendingCount, tvApprovedCount;
 
-    private final List<Event> pendingList = new ArrayList<>();
+    private TextView tvPendingCount, tvApprovedCount, tvTotalCount;
+    private TextView tvWelcome, tvInsight;
+    private TextView tvAvatarInitial, tvSheetAdminName, tvSheetEmail, tvSheetAvatar;
+
+    private View adminProfileSheet, profileSheetScrim;
+    private boolean sheetVisible = false;
+
+    private final List<Event> pendingList    = new ArrayList<>();
     private final List<Event> allPendingList = new ArrayList<>();
     private PendingEventAdapter adapter;
-
     private String currentFilter = "all";
 
-    // Keep references so we can remove listeners onDestroy
     private ListenerRegistration pendingListener;
     private ListenerRegistration statsListenerApproved;
 
@@ -60,26 +51,76 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_dashboard);
 
-        db = FirebaseFirestore.getInstance();
+        db    = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        tvPendingCount   = findViewById(R.id.tvPendingCount);
-        tvApprovedCount  = findViewById(R.id.tvApprovedCount);
-
+        bindViews();
+        setupWelcomeMessage();
         setupRecyclerView();
         setupNavigation();
         setupFilters();
+        setupProfileSheet();
         listenToStats();
-        listenToPendingEvents(); // real-time — handles deletes automatically
+        listenToPendingEvents();
+        loadAdminProfile();
+    }
+
+    private void bindViews() {
+        tvPendingCount  = findViewById(R.id.tvPendingCount);
+        tvApprovedCount = findViewById(R.id.tvApprovedCount);
+        tvTotalCount    = findViewById(R.id.tvTotalCount);
+        tvWelcome       = findViewById(R.id.tvWelcome);
+        tvInsight       = findViewById(R.id.tvInsight);
+        tvAvatarInitial = findViewById(R.id.tvAvatarInitial);
+        tvSheetAdminName= findViewById(R.id.tvSheetAdminName);
+        tvSheetEmail    = findViewById(R.id.tvSheetEmail);
+        tvSheetAvatar   = findViewById(R.id.tvSheetAvatar);
+        adminProfileSheet = findViewById(R.id.adminProfileSheet);
+        profileSheetScrim = findViewById(R.id.profileSheetScrim);
+    }
+
+    private void setupWelcomeMessage() {
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        String greeting;
+        if (hour < 12)      greeting = "Good morning, Admin 👋";
+        else if (hour < 17) greeting = "Good afternoon, Admin 👋";
+        else                greeting = "Good evening, Admin 👋";
+        tvWelcome.setText(greeting);
+    }
+
+    private void loadAdminProfile() {
+        if (mAuth.getCurrentUser() != null) {
+            String email = mAuth.getCurrentUser().getEmail();
+            if (email != null) {
+                String initial = email.substring(0, 1).toUpperCase();
+                tvAvatarInitial.setText(initial);
+                tvSheetAvatar.setText(initial);
+                tvSheetEmail.setText(email);
+            }
+            // Try to get display name from Firestore
+            db.collection("users").document(mAuth.getCurrentUser().getUid())
+                    .get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc.exists()) {
+                            String name = doc.getString("name");
+                            if (name != null && !name.isEmpty()) {
+                                tvSheetAdminName.setText(name);
+                                String initial = name.substring(0, 1).toUpperCase();
+                                tvAvatarInitial.setText(initial);
+                                tvSheetAvatar.setText(initial);
+                            }
+                        }
+                    });
+        }
     }
 
     private void setupRecyclerView() {
         RecyclerView rv = findViewById(R.id.rvPendingEvents);
         adapter = new PendingEventAdapter(
                 pendingList,
-                eventId -> confirmAction(eventId, "active",   "Approve this event?",
+                eventId -> confirmAction(eventId, "active",    "Approve this event?",
                         "The event will go live and students can RSVP."),
-                eventId -> confirmAction(eventId, "rejected", "Decline this event?",
+                eventId -> confirmAction(eventId, "rejected",  "Decline this event?",
                         "The event manager will be notified.")
         );
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -87,30 +128,124 @@ public class AdminDashboardActivity extends BaseSessionActivity {
     }
 
     private void setupNavigation() {
-        // Bottom nav Sign Out tab
-        findViewById(R.id.navSignOut).setOnClickListener(v -> showLogoutDialog());
-        // Top-right logout icon button (added to XML)
-        View btnLogout = findViewById(R.id.btnLogout);
-        if (btnLogout != null) btnLogout.setOnClickListener(v -> showLogoutDialog());
+        // Top avatar button → open profile sheet
+        findViewById(R.id.btnAdminAvatar).setOnClickListener(v -> toggleProfileSheet());
 
-        findViewById(R.id.tvSeeAll).setOnClickListener(v ->
-                startActivity(new Intent(this, EventsListActivity.class)));
-
+        // Bottom nav
+        findViewById(R.id.navHome).setOnClickListener(v -> { /* already here */ });
         findViewById(R.id.navEvents).setOnClickListener(v ->
+                startActivity(new Intent(this, EventsListActivity.class)));
+        findViewById(R.id.navProfile).setOnClickListener(v -> toggleProfileSheet());
+
+        // Quick actions
+        View qaEvents = findViewById(R.id.quickActionEvents);
+        if (qaEvents != null) qaEvents.setOnClickListener(v -> {
+            Intent i = new Intent(this, EventsListActivity.class);
+            i.putExtra("filter", "all");
+            startActivity(i);
+        });
+
+        View qaPending = findViewById(R.id.quickActionPending);
+        if (qaPending != null) qaPending.setOnClickListener(v -> {
+            Intent i = new Intent(this, EventsListActivity.class);
+            i.putExtra("filter", "pending");
+            startActivity(i);
+        });
+
+        View qaApproved = findViewById(R.id.quickActionApproved);
+        if (qaApproved != null) qaApproved.setOnClickListener(v -> {
+            Intent i = new Intent(this, EventsListActivity.class);
+            i.putExtra("filter", "approved");
+            startActivity(i);
+        });
+
+        // See all
+        TextView tvSeeAll = findViewById(R.id.tvSeeAll);
+        if (tvSeeAll != null) tvSeeAll.setOnClickListener(v ->
                 startActivity(new Intent(this, EventsListActivity.class)));
     }
 
     private void setupFilters() {
-        try {
-            findViewById(R.id.chipAll).setOnClickListener(v -> {
-                currentFilter = "all";
-                applyFilter();
-            });
-            findViewById(R.id.chipUrgent).setOnClickListener(v -> {
-                currentFilter = "urgent";
-                applyFilter();
-            });
-        } catch (Exception ignored) { /* chips optional */ }
+        TextView chipAll    = findViewById(R.id.chipAll);
+        TextView chipUrgent = findViewById(R.id.chipUrgent);
+        TextView chipNewest = findViewById(R.id.chipNewest);
+
+        if (chipAll != null) chipAll.setOnClickListener(v -> {
+            currentFilter = "all";
+            updateChipUI("all");
+            applyFilter();
+        });
+        if (chipUrgent != null) chipUrgent.setOnClickListener(v -> {
+            currentFilter = "urgent";
+            updateChipUI("urgent");
+            applyFilter();
+        });
+        if (chipNewest != null) chipNewest.setOnClickListener(v -> {
+            currentFilter = "newest";
+            updateChipUI("newest");
+            applyFilter();
+        });
+    }
+
+    private void updateChipUI(String active) {
+        setChipState(findViewById(R.id.chipAll),    "all".equals(active));
+        setChipState(findViewById(R.id.chipUrgent), "urgent".equals(active));
+        setChipState(findViewById(R.id.chipNewest), "newest".equals(active));
+    }
+
+    private void setChipState(TextView chip, boolean isActive) {
+        if (chip == null) return;
+        chip.setBackgroundResource(isActive ? R.drawable.bg_chip_active : R.drawable.bg_chip_inactive);
+        chip.setTextColor(getColor(isActive ? R.color.white : R.color.admin_text_secondary));
+    }
+
+    private void setupProfileSheet() {
+        // Tapping scrim closes sheet
+        profileSheetScrim.setOnClickListener(v -> hideProfileSheet());
+        // Logout from sheet
+        View btnSheetLogout = findViewById(R.id.btnSheetLogout);
+        if (btnSheetLogout != null) btnSheetLogout.setOnClickListener(v -> {
+            hideProfileSheet();
+            showLogoutDialog();
+        });
+    }
+
+    private void toggleProfileSheet() {
+        if (sheetVisible) hideProfileSheet();
+        else              showProfileSheet();
+    }
+
+    private void showProfileSheet() {
+        sheetVisible = true;
+        profileSheetScrim.setVisibility(View.VISIBLE);
+        profileSheetScrim.setAlpha(0f);
+        profileSheetScrim.animate().alpha(1f).setDuration(200).start();
+
+        adminProfileSheet.setVisibility(View.VISIBLE);
+        adminProfileSheet.post(() -> {
+            float startY = adminProfileSheet.getHeight();
+            adminProfileSheet.setTranslationY(startY);
+            adminProfileSheet.animate()
+                    .translationY(0f)
+                    .setDuration(320)
+                    .setInterpolator(new DecelerateInterpolator(2f))
+                    .start();
+        });
+    }
+
+    private void hideProfileSheet() {
+        sheetVisible = false;
+        profileSheetScrim.animate().alpha(0f).setDuration(200)
+                .withEndAction(() -> profileSheetScrim.setVisibility(View.GONE))
+                .start();
+
+        float endY = adminProfileSheet.getHeight();
+        adminProfileSheet.animate()
+                .translationY(endY)
+                .setDuration(280)
+                .setInterpolator(new DecelerateInterpolator())
+                .withEndAction(() -> adminProfileSheet.setVisibility(View.GONE))
+                .start();
     }
 
     private void applyFilter() {
@@ -125,6 +260,15 @@ public class AdminDashboardActivity extends BaseSessionActivity {
                     if (diffDays >= 0 && diffDays <= 7) filtered.add(e);
                 }
             }
+        } else if ("newest".equals(currentFilter)) {
+            // Sort by submission date descending (most recently submitted first)
+            filtered.addAll(allPendingList);
+            filtered.sort((a, b) -> {
+                if (a.getDate() == null && b.getDate() == null) return 0;
+                if (a.getDate() == null) return 1;
+                if (b.getDate() == null) return -1;
+                return b.getDate().compareTo(a.getDate());
+            });
         } else {
             filtered.addAll(allPendingList);
         }
@@ -132,49 +276,82 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         pendingList.clear();
         pendingList.addAll(filtered);
         adapter.notifyDataSetChanged();
+
+        // Show/hide empty state
+        View emptyState = findViewById(R.id.emptyState);
+        RecyclerView rv = findViewById(R.id.rvPendingEvents);
+        if (emptyState != null && rv != null) {
+            if (pendingList.isEmpty()) {
+                emptyState.setVisibility(View.VISIBLE);
+                rv.setVisibility(View.GONE);
+            } else {
+                emptyState.setVisibility(View.GONE);
+                rv.setVisibility(View.VISIBLE);
+            }
+        }
+
+        // Update insight text
+        if (tvInsight != null) {
+            int count = allPendingList.size();
+            if (count == 0) tvInsight.setText("All events reviewed ✅");
+            else tvInsight.setText(count + " event" + (count > 1 ? "s" : "") + " pending review");
+        }
     }
 
-    /**
-     * FIX: Use real-time stats listeners so counters update when event manager deletes an event
-     * or admin approves one — no manual refresh needed.
-     */
     private void listenToStats() {
-        // Pending count
         db.collection("events")
-                .whereEqualTo("status", "pending_approval")   // ← correct status string
+                .whereEqualTo("status", "pending_approval")
                 .addSnapshotListener((snap, e) -> {
-                    if (snap != null) tvPendingCount.setText(String.valueOf(snap.size()));
+                    if (snap != null) {
+                        int count = snap.size();
+                        animateCounter(tvPendingCount, count);
+                    }
                 });
 
-        // Approved count
         statsListenerApproved = db.collection("events")
                 .whereEqualTo("status", "active")
                 .addSnapshotListener((snap, e) -> {
-                    if (snap != null) tvApprovedCount.setText(String.valueOf(snap.size()));
+                    if (snap != null) animateCounter(tvApprovedCount, snap.size());
+                });
+
+        db.collection("events")
+                .addSnapshotListener((snap, e) -> {
+                    if (snap != null) animateCounter(tvTotalCount, snap.size());
                 });
     }
 
-    /**
-     * FIX: addSnapshotListener fires on ANY change (add, modify, REMOVE).
-     * The old implementation used a one-shot .get() call, so deleted events
-     * stayed visible until the admin restarted the app.
-     *
-     * By rebuilding allPendingList from each snapshot (which already reflects
-     * the current Firestore state including deletions), the RecyclerView
-     * automatically removes deleted events in real time.
-     */
+    private void animateCounter(TextView tv, int target) {
+        if (tv == null) return;
+
+        try {
+            int current = Integer.parseInt(tv.getText().toString());
+
+            android.animation.ValueAnimator anim =
+                    android.animation.ValueAnimator.ofInt(current, target);
+
+            anim.setDuration(600);
+
+            anim.addUpdateListener(a ->
+                    tv.setText(String.valueOf((int) a.getAnimatedValue()))
+            );
+
+            anim.start();
+
+        } catch (NumberFormatException e) {
+            tv.setText(String.valueOf(target));
+        }
+    }
+
     private void listenToPendingEvents() {
         pendingListener = db.collection("events")
-                .whereEqualTo("status", "pending_approval")   // ← matches CreateEventActivity
+                .whereEqualTo("status", "pending_approval")
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null) {
-                        Toast.makeText(this, "Error loading events: " + error.getMessage(),
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Error loading events", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     if (snapshots == null) return;
 
-                    // Rebuild entire list from the authoritative snapshot
                     allPendingList.clear();
                     for (DocumentSnapshot doc : snapshots.getDocuments()) {
                         Event event = doc.toObject(Event.class);
@@ -187,9 +364,6 @@ public class AdminDashboardActivity extends BaseSessionActivity {
                 });
     }
 
-    /**
-     * NEW: Show confirmation dialog before approving or declining.
-     */
     private void confirmAction(String eventId, String newStatus, String title, String message) {
         new AlertDialog.Builder(this)
                 .setTitle(title)
@@ -203,20 +377,27 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         db.collection("events").document(eventId)
                 .update("status", status)
                 .addOnSuccessListener(v -> {
-                    String msg = "active".equals(status) ? "✅ Event approved!" : "❌ Event declined";
+                    String msg = "active".equals(status) ? "✅ Event approved!" : "Event declined";
                     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-                    // No need to manually update the list — the snapshot listener handles it
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to update: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show());
+                        Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if (sheetVisible) {
+            hideProfileSheet();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Clean up Firestore listeners to avoid memory leaks
-        if (pendingListener != null)        pendingListener.remove();
-        if (statsListenerApproved != null)  statsListenerApproved.remove();
+        if (pendingListener != null)       pendingListener.remove();
+        if (statsListenerApproved != null) statsListenerApproved.remove();
     }
 }
