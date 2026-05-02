@@ -5,135 +5,191 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    app:cardBackgroundColor="@color/card_tan"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="4dp">
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="3dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="14dp">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <!-- Date Badge -->
+        <!-- Top Row: Date Badge + Title + Status -->
         <LinearLayout
-            android:layout_width="52dp"
-            android:layout_height="62dp"
-            android:layout_marginEnd="12dp"
-            android:background="@color/white"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
+            <!-- Date Badge -->
+            <LinearLayout
+                android:layout_width="52dp"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_date_badge"
+                android:orientation="vertical"
+                android:gravity="center">
+                <TextView
+                    android:id="@+id/tvDay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="15"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/admin_primary"/>
+                <TextView
+                    android:id="@+id/tvMonth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MAR"
+                    android:textSize="10sp"
+                    android:textColor="@color/admin_text_secondary"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- Event info -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="12dp">
+
+                <TextView
+                    android:id="@+id/tvEventTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Entrepreneurship Workshop"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/admin_text_primary"
+                    android:maxLines="2"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="3dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📍 "
+                        android:textSize="11sp"/>
+                    <TextView
+                        android:id="@+id/tvVenue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SDSB Room 101"
+                        android:textSize="12sp"
+                        android:textColor="@color/admin_text_secondary"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Status Badge -->
             <TextView
-                android:id="@+id/tvDay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="15"
-                android:textColor="@color/text_dark"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:background="@drawable/bg_status_pending"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:text="Pending"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="@color/admin_warning"/>
 
-            <TextView
-                android:id="@+id/tvMonth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:alpha="0.7"
-                android:text="MAR"
-                android:textColor="@color/text_dark"
-                android:textSize="11sp" />
         </LinearLayout>
 
-        <!-- Event Info -->
+        <!-- Submitter info row -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
 
+            <!-- Avatar initial -->
             <TextView
-                android:id="@+id/tvEventTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="2"
-                android:text="Entrepreneurship Workshop"
-                android:textColor="@color/text_dark"
+                android:id="@+id/tvSubmitterInitial"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_admin_avatar"
+                android:gravity="center"
+                android:text="M"
                 android:textSize="13sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textColor="@color/white"/>
 
-            <TextView
-                android:id="@+id/tvSubmittedBy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:alpha="0.7"
-                android:text="Submitted by Abeer"
-                android:textColor="@color/text_dark"
-                android:textSize="11sp" />
-
-            <TextView
-                android:id="@+id/tvEmail"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
-                android:alpha="0.6"
-                android:text="2110000@lums.edu.pk"
-                android:textColor="@color/text_dark"
-                android:textSize="10sp" />
-
-            <!-- Venue Row -->
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="10dp">
 
                 <TextView
+                    android:id="@+id/tvSubmittedBy"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📍 "
-                    android:textSize="11sp" />
+                    android:text="Submitted by Abeer"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/admin_text_primary"/>
 
                 <TextView
-                    android:id="@+id/tvVenue"
+                    android:id="@+id/tvEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:alpha="0.7"
-                    android:text="SDSB Room 101"
-                    android:textColor="@color/text_dark"
-                    android:textSize="11sp" />
+                    android:text="2110000@lums.edu.pk"
+                    android:textSize="11sp"
+                    android:textColor="@color/admin_text_secondary"/>
             </LinearLayout>
 
         </LinearLayout>
 
-        <!-- Accept / Decline Buttons -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:orientation="vertical">
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/admin_divider"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAccept"
-                android:layout_width="80dp"
-                android:layout_height="34dp"
-                android:layout_marginBottom="6dp"
-                android:backgroundTint="@color/green_accept"
-                android:text="Accept"
-                android:textColor="@color/white"
-                android:textSize="11sp"
-                app:cornerRadius="8dp" />
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="10dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDecline"
-                android:layout_width="80dp"
-                android:layout_height="34dp"
-                android:backgroundTint="@color/red_decline"
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/admin_error_bg"
                 android:text="Decline"
+                android:textColor="@color/admin_error"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/admin_error"
+                app:strokeWidth="0dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAccept"
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/admin_primary"
+                android:text="Approve ✓"
                 android:textColor="@color/white"
-                android:textSize="11sp"
-                app:cornerRadius="8dp" />
+                android:textSize="13sp"
+                android:textStyle="bold"
+                app:cornerRadius="12dp"/>
 
         </LinearLayout>
     </LinearLayout>
