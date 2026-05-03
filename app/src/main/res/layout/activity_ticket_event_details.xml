@@ -111,11 +111,23 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Cancel RSVP button pinned to bottom -->
+    <!-- Show My QR button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnShowQR"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="🎟  Show My QR Code"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:backgroundTint="@color/btn_student"
+        app:cornerRadius="0dp" />
+
+    <!-- Cancel RSVP button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCancelRsvp"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="52dp"
         android:text="Cancel RSVP"
         android:textColor="@color/white"
         android:textSize="16sp"

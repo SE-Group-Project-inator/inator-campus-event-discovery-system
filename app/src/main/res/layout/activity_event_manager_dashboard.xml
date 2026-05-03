@@ -131,6 +131,49 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- QR Scanner card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/btnQRScanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@android:drawable/ic_menu_camera"
+                    app:tint="@color/btn_eventmgr"
+                    android:contentDescription="QR Scanner" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:text="Scan Student Check-In QR"
+                    android:textColor="@color/text_dark"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_arrow_forward"
+                    app:tint="@color/text_dark" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
         <TextView
             android:id="@+id/tvSelectedDateHeader"
             android:layout_width="wrap_content"

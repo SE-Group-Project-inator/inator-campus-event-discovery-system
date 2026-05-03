@@ -100,6 +100,10 @@ public class StudentHomeActivity extends BaseSessionActivity {
         if (cardQuickProfile != null) cardQuickProfile.setOnClickListener(v ->
                 startActivity(new Intent(this, StudentProfileActivity.class)));
 
+        View cardQuickSocieties = findViewById(R.id.cardQuickSocieties);
+        if (cardQuickSocieties != null) cardQuickSocieties.setOnClickListener(v ->
+                startActivity(new Intent(this, SocietiesActivity.class)));
+
         btnNotification.setOnClickListener(v ->
                 startActivity(new Intent(this, NotificationsActivity.class)));
 
@@ -309,8 +313,85 @@ public class StudentHomeActivity extends BaseSessionActivity {
         if (upcomingEventsListener != null) upcomingEventsListener.remove();
     }
 
-    private void loadGreeting() {}
-    private void loadEventsThisWeek() {}
-    private void loadRegisteredCount() {}
-    private void loadSavedCount() {}
+    private void loadGreeting() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return;
+        db.collection("users").document(user.getUid()).get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        String name = doc.getString("name");
+                        if (name != null) tvGreeting.setText("Hello, " + name.split(" ")[0] + "!");
+                    }
+                });
+    }
+
+    private void loadEventsThisWeek() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) { tvEventsThisWeek.setText("0"); return; }
+
+        Calendar startOfWeek = Calendar.getInstance();
+        startOfWeek.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        startOfWeek.set(Calendar.HOUR_OF_DAY, 0);
+        startOfWeek.set(Calendar.MINUTE, 0);
+        startOfWeek.set(Calendar.SECOND, 0);
+        startOfWeek.set(Calendar.MILLISECOND, 0);
+        Calendar endOfWeek = (Calendar) startOfWeek.clone();
+        endOfWeek.add(Calendar.DAY_OF_WEEK, 6);
+        endOfWeek.set(Calendar.HOUR_OF_DAY, 23);
+        endOfWeek.set(Calendar.MINUTE, 59);
+        endOfWeek.set(Calendar.SECOND, 59);
+
+        Timestamp weekStart = new Timestamp(startOfWeek.getTime());
+        Timestamp weekEnd   = new Timestamp(endOfWeek.getTime());
+
+        db.collection("rsvps")
+                .whereEqualTo("userId", user.getUid())
+                .whereEqualTo("status", "confirmed")
+                .get()
+                .addOnSuccessListener(rsvpQuery -> {
+                    java.util.List<DocumentSnapshot> docs = rsvpQuery.getDocuments();
+                    if (docs.isEmpty()) { tvEventsThisWeek.setText("0"); return; }
+
+                    java.util.concurrent.atomic.AtomicInteger count     = new java.util.concurrent.atomic.AtomicInteger(0);
+                    java.util.concurrent.atomic.AtomicInteger remaining = new java.util.concurrent.atomic.AtomicInteger(docs.size());
+
+                    for (DocumentSnapshot rsvp : docs) {
+                        String eventId = rsvp.getString("eventId");
+                        if (eventId == null) {
+                            if (remaining.decrementAndGet() == 0) tvEventsThisWeek.setText(String.valueOf(count.get()));
+                            continue;
+                        }
+                        db.collection("events").document(eventId).get()
+                                .addOnSuccessListener(eventDoc -> {
+                                    Timestamp eventDate = eventDoc.getTimestamp("date");
+                                    if (eventDate != null
+                                            && eventDate.compareTo(weekStart) >= 0
+                                            && eventDate.compareTo(weekEnd) <= 0)
+                                        count.incrementAndGet();
+                                    if (remaining.decrementAndGet() == 0)
+                                        tvEventsThisWeek.setText(String.valueOf(count.get()));
+                                })
+                                .addOnFailureListener(e -> {
+                                    if (remaining.decrementAndGet() == 0)
+                                        tvEventsThisWeek.setText(String.valueOf(count.get()));
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> tvEventsThisWeek.setText("0"));
+    }
+
+    private void loadRegisteredCount() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) { tvRegistered.setText("0"); return; }
+        db.collection("rsvps")
+                .whereEqualTo("userId", user.getUid())
+                .whereEqualTo("status", "confirmed")
+                .get()
+                .addOnSuccessListener(query -> tvRegistered.setText(String.valueOf(query.size())))
+                .addOnFailureListener(e -> tvRegistered.setText("0"));
+    }
+
+    private void loadSavedCount() {
+        tvSaved.setText("0");
+    }
 }

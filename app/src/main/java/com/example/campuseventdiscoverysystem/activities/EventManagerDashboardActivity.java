@@ -229,6 +229,14 @@ public class EventManagerDashboardActivity extends BaseSessionActivity {
             btnPaymentVerification.setOnClickListener(v ->
                     startActivity(new Intent(this, PaymentVerificationActivity.class)));
         }
+
+        // QR scanner for the event
+        android.view.View btnQRScanner = findViewById(R.id.btnQRScanner);
+        if (btnQRScanner != null) {
+            btnQRScanner.setOnClickListener(v ->
+                    startActivity(new Intent(this, QRScannerActivity.class))
+            );
+        }
     }
 
     // Top-right logout button hook (added to XML)

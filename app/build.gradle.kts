@@ -40,6 +40,9 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.cardview:cardview:1.0.0")
+    // QR code
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation("com.google.zxing:core:3.5.2")
 
     // 🔥 Firebase — ADD THESE
     implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
