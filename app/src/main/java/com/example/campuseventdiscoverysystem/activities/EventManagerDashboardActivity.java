@@ -259,7 +259,7 @@ public class EventManagerDashboardActivity extends BaseSessionActivity {
                 startActivity(new Intent(this, PaymentVerificationActivity.class)));
 
         findViewById(R.id.btnQuickScanQR).setOnClickListener(v ->
-                Toast.makeText(this, "QR Scanner coming soon!", Toast.LENGTH_SHORT).show());
+                startActivity(new Intent(this, QRScannerActivity.class)));
     }
 
     /**
@@ -458,14 +458,6 @@ public class EventManagerDashboardActivity extends BaseSessionActivity {
 
         } catch (Exception e) {
             Toast.makeText(this, "Error processing image", Toast.LENGTH_SHORT).show();
-        }
-
-        // QR scanner for the event
-        android.view.View btnQRScanner = findViewById(R.id.btnQRScanner);
-        if (btnQRScanner != null) {
-            btnQRScanner.setOnClickListener(v ->
-                    startActivity(new Intent(this, QRScannerActivity.class))
-            );
         }
     }
 
