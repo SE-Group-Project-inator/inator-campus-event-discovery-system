@@ -234,6 +234,59 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- US-28: Campus AI Assistant entry point -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardCampusAssistant"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="18dp"
+                android:foreground="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#0D9488">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🤖"
+                        android:textSize="28sp"
+                        android:layout_marginEnd="14dp"/>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Ask Campus Assistant"
+                            android:textColor="#FFFFFF"
+                            android:textSize="15sp"
+                            android:textStyle="bold"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Find events, get recs, ask anything"
+                            android:textColor="#B2F0EB"
+                            android:textSize="12sp"
+                            android:layout_marginTop="2dp"/>
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textColor="#5EEAD4"
+                        android:textSize="28sp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
             <!-- Quick Actions row -->
             <LinearLayout
                 android:layout_width="match_parent"
