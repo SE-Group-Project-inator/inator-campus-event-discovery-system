@@ -2,13 +2,14 @@ package com.example.campuseventdiscoverysystem.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.example.campuseventdiscoverysystem.R;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,11 +27,13 @@ import java.util.Map;
  *
  * Saves to users/{uid}.preferences.categories and sets onboardingComplete = true.
  * "Skip" still flips the flag so the user is not prompted again.
+ *
+ * Chips are styled as rectangular "interest boxes" in a flowing two-row grid.
  */
 public class StudentOnboardingActivity extends AppCompatActivity {
 
     private ChipGroup chipGroup;
-    private Button btnContinue;
+    private MaterialButton btnContinue;
     private TextView tvSkip;
 
     private FirebaseFirestore db;
@@ -61,6 +64,30 @@ public class StudentOnboardingActivity extends AppCompatActivity {
             chip.setText(cat);
             chip.setCheckable(true);
             chip.setClickable(true);
+
+            // Style: pill-shaped selectable chip matching teal theme
+            chip.setChipBackgroundColorResource(R.color.white);
+            chip.setChipStrokeColorResource(R.color.card_student);
+            chip.setChipStrokeWidth(2f);
+            chip.setTextColor(ContextCompat.getColor(this, R.color.text_dark));
+            chip.setTextSize(13f);
+            chip.setCheckedIconVisible(false);
+
+            // When checked: teal background + white text
+            chip.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+                if (isChecked) {
+                    chip.setChipBackgroundColor(
+                            android.content.res.ColorStateList.valueOf(0xFF0D9488));
+                    chip.setTextColor(0xFFFFFFFF);
+                    chip.setChipStrokeWidth(0f);
+                } else {
+                    chip.setChipBackgroundColor(
+                            android.content.res.ColorStateList.valueOf(0xFFFFFFFF));
+                    chip.setTextColor(ContextCompat.getColor(this, R.color.text_dark));
+                    chip.setChipStrokeWidth(2f);
+                }
+            });
+
             chipGroup.addView(chip);
         }
     }

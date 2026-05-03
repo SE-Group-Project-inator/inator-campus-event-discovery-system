@@ -5,43 +5,40 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/bg_student">
+    android:background="#EBF8F5">
 
-    <!-- Top Bar -->
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/btn_student"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Search Events"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/white" />
-
-    </RelativeLayout>
-
-    <!-- Search Bar -->
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/bg_student"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="8dp">
+        android:orientation="vertical"
+        android:background="#0D9488"
+        android:paddingTop="44dp"
+        android:paddingBottom="14dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Explore Events"
+                android:textColor="#FFFFFF"
+                android:textSize="17sp"
+                android:textStyle="bold"/>
+        </RelativeLayout>
+
+        <!-- Search Bar inline in header -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="44dp"
+            android:layout_marginTop="14dp"
             app:cardCornerRadius="22dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/white">
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#1AFFFFFF">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -55,14 +52,13 @@
                     android:layout_height="match_parent"
                     android:hint="Search events, clubs, venues..."
                     android:textSize="13sp"
-                    android:textColor="@color/text_dark"
-                    android:textColorHint="@color/text_dark"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#B2F0EB"
                     android:background="@null"
                     android:singleLine="true"
                     android:paddingEnd="36dp"
-                    android:alpha="0.6"
                     android:imeOptions="actionSearch"
-                    android:inputType="text" />
+                    android:inputType="text"/>
 
                 <ImageView
                     android:id="@+id/btnSearch"
@@ -71,12 +67,10 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:src="@android:drawable/ic_menu_search"
-                    app:tint="@color/btn_student" />
+                    app:tint="#FFFFFF"/>
 
             </RelativeLayout>
-
         </androidx.cardview.widget.CardView>
-
     </LinearLayout>
 
     <!-- Filter Chips Row -->
@@ -86,6 +80,7 @@
         android:scrollbars="none"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
+        android:paddingTop="12dp"
         android:paddingBottom="8dp">
 
         <LinearLayout
@@ -99,13 +94,13 @@
                 android:layout_height="32dp"
                 android:text="All"
                 android:textSize="12sp"
-                android:textColor="@color/white"
+                android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:background="@drawable/chip_active"
                 android:paddingStart="14dp"
                 android:paddingEnd="14dp"
                 android:gravity="center"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginEnd="8dp"/>
 
             <TextView
                 android:id="@+id/chipSports"
@@ -118,7 +113,7 @@
                 android:paddingStart="14dp"
                 android:paddingEnd="14dp"
                 android:gravity="center"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginEnd="8dp"/>
 
             <TextView
                 android:id="@+id/chipAcademic"
@@ -131,7 +126,7 @@
                 android:paddingStart="14dp"
                 android:paddingEnd="14dp"
                 android:gravity="center"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginEnd="8dp"/>
 
             <TextView
                 android:id="@+id/chipCultural"
@@ -144,13 +139,12 @@
                 android:paddingStart="14dp"
                 android:paddingEnd="14dp"
                 android:gravity="center"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginEnd="8dp"/>
 
         </LinearLayout>
-
     </HorizontalScrollView>
 
-    <!-- Date Range + Price Range + Sort filters (flat rows, no boxes) -->
+    <!-- Filter rows -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -159,7 +153,6 @@
         android:paddingEnd="16dp"
         android:paddingBottom="4dp">
 
-        <!-- Date Range Row -->
         <LinearLayout
             android:id="@+id/btnDateRange"
             android:layout_width="match_parent"
@@ -167,43 +160,12 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:layout_marginBottom="2dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📅"
-                android:textSize="14sp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Select date range"
-                android:textSize="13sp"
-                android:textColor="@color/btn_student"
-                android:textStyle="bold"
-                android:layout_marginStart="8dp" />
-
-            <TextView
-                android:id="@+id/tvDateValue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Any date"
-                android:textSize="12sp"
-                android:textColor="@color/btn_student"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=" ›"
-                android:textSize="16sp"
-                android:textColor="@color/btn_student"
-                android:layout_marginStart="4dp" />
-
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📅" android:textSize="14sp"/>
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Select date range" android:textSize="13sp" android:textColor="#0D9488" android:textStyle="bold" android:layout_marginStart="8dp"/>
+            <TextView android:id="@+id/tvDateValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Any date" android:textSize="12sp" android:textColor="#0D9488" android:textStyle="bold"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" ›" android:textSize="16sp" android:textColor="#0D9488" android:layout_marginStart="4dp"/>
         </LinearLayout>
 
-        <!-- Price Range Row -->
         <LinearLayout
             android:id="@+id/btnPriceRange"
             android:layout_width="match_parent"
@@ -211,108 +173,43 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:layout_marginBottom="2dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="💰"
-                android:textSize="14sp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Price range"
-                android:textSize="13sp"
-                android:textColor="@color/btn_student"
-                android:textStyle="bold"
-                android:layout_marginStart="8dp" />
-
-            <TextView
-                android:id="@+id/tvPriceValue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Free – Rs.500"
-                android:textSize="12sp"
-                android:textColor="@color/btn_student"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=" ›"
-                android:textSize="16sp"
-                android:textColor="@color/btn_student"
-                android:layout_marginStart="4dp" />
-
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="💰" android:textSize="14sp"/>
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Price range" android:textSize="13sp" android:textColor="#0D9488" android:textStyle="bold" android:layout_marginStart="8dp"/>
+            <TextView android:id="@+id/tvPriceValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Free – Rs.500" android:textSize="12sp" android:textColor="#0D9488" android:textStyle="bold"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" ›" android:textSize="16sp" android:textColor="#0D9488" android:layout_marginStart="4dp"/>
         </LinearLayout>
 
-        <!-- Sort Row -->
         <LinearLayout
             android:id="@+id/btnSort"
             android:layout_width="match_parent"
             android:layout_height="44dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="⬇"
-                android:textSize="14sp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Sort"
-                android:textSize="13sp"
-                android:textColor="@color/btn_student"
-                android:textStyle="bold"
-                android:layout_marginStart="8dp" />
-
-            <TextView
-                android:id="@+id/tvSort"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Latest"
-                android:textSize="12sp"
-                android:textColor="@color/btn_student"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=" ›"
-                android:textSize="16sp"
-                android:textColor="@color/btn_student"
-                android:layout_marginStart="4dp" />
-
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⬇" android:textSize="14sp"/>
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Sort" android:textSize="13sp" android:textColor="#0D9488" android:textStyle="bold" android:layout_marginStart="8dp"/>
+            <TextView android:id="@+id/tvSort" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Latest" android:textSize="12sp" android:textColor="#0D9488" android:textStyle="bold"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" ›" android:textSize="16sp" android:textColor="#0D9488" android:layout_marginStart="4dp"/>
         </LinearLayout>
-
     </LinearLayout>
 
-    <!-- Results count row -->
+    <!-- Results count -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:paddingBottom="8dp">
-
+        android:paddingBottom="4dp">
         <TextView
             android:id="@+id/tvResultCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0 events found"
             android:textSize="12sp"
-            android:textColor="@color/text_dark"
+            android:textColor="#134E4A"
             android:textStyle="bold"
-            android:layout_centerVertical="true" />
-
+            android:layout_centerVertical="true"/>
     </RelativeLayout>
 
-    <!-- Results label -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -322,40 +219,37 @@
         android:textStyle="bold"
         android:alpha="0.6"
         android:paddingStart="16dp"
-        android:paddingBottom="6dp" />
+        android:paddingBottom="6dp"/>
 
-    <!-- Results List -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false">
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
-
             <LinearLayout
                 android:id="@+id/searchResultsList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-            </LinearLayout>
-
+                android:orientation="vertical"/>
         </LinearLayout>
-
     </ScrollView>
-    <!-- Bottom Navigation -->
+
+    <!-- ══════════════ PREMIUM BOTTOM NAV — STUDENT ══════════════ -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="72dp"
         android:orientation="horizontal"
-        android:background="@color/white"
-        android:elevation="8dp">
-
+        android:background="@drawable/bg_bottom_nav"
+        android:elevation="20dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
         <LinearLayout
             android:id="@+id/navHome"
             android:layout_width="0dp"
@@ -363,22 +257,19 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="?attr/selectableItemBackground">
-
+            android:background="?attr/selectableItemBackgroundBorderless">
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@android:drawable/ic_menu_compass"
-                app:tint="@color/text_dark" />
-
+                android:src="@drawable/ic_nav_home"
+                app:tint="#94A3B8"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Home"
                 android:textSize="10sp"
-                android:textColor="@color/text_dark"
-                android:layout_marginTop="2dp" />
-
+                android:textColor="#94A3B8"
+                android:layout_marginTop="3dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -388,23 +279,26 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="?attr/selectableItemBackground">
-
-            <ImageView
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@android:drawable/ic_menu_search"
-                app:tint="@color/nav_active" />
-
+            android:background="?attr/selectableItemBackgroundBorderless">
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_nav_item_active_student">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_nav_search"
+                    app:tint="#0D9488"/>
+            </FrameLayout>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Search"
+                android:text="Explore"
                 android:textSize="10sp"
-                android:textColor="@color/nav_active"
                 android:textStyle="bold"
-                android:layout_marginTop="2dp" />
-
+                android:textColor="#0D9488"
+                android:layout_marginTop="2dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -414,22 +308,19 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="?attr/selectableItemBackground">
-
+            android:background="?attr/selectableItemBackgroundBorderless">
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@android:drawable/ic_menu_agenda"
-                app:tint="@color/text_dark" />
-
+                android:src="@drawable/ic_nav_ticket"
+                app:tint="#94A3B8"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tickets"
+                android:text="Payments"
                 android:textSize="10sp"
-                android:textColor="@color/text_dark"
-                android:layout_marginTop="2dp" />
-
+                android:textColor="#94A3B8"
+                android:layout_marginTop="3dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -439,24 +330,20 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:background="?attr/selectableItemBackground">
-
+            android:background="?attr/selectableItemBackgroundBorderless">
             <ImageView
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:src="@android:drawable/ic_menu_myplaces"
-                app:tint="@color/text_dark" />
-
+                android:src="@drawable/ic_nav_profile"
+                app:tint="#94A3B8"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Profile"
                 android:textSize="10sp"
-                android:textColor="@color/text_dark"
-                android:layout_marginTop="2dp" />
-
+                android:textColor="#94A3B8"
+                android:layout_marginTop="3dp"/>
         </LinearLayout>
 
     </LinearLayout>
-
 </LinearLayout>
