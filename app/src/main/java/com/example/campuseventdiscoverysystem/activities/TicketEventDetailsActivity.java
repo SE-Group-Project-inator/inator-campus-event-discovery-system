@@ -85,6 +85,7 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
         Intent in        = getIntent();
         String rsvpId    = in.getStringExtra("rsvpId");
         String eventId   = in.getStringExtra("eventId");
+        String title     = in.getStringExtra("eventTitle");
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
@@ -106,32 +107,73 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
 
         // Cancel RSVP
         findViewById(R.id.btnCancelRsvp).setOnClickListener(v -> {
-            if (rsvpId == null) {
+            if (rsvpId == null || eventId == null) {
                 Toast.makeText(this, "Could not find RSVP", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Delete the RSVP document and decrement registeredCount on the event
+            // Get the current student's ID so we can remove them from the roster
+            String currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+            // Delete the RSVP document
             db.collection("rsvps").document(rsvpId)
                     .delete()
                     .addOnSuccessListener(unused -> {
-                        // Decrement registeredCount on the event
-                        if (eventId != null) {
-                            db.collection("events").document(eventId)
-                                    .update("registeredCount",
-                                            com.google.firebase.firestore.FieldValue.increment(-1));
-                        }
-                        Toast.makeText(this,
-                                "RSVP cancelled successfully", Toast.LENGTH_SHORT).show();
-                        // Go back to tickets list
-                        Intent intent = new Intent(this, TicketsActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
-                        finish();
+
+                        // Remove the student from the manager's attendee roster
+                        db.collection("event_attendees").document(eventId)
+                                .collection("attendees").document(currentUserId)
+                                .delete();
+
+                        // Check for waitlisted students (Auto-Promotion Logic)
+                        db.collection("rsvps")
+                                .whereEqualTo("eventId", eventId)
+                                .whereEqualTo("status", "waitlisted")
+                                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.ASCENDING)
+                                .limit(1) // Get the oldest waitlist entry
+                                .get()
+                                .addOnSuccessListener(querySnapshots -> {
+
+                                    if (!querySnapshots.isEmpty()) {
+                                        // A spot opened up and someone is on the waitlist! Promote them.
+                                        com.google.firebase.firestore.DocumentSnapshot waitlistDoc = querySnapshots.getDocuments().get(0);
+                                        String promotedRsvpId = waitlistDoc.getId();
+                                        String promotedUserId = waitlistDoc.getString("userId");
+
+                                        // Update their status from waitlisted to confirmed
+                                        db.collection("rsvps").document(promotedRsvpId).update("status", "confirmed");
+
+                                        // Add them to the attendees roster
+                                        java.util.Map<String, Object> attendee = new java.util.HashMap<>();
+                                        attendee.put("userId", promotedUserId);
+                                        attendee.put("joinedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
+                                        db.collection("event_attendees").document(eventId)
+                                                .collection("attendees").document(promotedUserId).set(attendee);
+
+                                        // Send the promoted student a notification
+                                        java.util.Map<String, Object> notif = new java.util.HashMap<>();
+                                        notif.put("title", "Waitlist Update \uD83C\uDF89"); // 🎉 Emoji
+                                        notif.put("message", "A spot opened up! You are now confirmed for \"" + title + "\".");
+                                        notif.put("read", false);
+                                        notif.put("timestamp", com.google.firebase.firestore.FieldValue.serverTimestamp());
+                                        db.collection("users").document(promotedUserId).collection("notifications").add(notif);
+
+                                    } else {
+                                        // No one is on the waitlist. Decrement the capacity safely.
+                                        db.collection("events").document(eventId)
+                                                .update("registeredCount", com.google.firebase.firestore.FieldValue.increment(-1));
+                                    }
+
+                                    // Finish up and return to the tickets screen
+                                    Toast.makeText(this, "RSVP cancelled successfully", Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(this, TicketsActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(intent);
+                                    finish();
+                                });
                     })
                     .addOnFailureListener(e ->
-                            Toast.makeText(this,
-                                    "Failed to cancel RSVP", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Failed to cancel RSVP", Toast.LENGTH_SHORT).show()
                     );
         });
     }

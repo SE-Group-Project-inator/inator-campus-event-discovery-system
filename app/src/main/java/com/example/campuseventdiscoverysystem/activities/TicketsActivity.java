@@ -67,7 +67,6 @@ public class TicketsActivity extends AppCompatActivity {
 
         db.collection("rsvps")
                 .whereEqualTo("userId", user.getUid())
-                .whereEqualTo("status", "confirmed")
                 .get()
                 .addOnSuccessListener(rsvpQuery -> {
                     ticketsList.removeAllViews();
@@ -95,8 +94,10 @@ public class TicketsActivity extends AppCompatActivity {
                                 .addOnSuccessListener(eventDoc -> {
                                     Timestamp ts = eventDoc.getTimestamp("date");
 
-                                    // Only future events shown here
-                                    if (ts != null && ts.toDate().after(now)) {
+                                    // Only future events shown here, only confirmed RSVPs
+                                    String rsvpStatus = rsvpDoc.getString("status");
+                                    boolean showTicket = "confirmed".equals(rsvpStatus) || "payment_pending".equals(rsvpStatus);
+                                    if (ts != null && ts.toDate().after(now) && showTicket) {
 
                                         String title = eventDoc.getString("title");
                                         String venue = eventDoc.getString("venue");
@@ -136,7 +137,18 @@ public class TicketsActivity extends AppCompatActivity {
                                         // Availability badge — show "Registered" for tickets
                                         TextView tvAvailability = card.findViewById(R.id.tvAvailability);
                                         if (tvAvailability != null) {
-                                            tvAvailability.setText("Registered");
+                                            // Show PAID badge for online-verified payments
+                                            Boolean paidBadge = rsvpDoc.getBoolean("paidBadge");
+                                            String payMethod  = rsvpDoc.getString("paymentMethod");
+                                            boolean isOnlinePaid = (paidBadge != null && paidBadge)
+                                                    || ("approved".equals(rsvpDoc.getString("paymentStatus")));
+                                            if (isOnlinePaid && payMethod != null && !payMethod.equals("cash")) {
+                                                tvAvailability.setText("💳 Paid");
+                                                tvAvailability.setBackgroundResource(0);
+                                                tvAvailability.setTextColor(android.graphics.Color.parseColor("#10B981"));
+                                            } else {
+                                                tvAvailability.setText("✅ Registered");
+                                            }
                                         }
 
                                         String finalTitle   = title;

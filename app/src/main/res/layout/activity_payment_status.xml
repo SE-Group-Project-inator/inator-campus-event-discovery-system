@@ -232,6 +232,18 @@
 
             <!-- Action buttons -->
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewTickets"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="🎟️ View My Tickets"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="#10B981"
+                app:cornerRadius="14dp"
+                android:layout_marginBottom="12dp"
+                android:textStyle="bold"
+                android:visibility="gone"/>
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnViewMyPayments"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"

@@ -7,28 +7,30 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import com.example.campuseventdiscoverysystem.R;
-import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class StudentProfileActivity extends BaseSessionActivity {
 
-    // UI elements
     private TextView tvStudentName, tvStudentEmail;
     private TextView tvEventsAttended, tvThisMonth, tvFollowing;
-    private CardView btnAttendanceHistory, btnMySocieties;
+    private CardView btnAttendanceHistory, btnMySocieties, btnMyPayments;
     private CardView btnQRCheckIn, btnSignOut, btnPrivacySettings;
     private ImageButton btnNotification;
     private LinearLayout navHome, navSearch, navTickets, navProfile;
 
-    // Firebase
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
@@ -37,11 +39,9 @@ public class StudentProfileActivity extends BaseSessionActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_profile);
 
-        // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
+        db    = FirebaseFirestore.getInstance();
 
-        // Link UI elements
         tvStudentName        = findViewById(R.id.tvStudentName);
         tvStudentEmail       = findViewById(R.id.tvStudentEmail);
         tvEventsAttended     = findViewById(R.id.tvEventsAttended);
@@ -50,6 +50,7 @@ public class StudentProfileActivity extends BaseSessionActivity {
         btnNotification      = findViewById(R.id.btnNotification);
         btnAttendanceHistory = findViewById(R.id.btnAttendanceHistory);
         btnMySocieties       = findViewById(R.id.btnMySocieties);
+        btnMyPayments        = findViewById(R.id.btnMyPayments);
         btnQRCheckIn         = findViewById(R.id.btnQRCheckIn);
         btnSignOut           = findViewById(R.id.btnSignOut);
         btnPrivacySettings   = findViewById(R.id.btnPrivacySettings);
@@ -58,38 +59,33 @@ public class StudentProfileActivity extends BaseSessionActivity {
         navTickets           = findViewById(R.id.navTickets);
         navProfile           = findViewById(R.id.navProfile);
 
-        // Load all data
         loadStudentProfile();
         loadAttendedCount();
         loadThisMonthCount();
         loadFollowingCount();
 
-        // Notification bell
         btnNotification.setOnClickListener(v ->
                 Toast.makeText(this, "Notifications coming soon!", Toast.LENGTH_SHORT).show()
         );
 
-//         Attendance History
-//        btnAttendanceHistory.setOnClickListener(v ->
-//                startActivity(new Intent(this, AttendanceHistoryActivity.class))
-//        );
-//
-//         My Societies
-//        btnMySocieties.setOnClickListener(v ->
-//                startActivity(new Intent(this, SocietiesActivity.class))
-//        );
-//
-//         QR Check In
-//        btnQRCheckIn.setOnClickListener(v ->
-//                startActivity(new Intent(this, QRActivity.class))
-//        );
+        // Attendance History → EventHistoryActivity
+        // (the button is labelled "Attendance History" in the layout,
+        //  EventHistoryActivity is the class that implements it)
+        btnAttendanceHistory.setOnClickListener(v ->
+                startActivity(new Intent(this, EventHistoryActivity.class))
+        );
 
-        // Privacy Settings
+        // My Payments → MyPaymentsActivity
+        if (btnMyPayments != null) {
+            btnMyPayments.setOnClickListener(v ->
+                    startActivity(new Intent(this, MyPaymentsActivity.class))
+            );
+        }
+
         btnPrivacySettings.setOnClickListener(v ->
                 startActivity(new Intent(this, PrivacySettingsActivity.class))
         );
 
-        // Sign Out
         btnSignOut.setOnClickListener(v -> showLogoutDialog());
 
         // Bottom Navigation
@@ -102,21 +98,18 @@ public class StudentProfileActivity extends BaseSessionActivity {
                 startActivity(new Intent(this, SearchActivity.class))
         );
 
+        // navTickets → TicketsActivity (not Payments — Payments is in profile buttons above)
         navTickets.setOnClickListener(v ->
-                Toast.makeText(this, "Tickets coming soon!", Toast.LENGTH_SHORT).show()
+                startActivity(new Intent(this, TicketsActivity.class))
         );
 
-        navProfile.setOnClickListener(v -> {
-            // already on profile, do nothing
-        });
+        navProfile.setOnClickListener(v -> { /* already here */ });
     }
 
-    // ── Load name and email from /users/{uid} ──
     private void loadStudentProfile() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) return;
 
-        // Set email from Auth immediately as fallback
         tvStudentEmail.setText(user.getEmail());
 
         db.collection("users")
@@ -131,13 +124,15 @@ public class StudentProfileActivity extends BaseSessionActivity {
                     }
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this,
-                                "Could not load profile", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Could not load profile",
+                                Toast.LENGTH_SHORT).show()
                 );
     }
 
-
-    // Fields used: userId, status
+    /**
+     * Counts confirmed RSVPs where the event date has already passed.
+     * Matches EventHistoryActivity's definition of "attended" exactly.
+     */
     private void loadAttendedCount() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) return;
@@ -146,49 +141,99 @@ public class StudentProfileActivity extends BaseSessionActivity {
                 .whereEqualTo("userId", user.getUid())
                 .whereEqualTo("status", "confirmed")
                 .get()
-                .addOnSuccessListener(query ->
-                        tvEventsAttended.setText(String.valueOf(query.size()))
-                )
-                .addOnFailureListener(e ->
-                        tvEventsAttended.setText("0")
-                );
+                .addOnSuccessListener(rsvpQuery -> {
+                    List<DocumentSnapshot> docs = rsvpQuery.getDocuments();
+                    if (docs.isEmpty()) {
+                        tvEventsAttended.setText("0");
+                        return;
+                    }
+
+                    Date now = new Date();
+                    AtomicInteger total     = new AtomicInteger(0);
+                    AtomicInteger remaining = new AtomicInteger(docs.size());
+
+                    for (DocumentSnapshot rsvp : docs) {
+                        String eventId = rsvp.getString("eventId");
+                        if (eventId == null) {
+                            if (remaining.decrementAndGet() == 0)
+                                tvEventsAttended.setText(String.valueOf(total.get()));
+                            continue;
+                        }
+                        db.collection("events").document(eventId).get()
+                                .addOnSuccessListener(eventDoc -> {
+                                    com.google.firebase.Timestamp ts =
+                                            eventDoc.getTimestamp("date");
+                                    if (ts != null && ts.toDate().before(now))
+                                        total.incrementAndGet();
+                                    if (remaining.decrementAndGet() == 0)
+                                        tvEventsAttended.setText(String.valueOf(total.get()));
+                                })
+                                .addOnFailureListener(e -> {
+                                    if (remaining.decrementAndGet() == 0)
+                                        tvEventsAttended.setText(String.valueOf(total.get()));
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> tvEventsAttended.setText("0"));
     }
 
-
-    // Fields used: userId, status, createdAt
+    /**
+     * Counts past-date RSVPs whose event month matches the current calendar month.
+     * Matches EventHistoryActivity's updateStats() logic exactly.
+     */
     private void loadThisMonthCount() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) return;
 
-        // Get first day of current month as Timestamp
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.DAY_OF_MONTH, 1);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        Timestamp startOfMonth = new Timestamp(cal.getTime());
+        String currentMonth = new SimpleDateFormat("MMM", Locale.getDefault())
+                .format(Calendar.getInstance().getTime()).toUpperCase();
+        Date now = new Date();
 
         db.collection("rsvps")
                 .whereEqualTo("userId", user.getUid())
                 .whereEqualTo("status", "confirmed")
-                .whereGreaterThanOrEqualTo("createdAt", startOfMonth)
                 .get()
-                .addOnSuccessListener(query ->
-                        tvThisMonth.setText(String.valueOf(query.size()))
-                )
-                .addOnFailureListener(e ->
-                        tvThisMonth.setText("0")
-                );
+                .addOnSuccessListener(rsvpQuery -> {
+                    List<DocumentSnapshot> docs = rsvpQuery.getDocuments();
+                    if (docs.isEmpty()) {
+                        tvThisMonth.setText("0");
+                        return;
+                    }
+
+                    AtomicInteger count     = new AtomicInteger(0);
+                    AtomicInteger remaining = new AtomicInteger(docs.size());
+
+                    for (DocumentSnapshot rsvp : docs) {
+                        String eventId = rsvp.getString("eventId");
+                        if (eventId == null) {
+                            if (remaining.decrementAndGet() == 0)
+                                tvThisMonth.setText(String.valueOf(count.get()));
+                            continue;
+                        }
+                        db.collection("events").document(eventId).get()
+                                .addOnSuccessListener(eventDoc -> {
+                                    com.google.firebase.Timestamp ts =
+                                            eventDoc.getTimestamp("date");
+                                    if (ts != null && ts.toDate().before(now)) {
+                                        String month = new SimpleDateFormat(
+                                                "MMM", Locale.getDefault())
+                                                .format(ts.toDate()).toUpperCase();
+                                        if (month.equals(currentMonth))
+                                            count.incrementAndGet();
+                                    }
+                                    if (remaining.decrementAndGet() == 0)
+                                        tvThisMonth.setText(String.valueOf(count.get()));
+                                })
+                                .addOnFailureListener(e -> {
+                                    if (remaining.decrementAndGet() == 0)
+                                        tvThisMonth.setText(String.valueOf(count.get()));
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> tvThisMonth.setText("0"));
     }
 
-    // ── Following count ──
-    // No following collection in DB yet — set to 0 for now
     private void loadFollowingCount() {
-        // TODO: update when following collection is added to Firestore
         tvFollowing.setText("0");
     }
-
-    // ── Sign out ──
-    // signOut() removed — handled by BaseSessionActivity.showLogoutDialog()
 }

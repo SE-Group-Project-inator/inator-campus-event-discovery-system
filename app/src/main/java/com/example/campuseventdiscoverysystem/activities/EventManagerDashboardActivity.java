@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.view.View;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.CalendarView;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -45,6 +46,7 @@ public class EventManagerDashboardActivity extends BaseSessionActivity {
     private TextView tvSelectedDateHeader, tvGreeting;
     private RecyclerView rvDateEvents;
     private ImageButton btnNotifications;
+    private TextView tvEmpty;
 
     // Adapter and data source for populating the daily events list
     private ManagerEventAdapter adapter;
@@ -93,6 +95,7 @@ public class EventManagerDashboardActivity extends BaseSessionActivity {
         rvDateEvents = findViewById(R.id.rvDateEvents);
         tvGreeting = findViewById(R.id.tvGreeting);
         btnNotifications = findViewById(R.id.btnNotifications);
+        tvEmpty = findViewById(R.id.tvEmpty);
     }
 
     /**
@@ -120,10 +123,11 @@ public class EventManagerDashboardActivity extends BaseSessionActivity {
      */
     private void setupRecyclerView() {
 
-        // Route to the AttendeeListActivity
+        // Route to the EventDisplayActivity
         adapter = new ManagerEventAdapter(dateEventsList, eventId -> {
-            Intent intent = new Intent(this, AttendeeListActivity.class);
+            Intent intent = new Intent(this, EventDisplayActivity.class);
             intent.putExtra("EVENT_ID", eventId);
+            intent.putExtra("USER_ROLE", "manager");
             startActivity(intent);
         });
 
@@ -184,6 +188,16 @@ public class EventManagerDashboardActivity extends BaseSessionActivity {
 
                     // Notify the adapter
                     adapter.notifyDataSetChanged();
+
+                    if (tvEmpty != null) {
+                        if (dateEventsList.isEmpty()) {
+                            tvEmpty.setVisibility(View.VISIBLE);
+                            rvDateEvents.setVisibility(View.GONE);
+                        } else {
+                            tvEmpty.setVisibility(View.GONE);
+                            rvDateEvents.setVisibility(View.VISIBLE);
+                        }
+                    }
                 });
     }
 
@@ -206,7 +220,7 @@ public class EventManagerDashboardActivity extends BaseSessionActivity {
 
         // Floating Create Button
         findViewById(R.id.fabCreate).setOnClickListener(v -> {
-            startActivity(new Intent(this, CreateEventActivity.class));
+            startActivity(new Intent(this, ManageEventActivity.class));
         });
 
         // Payment Verification button (in dashboard quick-actions or header)

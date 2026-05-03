@@ -467,13 +467,17 @@
             </LinearLayout>
         </ScrollView>
 
-        <!-- ===== BOTTOM NAVIGATION ===== -->
+        <!-- ══════════════ PREMIUM BOTTOM NAV — ADMIN ══════════════ -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="68dp"
+            android:layout_height="72dp"
             android:orientation="horizontal"
-            android:background="@color/white"
-            android:elevation="16dp">
+            android:background="@drawable/bg_bottom_nav"
+            android:elevation="20dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
 
             <!-- Dashboard (active) -->
             <LinearLayout
@@ -483,25 +487,25 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:background="?attr/selectableItemBackground">
-                <LinearLayout
-                    android:layout_width="52dp"
+                android:background="?attr/selectableItemBackgroundBorderless">
+                <FrameLayout
+                    android:layout_width="56dp"
                     android:layout_height="32dp"
-                    android:background="@drawable/bg_nav_pill"
-                    android:gravity="center">
+                    android:background="@drawable/bg_nav_item_active">
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:src="@android:drawable/ic_menu_compass"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_nav_dashboard"
                         app:tint="@color/admin_primary"/>
-                </LinearLayout>
+                </FrameLayout>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Home"
+                    android:text="Dashboard"
                     android:textSize="10sp"
-                    android:textColor="@color/admin_primary"
                     android:textStyle="bold"
+                    android:textColor="@color/admin_primary"
                     android:layout_marginTop="2dp"/>
             </LinearLayout>
 
@@ -513,11 +517,11 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackgroundBorderless">
                 <ImageView
                     android:layout_width="22dp"
                     android:layout_height="22dp"
-                    android:src="@android:drawable/ic_menu_agenda"
+                    android:src="@drawable/ic_nav_events"
                     app:tint="@color/admin_nav_inactive"/>
                 <TextView
                     android:layout_width="wrap_content"
@@ -525,10 +529,10 @@
                     android:text="Events"
                     android:textSize="10sp"
                     android:textColor="@color/admin_nav_inactive"
-                    android:layout_marginTop="2dp"/>
+                    android:layout_marginTop="3dp"/>
             </LinearLayout>
 
-            <!-- Profile / Avatar tab -->
+            <!-- Profile -->
             <LinearLayout
                 android:id="@+id/navProfile"
                 android:layout_width="0dp"
@@ -536,11 +540,11 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackgroundBorderless">
                 <ImageView
                     android:layout_width="22dp"
                     android:layout_height="22dp"
-                    android:src="@android:drawable/ic_menu_my_calendar"
+                    android:src="@drawable/ic_nav_profile"
                     app:tint="@color/admin_nav_inactive"/>
                 <TextView
                     android:layout_width="wrap_content"
@@ -548,7 +552,7 @@
                     android:text="Profile"
                     android:textSize="10sp"
                     android:textColor="@color/admin_nav_inactive"
-                    android:layout_marginTop="2dp"/>
+                    android:layout_marginTop="3dp"/>
             </LinearLayout>
 
         </LinearLayout>

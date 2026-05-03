@@ -39,8 +39,8 @@
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
 
         <activity android:name=".activities.EventManagerDashboardActivity"/>
-        <activity android:name=".activities.CreateEventActivity"/>
-        <activity android:name=".activities.EditEventActivity"/>
+        <activity android:name=".activities.ManageEventActivity"/>
+<!--        <activity android:name=".activities.EditEventActivity"/>-->
         <activity android:name=".activities.RsvpActivity"/>
         <activity android:name=".activities.NotificationsActivity"/>
         <activity android:name=".activities.EventHistoryActivity"/>
@@ -73,7 +73,8 @@
         <activity android:name=".activities.TicketEventDetailsActivity"/>
         <activity android:name=".activities.EventDisplayActivity"/>
 
-
+        <activity android:name=".activities.AttendeesRosterActivity"/>
+        <activity android:name=".activities.EventAnalyticsActivity"/>
 
 
 

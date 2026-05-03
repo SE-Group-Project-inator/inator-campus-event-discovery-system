@@ -12,6 +12,7 @@ public class Payment {
     public static final String STATUS_APPROVED             = "approved";
     public static final String STATUS_REJECTED             = "rejected";
     public static final String STATUS_PENDING_CASH         = "pending_cash";
+    public static final String STATUS_PAID             = "paid";   // online payment approved + tag shown
     public static final String STATUS_REGISTERED           = "registered";
 
     public static final String METHOD_CASH       = "cash";

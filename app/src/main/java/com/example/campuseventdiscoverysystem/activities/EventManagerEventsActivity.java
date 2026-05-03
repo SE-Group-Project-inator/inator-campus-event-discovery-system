@@ -103,11 +103,11 @@ public class EventManagerEventsActivity extends AppCompatActivity {
             if (isEditMode) {
                 // Edit Mode: Change text and set background to grey color
                 btnToggleEdit.setText("Done");
-                tvHeaderTitle.setText("Tap Event to Edit");
+                tvHeaderTitle.setText("Tap Event to Manage");
                 topBar.setBackgroundResource(R.color.text_grey);
             } else {
                 // Normal Mode: Revert to default text and primary theme color
-                btnToggleEdit.setText("Edit");
+                btnToggleEdit.setText("Manage");
                 tvHeaderTitle.setText("My Events");
                 topBar.setBackgroundResource(R.color.btn_eventmgr);
             }
@@ -119,18 +119,33 @@ public class EventManagerEventsActivity extends AppCompatActivity {
      * Defines what happens when an individual event card is clicked
      */
     private void setupRecyclerView() {
-
         // The click listener behavior changes on the 'isEditMode' flag
         adapter = new ManagerEventAdapter(myEventsList, eventId -> {
             if (isEditMode) {
-                // Edit Mode: Route the user to the EditEventActivity
-                Intent intent = new Intent(this, EditEventActivity.class);
-                intent.putExtra("EVENT_ID", eventId);
-                startActivity(intent);
+                // Edit Mode: Pop up a menu to choose exactly what to manage
+                String[] options = {"Edit Event Details", "Manage Attendees & Waitlist", "View Analytics"};
+                new android.app.AlertDialog.Builder(this)
+                        .setTitle("Manage Event")
+                        .setItems(options, (dialog, which) -> {
+                            if (which == 0) {
+                                Intent intent = new Intent(this, ManageEventActivity.class);
+                                intent.putExtra("EVENT_ID", eventId);
+                                startActivity(intent);
+                            } else if (which == 1) {
+                                Intent intent = new Intent(this, AttendeesRosterActivity.class);
+                                intent.putExtra("EVENT_ID", eventId);
+                                startActivity(intent);
+                            } else if (which == 2) {
+                                Intent intent = new Intent(this, EventAnalyticsActivity.class);
+                                intent.putExtra("EVENT_ID", eventId);
+                                startActivity(intent);
+                            }
+                        }).show();
             } else {
-                // Normal Mode: Route the user to the AttendeeListActivity
-                Intent intent = new Intent(this, AttendeeListActivity.class);
+                // Normal Mode: Route the user to the EventDisplayActivity
+                Intent intent = new Intent(this, EventDisplayActivity.class);
                 intent.putExtra("EVENT_ID", eventId);
+                intent.putExtra("USER_ROLE", "manager");
                 startActivity(intent);
             }
         });

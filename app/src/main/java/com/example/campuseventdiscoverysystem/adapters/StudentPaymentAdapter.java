@@ -67,6 +67,8 @@ public class StudentPaymentAdapter
                 label = "❌ Rejected"; colorRes = R.color.admin_error; break;
             case Payment.STATUS_PENDING_CASH:
                 label = "💵 Cash Pending"; colorRes = R.color.admin_info; break;
+            case Payment.STATUS_REGISTERED:
+                label = "🎉 Registered"; colorRes = R.color.admin_success; break;
             default:
                 label = status; colorRes = R.color.text_grey;
         }
