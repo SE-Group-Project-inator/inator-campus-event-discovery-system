@@ -26,7 +26,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run Tests
-        run: ./gradlew test
+        run: ./gradlew test --continue
 
       - name: Upload Test Report
         if: always()
@@ -34,3 +34,12 @@ jobs:
         with:
           name: unit-test-reports
           path: app/build/reports/tests/
+
+      # ── NEW: shows pass/fail per test in the Actions summary ──
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results
+          path: app/build/test-results/**/*.xml
+          reporter: java-junit
