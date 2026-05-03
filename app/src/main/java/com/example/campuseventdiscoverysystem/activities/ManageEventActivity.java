@@ -125,17 +125,38 @@ public class ManageEventActivity extends AppCompatActivity {
      * Initializes the Spinners with data
      */
     private void setupSpinners() {
-        // Setup Venue Spinner
+        // Use custom layouts so selected text is black on white, dropdown also black on white
         venueAdapter = ArrayAdapter.createFromResource(this,
-                R.array.venue_array, android.R.layout.simple_spinner_item);
-        venueAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                R.array.venue_array, R.layout.item_spinner_selected);
+        venueAdapter.setDropDownViewResource(R.layout.item_spinner_dropdown);
         spVenue.setAdapter(venueAdapter);
+        // Force dark text on selected item regardless of theme
+        spVenue.post(() -> {
+            android.widget.TextView tv = (android.widget.TextView) spVenue.getSelectedView();
+            if (tv != null) tv.setTextColor(android.graphics.Color.BLACK);
+        });
 
-        // Setup Category Spinner
         categoryAdapter = ArrayAdapter.createFromResource(this,
-                R.array.category_array, android.R.layout.simple_spinner_item);
-        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                R.array.category_array, R.layout.item_spinner_selected);
+        categoryAdapter.setDropDownViewResource(R.layout.item_spinner_dropdown);
         spCategory.setAdapter(categoryAdapter);
+        spCategory.post(() -> {
+            android.widget.TextView tv = (android.widget.TextView) spCategory.getSelectedView();
+            if (tv != null) tv.setTextColor(android.graphics.Color.BLACK);
+        });
+        // Also set listeners to keep text dark after selection changes
+        spVenue.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(android.widget.AdapterView<?> p, android.view.View v, int pos, long id) {
+                if (v instanceof android.widget.TextView) ((android.widget.TextView) v).setTextColor(android.graphics.Color.BLACK);
+            }
+            @Override public void onNothingSelected(android.widget.AdapterView<?> p) {}
+        });
+        spCategory.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(android.widget.AdapterView<?> p, android.view.View v, int pos, long id) {
+                if (v instanceof android.widget.TextView) ((android.widget.TextView) v).setTextColor(android.graphics.Color.BLACK);
+            }
+            @Override public void onNothingSelected(android.widget.AdapterView<?> p) {}
+        });
     }
 
     /**

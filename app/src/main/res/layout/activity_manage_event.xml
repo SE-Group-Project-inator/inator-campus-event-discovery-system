@@ -125,13 +125,15 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:background="@android:drawable/editbox_background"
+                    android:background="@drawable/bg_input_field"
                     android:layout_marginBottom="16dp">
                     <Spinner
                         android:id="@+id/spVenue"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@null" />
+                        android:background="@null"
+                        android:paddingStart="12dp"
+                        android:popupBackground="#FFFFFF"/>
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -204,13 +206,15 @@
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:background="@android:drawable/editbox_background"
+                    android:background="@drawable/bg_input_field"
                     android:layout_marginBottom="16dp">
                     <Spinner
                         android:id="@+id/spCategory"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@null" />
+                        android:background="@null"
+                        android:paddingStart="12dp"
+                        android:popupBackground="#FFFFFF"/>
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
