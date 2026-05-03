@@ -66,10 +66,14 @@
         <activity android:name=".activities.TicketEventDetailsActivity"/>
         <activity android:name=".activities.EventDisplayActivity"/>
 
+        <!-- QR scanner -->
+        <activity android:name=".activities.StudentQRActivity"/>
+        <activity android:name=".activities.QRScannerActivity"/>
 
-
-
-
+        <!-- Societies -->
+        <activity android:name=".activities.SocietiesActivity"/>
+        <activity android:name=".activities.MySocietiesActivity"/>
+        <activity android:name=".activities.SocietyDetailActivity"/>
 
     </application>
 </manifest>

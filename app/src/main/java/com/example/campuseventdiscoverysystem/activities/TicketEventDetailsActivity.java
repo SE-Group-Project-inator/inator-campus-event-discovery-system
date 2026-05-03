@@ -11,6 +11,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.campuseventdiscoverysystem.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
@@ -19,7 +21,7 @@ import java.util.Locale;
 
 /**
  * Event detail screen for a ticket (future RSVP).
- * Same details view as EventDisplayActivity but with a Cancel RSVP button at the bottom.
+ * Shows full event details, a "Show My QR" button, and a Cancel RSVP button.
  */
 public class TicketEventDetailsActivity extends AppCompatActivity {
 
@@ -40,16 +42,19 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
     private void populateDetails() {
         Intent in = getIntent();
 
-        String title      = in.getStringExtra("eventTitle");
-        String description= in.getStringExtra("eventDescription");
-        String venue      = in.getStringExtra("eventVenue");
-        int    capacity   = in.getIntExtra("eventCapacity", 0);
-        int    registered = in.getIntExtra("eventRegistered", 0);
-        long   dateMillis = in.getLongExtra("eventDateMillis", 0);
+        String title       = in.getStringExtra("eventTitle");
+        String description = in.getStringExtra("eventDescription");
+        String venue       = in.getStringExtra("eventVenue");
+        int    capacity    = in.getIntExtra("eventCapacity", 0);
+        int    registered  = in.getIntExtra("eventRegistered", 0);
+        long   dateMillis  = in.getLongExtra("eventDateMillis", 0);
 
-        ((TextView) findViewById(R.id.tvTitle)).setText(title != null ? title : "Event");
-        ((TextView) findViewById(R.id.tvHeaderVenue)).setText(venue != null ? venue : "TBD");
-        ((TextView) findViewById(R.id.tvVenue)).setText(venue != null ? venue : "TBD");
+        ((TextView) findViewById(R.id.tvTitle))
+                .setText(title != null ? title : "Event");
+        ((TextView) findViewById(R.id.tvHeaderVenue))
+                .setText(venue != null ? venue : "TBD");
+        ((TextView) findViewById(R.id.tvVenue))
+                .setText(venue != null ? venue : "TBD");
 
         if (dateMillis > 0) {
             Date d = new Date(dateMillis);
@@ -82,13 +87,14 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
     }
 
     private void setupButtons() {
-        Intent in        = getIntent();
-        String rsvpId    = in.getStringExtra("rsvpId");
-        String eventId   = in.getStringExtra("eventId");
+        Intent in      = getIntent();
+        String rsvpId  = in.getStringExtra("rsvpId");
+        String eventId = in.getStringExtra("eventId");
+        String title   = in.getStringExtra("eventTitle");
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
-        // Collapsible About
+        // Collapsible About section
         LinearLayout aboutToggle = findViewById(R.id.layoutAboutToggle);
         TextView tvDesc  = findViewById(R.id.tvDescription);
         TextView tvArrow = findViewById(R.id.tvAboutArrow);
@@ -104,34 +110,61 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
             }
         });
 
-        // Cancel RSVP
+        // Show My QR — opens StudentQRActivity with this student's personal QR
+        findViewById(R.id.btnShowQR).setOnClickListener(v -> {
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user == null) {
+                Toast.makeText(this, "Not logged in", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Intent qrIntent = new Intent(this, StudentQRActivity.class);
+            qrIntent.putExtra("userId",     user.getUid());
+            qrIntent.putExtra("eventId",    eventId);
+            qrIntent.putExtra("eventTitle", title);
+            startActivity(qrIntent);
+        });
+
+        // Cancel RSVP — reads the RSVP first to check waitlist before decrementing
         findViewById(R.id.btnCancelRsvp).setOnClickListener(v -> {
             if (rsvpId == null) {
                 Toast.makeText(this, "Could not find RSVP", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Delete the RSVP document and decrement registeredCount on the event
             db.collection("rsvps").document(rsvpId)
-                    .delete()
-                    .addOnSuccessListener(unused -> {
-                        // Decrement registeredCount on the event
-                        if (eventId != null) {
-                            db.collection("events").document(eventId)
-                                    .update("registeredCount",
-                                            com.google.firebase.firestore.FieldValue.increment(-1));
-                        }
-                        Toast.makeText(this,
-                                "RSVP cancelled successfully", Toast.LENGTH_SHORT).show();
-                        // Go back to tickets list
-                        Intent intent = new Intent(this, TicketsActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
-                        finish();
+                    .get()
+                    .addOnSuccessListener(rsvpDoc -> {
+                        boolean wasWaitlist = Boolean.TRUE.equals(
+                                rsvpDoc.getBoolean("optInWaitlist"));
+
+                        db.collection("rsvps").document(rsvpId)
+                                .delete()
+                                .addOnSuccessListener(unused -> {
+                                    // Only decrement if they weren't on the waitlist
+                                    if (!wasWaitlist && eventId != null) {
+                                        db.collection("events").document(eventId)
+                                                .update("registeredCount",
+                                                        com.google.firebase.firestore.FieldValue
+                                                                .increment(-1));
+                                    }
+                                    Toast.makeText(this,
+                                            "RSVP cancelled successfully",
+                                            Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(this, TicketsActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(intent);
+                                    finish();
+                                })
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(this,
+                                                "Failed to cancel RSVP",
+                                                Toast.LENGTH_SHORT).show()
+                                );
                     })
                     .addOnFailureListener(e ->
                             Toast.makeText(this,
-                                    "Failed to cancel RSVP", Toast.LENGTH_SHORT).show()
+                                    "Failed to cancel RSVP",
+                                    Toast.LENGTH_SHORT).show()
                     );
         });
     }
