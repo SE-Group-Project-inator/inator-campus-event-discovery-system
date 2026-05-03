@@ -29,7 +29,8 @@ public class EventsListActivity extends AppCompatActivity {
     private String currentFilter = "all";
 
     // Filter chip views
-    private TextView filterAll, filterPending, filterApproved, filterRejected;
+    private TextView filterAll, filterPending, filterApproved, filterRejected, filterNewest;
+    private boolean sortNewest = false;
 
     private ListenerRegistration allEventsListener;
 
@@ -47,6 +48,7 @@ public class EventsListActivity extends AppCompatActivity {
         filterPending  = findViewById(R.id.filterPending);
         filterApproved = findViewById(R.id.filterApproved);
         filterRejected = findViewById(R.id.filterRejected);
+        filterNewest   = findViewById(R.id.filterNewest);
 
         RecyclerView rv = findViewById(R.id.rvAllEvents);
         adapter = new PendingEventAdapter(
@@ -75,6 +77,19 @@ public class EventsListActivity extends AppCompatActivity {
         if (filterPending != null) filterPending.setOnClickListener(v -> setFilter("pending"));
         if (filterApproved != null) filterApproved.setOnClickListener(v -> setFilter("approved"));
         if (filterRejected != null) filterRejected.setOnClickListener(v -> setFilter("rejected"));
+        if (filterNewest != null) filterNewest.setOnClickListener(v -> {
+            sortNewest = !sortNewest;
+            if (filterNewest != null) {
+                if (sortNewest) {
+                    filterNewest.setBackgroundResource(R.drawable.bg_chip_active);
+                    filterNewest.setTextColor(getColor(R.color.white));
+                } else {
+                    filterNewest.setBackgroundResource(R.drawable.bg_chip_inactive);
+                    filterNewest.setTextColor(getColor(R.color.admin_text_secondary));
+                }
+            }
+            applyCardFilter();
+        });
     }
 
     private void setFilter(String filter) {
@@ -134,19 +149,34 @@ public class EventsListActivity extends AppCompatActivity {
     private void applyCardFilter() {
         displayList.clear();
         for (Event e : allEvents) {
+            String status = e.getStatus(); // may be null for old documents
             switch (currentFilter) {
                 case "pending":
-                    if ("pending_approval".equals(e.getStatus())) displayList.add(e);
+                    // match both possible pending status strings
+                    if ("pending_approval".equals(status) || "pending".equals(status))
+                        displayList.add(e);
                     break;
                 case "approved":
-                    if ("active".equals(e.getStatus())) displayList.add(e);
+                    if ("active".equals(status)) displayList.add(e);
                     break;
                 case "rejected":
-                    if ("rejected".equals(e.getStatus())) displayList.add(e);
+                    if ("rejected".equals(status)) displayList.add(e);
                     break;
+                case "all":
                 default:
-                    displayList.add(e);
+                    displayList.add(e); // ALL events — no status filter at all
+                    break;
             }
+        }
+        if (sortNewest) {
+            displayList.sort((a, b) -> {
+                com.google.firebase.Timestamp aTime = a.getSubmittedAt() != null ? a.getSubmittedAt() : a.getDate();
+                com.google.firebase.Timestamp bTime = b.getSubmittedAt() != null ? b.getSubmittedAt() : b.getDate();
+                if (aTime == null && bTime == null) return 0;
+                if (aTime == null) return 1;
+                if (bTime == null) return -1;
+                return bTime.compareTo(aTime);
+            });
         }
         adapter.notifyDataSetChanged();
     }
@@ -167,9 +197,36 @@ public class EventsListActivity extends AppCompatActivity {
                 .addOnSuccessListener(v -> {
                     String msg = "active".equals(status) ? "✅ Approved!" : "Declined";
                     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                    sendNotificationToEventManager(eventId, status);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    private void sendNotificationToEventManager(String eventId, String status) {
+        db.collection("events").document(eventId).get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+                    String createdBy = doc.getString("createdBy");
+                    String title     = doc.getString("title");
+                    if (createdBy == null || title == null) return;
+
+                    String notifTitle = "active".equals(status) ? "Event Approved ✅" : "Event Declined ❌";
+                    String notifMsg   = "active".equals(status)
+                            ? "Your event \"" + title + "\" has been approved and is now live!"
+                            : "Your event \"" + title + "\" was not approved by the admin.";
+
+                    java.util.Map<String, Object> notif = new java.util.HashMap<>();
+                    notif.put("title",     notifTitle);
+                    notif.put("message",   notifMsg);
+                    notif.put("read",      false);
+                    notif.put("timestamp", com.google.firebase.Timestamp.now());
+                    notif.put("eventId",   eventId);
+
+                    db.collection("users").document(createdBy)
+                            .collection("notifications")
+                            .add(notif);
+                });
     }
 
     @Override

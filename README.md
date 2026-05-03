@@ -258,7 +258,8 @@ Wednesday, March 25, 2026
 - Abeer Zahid Bhatti  
 - Maryam Ayub  
 - Areeba Fatima  
-- Umer Khalid 
+- Umer Khalid
+- Salsabeel Fatima
 
 #### Prepared Questions & Decisions
 - We revised how to split the work
