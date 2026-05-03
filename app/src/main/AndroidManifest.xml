@@ -55,6 +55,9 @@
         <activity android:name=".activities.StudentOnboardingActivity" android:theme="@style/Theme.Student"/>
         <activity android:name=".activities.RecommendationsActivity" android:theme="@style/Theme.Student"/>
 
+        <!-- US-28: Campus AI Assistant -->
+        <activity android:name=".activities.CampusAssistantActivity" android:theme="@style/Theme.Student"/>
+
         <!-- US-10: Trending Events (Student home) -->
         <activity android:name=".activities.TrendingEventsActivity"/>
         <!-- US-21: Event Detail + Calendar Export -->

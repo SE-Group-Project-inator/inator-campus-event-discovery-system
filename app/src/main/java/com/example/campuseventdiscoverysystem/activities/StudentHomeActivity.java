@@ -76,6 +76,12 @@ public class StudentHomeActivity extends BaseSessionActivity {
                     startActivity(new Intent(this, RecommendationsActivity.class)));
         }
 
+        View cardCampusAssistant = findViewById(R.id.cardCampusAssistant);
+        if (cardCampusAssistant != null) {
+            cardCampusAssistant.setOnClickListener(v ->
+                    startActivity(new Intent(this, CampusAssistantActivity.class)));
+        }
+
         View cardMyPayments = findViewById(R.id.cardMyPayments);
         if (cardMyPayments != null) {
             cardMyPayments.setOnClickListener(v ->
