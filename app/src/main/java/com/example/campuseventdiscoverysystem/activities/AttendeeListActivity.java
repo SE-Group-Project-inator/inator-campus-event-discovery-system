@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import com.google.firebase.Timestamp;
 
 /**
  * US-27: Attendee List — shows who is attending an event.
@@ -119,25 +121,74 @@ public class AttendeeListActivity extends AppCompatActivity {
     private void loadAttendees() {
         if (eventId == null || eventId.isEmpty()) return;
 
-        db.collection("registrations")
+        // Reads from the same `rsvps` collection RsvpActivity / PaymentActivity write to.
+        // Each rsvp doc only stores userId — for display we fan out to users/{uid} to
+        // pick up name + email, then apply the privacy flags (isNameVisible / isRollNoVisible)
+        // captured at RSVP time.
+        db.collection("rsvps")
                 .whereEqualTo("eventId", eventId)
+                .whereEqualTo("status", "confirmed")
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null || snapshots == null) return;
 
-                    allRegistrations.clear();
-                    for (DocumentSnapshot doc : snapshots) {
-                        Registration reg = doc.toObject(Registration.class);
-                        if (reg != null) {
-                            reg.setId(doc.getId());
-                            allRegistrations.add(reg);
-                        }
+                    List<DocumentSnapshot> rsvpDocs = snapshots.getDocuments();
+                    if (rsvpDocs.isEmpty()) {
+                        allRegistrations.clear();
+                        displayList.clear();
+                        adapter.notifyDataSetChanged();
+                        updateEmptyState();
+                        return;
                     }
 
-                    displayList.clear();
-                    displayList.addAll(allRegistrations);
-                    adapter.notifyDataSetChanged();
-                    updateEmptyState();
+                    List<Registration> built = new ArrayList<>();
+                    AtomicInteger remaining = new AtomicInteger(rsvpDocs.size());
+
+                    for (DocumentSnapshot rsvp : rsvpDocs) {
+                        String userId = rsvp.getString("userId");
+                        Boolean nameVisible = rsvp.getBoolean("isNameVisible");
+                        Boolean rollVisible = rsvp.getBoolean("isRollNoVisible");
+                        Timestamp createdAt = rsvp.getTimestamp("createdAt");
+
+                        if (userId == null) {
+                            if (remaining.decrementAndGet() == 0) publishAttendees(built);
+                            continue;
+                        }
+
+                        db.collection("users").document(userId).get()
+                                .addOnCompleteListener(task -> {
+                                    Registration reg = new Registration();
+                                    reg.setId(rsvp.getId());
+                                    reg.setEventId(eventId);
+                                    reg.setUserId(userId);
+                                    reg.setRegisteredAt(createdAt);
+                                    reg.setConfirmed(true);
+
+                                    String name = null, email = null;
+                                    if (task.isSuccessful() && task.getResult() != null
+                                            && task.getResult().exists()) {
+                                        name  = task.getResult().getString("name");
+                                        email = task.getResult().getString("email");
+                                    }
+
+                                    boolean showName = !Boolean.FALSE.equals(nameVisible);
+                                    boolean showRoll = !Boolean.FALSE.equals(rollVisible);
+                                    reg.setUserName(showName ? name : "Anonymous Attendee");
+                                    reg.setUserEmail(showRoll ? email : null);
+
+                                    synchronized (built) { built.add(reg); }
+                                    if (remaining.decrementAndGet() == 0) publishAttendees(built);
+                                });
+                    }
                 });
+    }
+
+    private void publishAttendees(List<Registration> regs) {
+        allRegistrations.clear();
+        allRegistrations.addAll(regs);
+        displayList.clear();
+        displayList.addAll(regs);
+        adapter.notifyDataSetChanged();
+        updateEmptyState();
     }
 
     private void updateEmptyState() {
@@ -159,7 +210,7 @@ public class AttendeeListActivity extends AppCompatActivity {
         Map<String, Object> updates = new HashMap<>();
         updates.put("confirmed", true);
 
-        db.collection("registrations")
+        db.collection("rsvps")
                 .document(registration.getId())
                 .update(updates)
                 .addOnSuccessListener(v -> {

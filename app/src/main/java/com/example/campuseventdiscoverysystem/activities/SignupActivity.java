@@ -273,6 +273,8 @@ public class SignupActivity extends AppCompatActivity {
                 extraData.put("batch",     batch);
                 extraData.put("program",   program);
                 extraData.put("department", school + " — " + program); // backward compat
+                // Drives the post-login routing into StudentOnboardingActivity.
+                extraData.put("onboardingComplete", false);
 
             } else if ("event_manager".equals(selectedRole)) {
                 String sname = etSocietyName != null ? etSocietyName.getText().toString().trim() : "";
