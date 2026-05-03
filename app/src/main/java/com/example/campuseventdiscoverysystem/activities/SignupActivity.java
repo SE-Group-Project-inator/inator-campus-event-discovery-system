@@ -116,6 +116,35 @@ public class SignupActivity extends AppCompatActivity {
                     spinnerBatch.clearFocus());
         }
 
+        // Society picker (event managers only) — loaded from Firestore
+        AutoCompleteTextView spinnerSociety = findViewById(R.id.etSocietyName);
+        if (spinnerSociety != null) {
+            spinnerSociety.setInputType(android.text.InputType.TYPE_NULL);
+            spinnerSociety.setHint("Select your Society");
+            db.collection("societies").orderBy("name").get()
+                    .addOnSuccessListener(query -> {
+                        List<String> names = new java.util.ArrayList<>();
+                        java.util.Map<String, String> nameToId = new java.util.LinkedHashMap<>();
+                        for (com.google.firebase.firestore.QueryDocumentSnapshot doc : query) {
+                            String n = doc.getString("name");
+                            if (n != null) {
+                                names.add(n);
+                                nameToId.put(n, doc.getId());
+                            }
+                        }
+                        ArrayAdapter<String> sAdapter = new ArrayAdapter<>(this,
+                                android.R.layout.simple_dropdown_item_1line, names);
+                        spinnerSociety.setAdapter(sAdapter);
+                        spinnerSociety.setOnItemClickListener((parent, view, pos, id) -> {
+                            String selected = names.get(pos);
+                            spinnerSociety.setTag(nameToId.get(selected)); // store societyId as tag
+                            spinnerSociety.clearFocus();
+                        });
+                    })
+                    .addOnFailureListener(e ->
+                            Toast.makeText(this, "Could not load societies", Toast.LENGTH_SHORT).show());
+        }
+
         // Society position (event managers only)
         AutoCompleteTextView spinnerPosition = findViewById(R.id.spinnerSocietyPosition);
         if (spinnerPosition != null) {
@@ -278,8 +307,12 @@ public class SignupActivity extends AppCompatActivity {
 
             } else if ("event_manager".equals(selectedRole)) {
                 String sname = etSocietyName != null ? etSocietyName.getText().toString().trim() : "";
-                if (TextUtils.isEmpty(sname)) { etSocietyName.setError("Society name required"); return; }
+                if (TextUtils.isEmpty(sname)) { etSocietyName.setError("Please select a society"); return; }
+                String sid = etSocietyName != null && etSocietyName.getTag() != null
+                        ? etSocietyName.getTag().toString() : "";
+                if (TextUtils.isEmpty(sid)) { etSocietyName.setError("Please select a society from the list"); return; }
                 extraData.put("societyName", sname);
+                extraData.put("societyId",   sid);
                 extraData.put("position",    spinnerPosition != null ? spinnerPosition.getText().toString() : "");
                 extraData.put("phone",       etPhone != null ? etPhone.getText().toString().trim() : "");
 

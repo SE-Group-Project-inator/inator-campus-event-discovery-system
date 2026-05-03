@@ -415,10 +415,14 @@ public class ManageEventActivity extends AppCompatActivity {
         // Fetch society name and creator name
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(doc -> {
-                    final String societyName = (doc.exists() && doc.getString("societyName") != null)
-                            ? doc.getString("societyName") : "Unknown Society";
-                    final String name = (doc.exists() && doc.getString("name") != null)
-                            ? doc.getString("name") : "Unknown";
+                    String societyName = "Unknown Society";
+                    String societyId   = "";
+                    String name = "Unknown";
+                    if (doc.exists()) {
+                        if (doc.getString("societyName") != null) societyName = doc.getString("societyName");
+                        if (doc.getString("societyId")   != null) societyId   = doc.getString("societyId");
+                        if (doc.getString("name")        != null) name        = doc.getString("name");
+                    }
 
                     // Instantiate new event model
                     Event newEvent = new Event();
@@ -439,15 +443,31 @@ public class ManageEventActivity extends AppCompatActivity {
                     newEvent.setCreatedBy(uid);
                     newEvent.setSubmittedByEmail(email);
                     newEvent.setSubmittedByName(name);
-                    newEvent.setSubmittedAt(Timestamp.now());
 
-                    // Push the event object to events collection in firestore
-                    db.collection("events").add(newEvent)
+                    // Build the Firestore map so we can add societyId (not in Event model)
+                    Map<String, Object> eventMap = new HashMap<>();
+                    eventMap.put("title",            newEvent.getTitle());
+                    eventMap.put("description",      newEvent.getDescription());
+                    eventMap.put("date",             newEvent.getDate());
+                    eventMap.put("startTime",        newEvent.getStartTime());
+                    eventMap.put("endTime",          newEvent.getEndTime());
+                    eventMap.put("capacity",         newEvent.getCapacity());
+                    eventMap.put("registeredCount",  0);
+                    eventMap.put("venue",            newEvent.getVenue());
+                    eventMap.put("category",         newEvent.getCategory());
+                    eventMap.put("society",          newEvent.getSociety());
+                    eventMap.put("societyId",        societyId);
+                    eventMap.put("price",            newEvent.getPrice());
+                    eventMap.put("status",           "pending_approval");
+                    eventMap.put("createdBy",        uid);
+                    eventMap.put("submittedByEmail", email);
+                    eventMap.put("submittedByName",  name);
+
+                    // Push the event map to events collection in firestore
+                    db.collection("events").add(eventMap)
                             .addOnSuccessListener(dr -> {
                                 setLoading(false);
                                 showSuccessDialog("Event submitted for evaluation!", "Your event has been sent to the admins.");
-                                // Notify all admins about the new pending event
-                                notifyAllAdmins(dr.getId(), newEvent.getTitle(), name);
                             })
                             .addOnFailureListener(e -> {
                                 setLoading(false);
@@ -472,10 +492,10 @@ public class ManageEventActivity extends AppCompatActivity {
         updates.put("startTime", startTime);
         updates.put("endTime", endTime);
         updates.put("capacity", capacity);
-            // Save waitlist enabled state
-            androidx.appcompat.widget.SwitchCompat switchWaitlist = findViewById(R.id.switchWaitlist);
-            boolean waitlistEnabled = switchWaitlist != null && switchWaitlist.isChecked();
-            updates.put("waitlistEnabled", waitlistEnabled);
+        // Save waitlist enabled state
+        androidx.appcompat.widget.SwitchCompat switchWaitlist = findViewById(R.id.switchWaitlist);
+        boolean waitlistEnabled = switchWaitlist != null && switchWaitlist.isChecked();
+        updates.put("waitlistEnabled", waitlistEnabled);
         updates.put("venue", venue);
         updates.put("category", category);
         updates.put("price", price);
@@ -497,10 +517,6 @@ public class ManageEventActivity extends AppCompatActivity {
                     } else {
                         successMsg = "Changes saved successfully! The event is now pending admin approval.";
                     }
-
-                    // Notify admins about the resubmission
-                    notifyAllAdmins(eventID, title, FirebaseAuth.getInstance().getCurrentUser() != null
-                            ? FirebaseAuth.getInstance().getCurrentUser().getEmail() : "Event Manager");
 
                     showSuccessDialog("Changes saved successfully!", successMsg);
                 })
@@ -653,30 +669,5 @@ public class ManageEventActivity extends AppCompatActivity {
         }
         btnSubmit.setEnabled(!loading);
         btnDelete.setEnabled(!loading);
-    }
-
-    /**
-     * Sends a notification to all admin users when a new event is submitted for review.
-     */
-    private void notifyAllAdmins(String eventId, String eventTitle, String submitterName) {
-        db.collection("users")
-                .whereEqualTo("role", "admin")
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    for (com.google.firebase.firestore.DocumentSnapshot adminDoc : querySnapshot.getDocuments()) {
-                        java.util.Map<String, Object> notif = new java.util.HashMap<>();
-                        notif.put("title",     "📋 New Event Pending Review");
-                        notif.put("message",   "\"" + eventTitle + "\" submitted by " + submitterName + " needs your approval.");
-                        notif.put("read",      false);
-                        notif.put("timestamp", com.google.firebase.Timestamp.now());
-                        notif.put("eventId",   eventId);
-                        notif.put("type",      "new_submission");
-
-                        db.collection("users")
-                                .document(adminDoc.getId())
-                                .collection("notifications")
-                                .add(notif);
-                    }
-                });
     }
 }
