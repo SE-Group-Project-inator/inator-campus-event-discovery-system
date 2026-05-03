@@ -46,34 +46,33 @@
                     android:textColor="#CCffffff"/>
             </LinearLayout>
 
-            <!-- Admin Avatar (right) -->
+            <!-- Notifications Bell (right) with unread badge -->
             <FrameLayout
                 android:id="@+id/btnAdminAvatar"
                 android:layout_width="44dp"
                 android:layout_height="44dp"
                 android:layout_centerVertical="true"
                 android:layout_alignParentEnd="true"
+                android:layout_marginEnd="4dp"
                 android:background="?attr/selectableItemBackgroundBorderless">
 
-                <TextView
-                    android:id="@+id/tvAvatarInitial"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:background="@drawable/bg_admin_avatar"
-                    android:gravity="center"
-                    android:text="A"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"/>
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_nav_notifications"
+                    android:contentDescription="Notifications"
+                    app:tint="@color/white"/>
 
-                <!-- Online dot -->
                 <View
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
-                    android:layout_gravity="bottom|end"
-                    android:background="@drawable/bg_status_active"
-                    android:layout_marginBottom="1dp"
-                    android:layout_marginEnd="1dp"/>
+                    android:id="@+id/notifBadge"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/bg_reddot"
+                    android:visibility="gone"/>
             </FrameLayout>
 
         </RelativeLayout>
@@ -84,7 +83,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:overScrollMode="never"
-            android:fillViewport="false">
+            android:fillViewport="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -527,6 +526,29 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Events"
+                    android:textSize="10sp"
+                    android:textColor="@color/admin_nav_inactive"
+                    android:layout_marginTop="3dp"/>
+            </LinearLayout>
+
+            <!-- Notifications -->
+            <LinearLayout
+                android:id="@+id/navNotifications"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless">
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_nav_notifications"
+                    app:tint="@color/admin_nav_inactive"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Alerts"
                     android:textSize="10sp"
                     android:textColor="@color/admin_nav_inactive"
                     android:layout_marginTop="3dp"/>

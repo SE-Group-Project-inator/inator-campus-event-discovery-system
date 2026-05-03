@@ -394,16 +394,10 @@ public class ManageEventActivity extends AppCompatActivity {
         // Fetch society name and creator name
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(doc -> {
-                    String societyName = "Unknown Society";
-                    String name = "Unknown";
-                    if (doc.exists()) {
-                        if (doc.getString("societyName") != null) {
-                            societyName = doc.getString("societyName");
-                        }
-                        if (doc.getString("name") != null) {
-                            name = doc.getString("name");
-                        }
-                    }
+                    final String societyName = (doc.exists() && doc.getString("societyName") != null)
+                            ? doc.getString("societyName") : "Unknown Society";
+                    final String name = (doc.exists() && doc.getString("name") != null)
+                            ? doc.getString("name") : "Unknown";
 
                     // Instantiate new event model
                     Event newEvent = new Event();
@@ -424,12 +418,15 @@ public class ManageEventActivity extends AppCompatActivity {
                     newEvent.setCreatedBy(uid);
                     newEvent.setSubmittedByEmail(email);
                     newEvent.setSubmittedByName(name);
+                    newEvent.setSubmittedAt(Timestamp.now());
 
                     // Push the event object to events collection in firestore
                     db.collection("events").add(newEvent)
                             .addOnSuccessListener(dr -> {
                                 setLoading(false);
                                 showSuccessDialog("Event submitted for evaluation!", "Your event has been sent to the admins.");
+                                // Notify all admins about the new pending event
+                                notifyAllAdmins(dr.getId(), newEvent.getTitle(), name);
                             })
                             .addOnFailureListener(e -> {
                                 setLoading(false);
@@ -475,6 +472,10 @@ public class ManageEventActivity extends AppCompatActivity {
                     } else {
                         successMsg = "Changes saved successfully! The event is now pending admin approval.";
                     }
+
+                    // Notify admins about the resubmission
+                    notifyAllAdmins(eventID, title, FirebaseAuth.getInstance().getCurrentUser() != null
+                            ? FirebaseAuth.getInstance().getCurrentUser().getEmail() : "Event Manager");
 
                     showSuccessDialog("Changes saved successfully!", successMsg);
                 })
@@ -627,5 +628,30 @@ public class ManageEventActivity extends AppCompatActivity {
         }
         btnSubmit.setEnabled(!loading);
         btnDelete.setEnabled(!loading);
+    }
+
+    /**
+     * Sends a notification to all admin users when a new event is submitted for review.
+     */
+    private void notifyAllAdmins(String eventId, String eventTitle, String submitterName) {
+        db.collection("users")
+                .whereEqualTo("role", "admin")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (com.google.firebase.firestore.DocumentSnapshot adminDoc : querySnapshot.getDocuments()) {
+                        java.util.Map<String, Object> notif = new java.util.HashMap<>();
+                        notif.put("title",     "📋 New Event Pending Review");
+                        notif.put("message",   "\"" + eventTitle + "\" submitted by " + submitterName + " needs your approval.");
+                        notif.put("read",      false);
+                        notif.put("timestamp", com.google.firebase.Timestamp.now());
+                        notif.put("eventId",   eventId);
+                        notif.put("type",      "new_submission");
+
+                        db.collection("users")
+                                .document(adminDoc.getId())
+                                .collection("notifications")
+                                .add(notif);
+                    }
+                });
     }
 }

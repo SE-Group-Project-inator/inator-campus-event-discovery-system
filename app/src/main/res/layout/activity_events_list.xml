@@ -188,27 +188,35 @@
                 android:gravity="center"
                 android:text="Rejected"
                 android:textColor="@color/admin_text_secondary"
+                android:textSize="13sp"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:id="@+id/filterNewest"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_chip_inactive"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:gravity="center"
+                android:text="🕐 Newest"
+                android:textColor="@color/admin_text_secondary"
                 android:textSize="13sp"/>
 
         </LinearLayout>
     </HorizontalScrollView>
 
     <!-- Events List -->
-    <ScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvAllEvents"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:paddingTop="8dp"
         android:paddingBottom="16dp"
         android:clipToPadding="false"
-        android:overScrollMode="never">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvAllEvents"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"/>
-    </ScrollView>
+        android:overScrollMode="never"/>
 
 </LinearLayout>

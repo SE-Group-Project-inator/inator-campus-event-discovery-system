@@ -39,6 +39,19 @@ public class NotificationsActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
+        // Apply admin theme if launched from admin dashboard
+        String role = getIntent().getStringExtra("role");
+        if ("admin".equals(role)) {
+            View headerLayout = findViewById(R.id.headerLayout);
+            if (headerLayout != null) {
+                headerLayout.setBackgroundColor(getColor(R.color.admin_primary));
+            }
+            View rootLayout = findViewById(R.id.notificationsRoot);
+            if (rootLayout != null) {
+                rootLayout.setBackgroundColor(getColor(R.color.admin_bg));
+            }
+        }
+
         rvNotifications = findViewById(R.id.rvNotifications);
         tvEmpty         = findViewById(R.id.tvEmptyNotifications);
         ImageButton btnBack = findViewById(R.id.btnBack);

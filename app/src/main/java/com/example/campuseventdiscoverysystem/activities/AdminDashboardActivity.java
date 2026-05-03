@@ -46,13 +46,15 @@ public class AdminDashboardActivity extends BaseSessionActivity {
 
     private TextView tvPendingCount, tvApprovedCount, tvTotalCount;
     private TextView tvWelcome, tvInsight;
-    private TextView tvAvatarInitial, tvSheetAdminName, tvSheetEmail, tvSheetAvatar;
+    private TextView tvSheetAdminName, tvSheetEmail, tvSheetAvatar;
 
     private View adminProfileSheet, profileSheetScrim;
+    private View notifBadge;
     private boolean sheetVisible = false;
 
     private final List<Event> pendingList    = new ArrayList<>();
-    private final List<Event> allPendingList = new ArrayList<>();
+    private final List<Event> allPendingList = new ArrayList<>(); // only pending status events
+    private final List<Event> allEventsList  = new ArrayList<>(); // ALL events regardless of status
     private PendingEventAdapter adapter;
     private String currentFilter = "all";
 
@@ -79,6 +81,7 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         setupProfileSheet();
         listenToStats();
         listenToPendingEvents();
+        listenForUnreadNotifBadge();
         loadAdminProfile();
     }
 
@@ -91,12 +94,12 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         tvTotalCount    = findViewById(R.id.tvTotalCount);
         tvWelcome       = findViewById(R.id.tvWelcome);
         tvInsight       = findViewById(R.id.tvInsight);
-        tvAvatarInitial = findViewById(R.id.tvAvatarInitial);
         tvSheetAdminName= findViewById(R.id.tvSheetAdminName);
         tvSheetEmail    = findViewById(R.id.tvSheetEmail);
         tvSheetAvatar   = findViewById(R.id.tvSheetAvatar);
         adminProfileSheet = findViewById(R.id.adminProfileSheet);
         profileSheetScrim = findViewById(R.id.profileSheetScrim);
+        notifBadge        = findViewById(R.id.notifBadge);
     }
 
     /**
@@ -119,7 +122,6 @@ public class AdminDashboardActivity extends BaseSessionActivity {
             String email = mAuth.getCurrentUser().getEmail();
             if (email != null) {
                 String initial = email.substring(0, 1).toUpperCase();
-                tvAvatarInitial.setText(initial);
                 tvSheetAvatar.setText(initial);
                 tvSheetEmail.setText(email);
             }
@@ -133,7 +135,6 @@ public class AdminDashboardActivity extends BaseSessionActivity {
                             if (name != null && !name.isEmpty()) {
                                 tvSheetAdminName.setText(name);
                                 String initial = name.substring(0, 1).toUpperCase();
-                                tvAvatarInitial.setText(initial);
                                 tvSheetAvatar.setText(initial);
                             }
                         }
@@ -161,12 +162,28 @@ public class AdminDashboardActivity extends BaseSessionActivity {
      * Sets up navigation buttons and quick actions.
      */
     private void setupNavigation() {
-        findViewById(R.id.btnAdminAvatar).setOnClickListener(v -> toggleProfileSheet());
+        // Top-right button → Notifications
+        View btnNotifIcon = findViewById(R.id.btnAdminAvatar);
+        if (btnNotifIcon != null) btnNotifIcon.setOnClickListener(v -> {
+            Intent ni = new Intent(this, NotificationsActivity.class);
+            ni.putExtra("role", "admin");
+            startActivity(ni);
+        });
 
         findViewById(R.id.navHome).setOnClickListener(v -> { /* already here */ });
         findViewById(R.id.navEvents).setOnClickListener(v ->
                 startActivity(new Intent(this, EventsListActivity.class)));
-        findViewById(R.id.navProfile).setOnClickListener(v -> toggleProfileSheet());
+
+        // Bottom nav → Notifications
+        View navNotifBtn = findViewById(R.id.navNotifications);
+        if (navNotifBtn != null) navNotifBtn.setOnClickListener(v -> {
+            Intent ni = new Intent(this, NotificationsActivity.class);
+            ni.putExtra("role", "admin");
+            startActivity(ni);
+        });
+
+        View navProfileBtn = findViewById(R.id.navProfile);
+        if (navProfileBtn != null) navProfileBtn.setOnClickListener(v -> toggleProfileSheet());
 
         View qaEvents = findViewById(R.id.quickActionEvents);
         if (qaEvents != null) qaEvents.setOnClickListener(v -> {
@@ -305,6 +322,7 @@ public class AdminDashboardActivity extends BaseSessionActivity {
         Date today = new Date();
 
         if ("urgent".equals(currentFilter)) {
+            // urgent = pending events happening within 7 days
             for (Event e : allPendingList) {
                 if (e.getDate() != null) {
                     long diffMs   = e.getDate().toDate().getTime() - today.getTime();
@@ -313,15 +331,19 @@ public class AdminDashboardActivity extends BaseSessionActivity {
                 }
             }
         } else if ("newest".equals(currentFilter)) {
-            filtered.addAll(allPendingList);
+            // newest = all events, sorted by newest submitted first
+            filtered.addAll(allEventsList);
             filtered.sort((a, b) -> {
-                if (a.getDate() == null && b.getDate() == null) return 0;
-                if (a.getDate() == null) return 1;
-                if (b.getDate() == null) return -1;
-                return b.getDate().compareTo(a.getDate());
+                com.google.firebase.Timestamp aTime = a.getSubmittedAt() != null ? a.getSubmittedAt() : a.getDate();
+                com.google.firebase.Timestamp bTime = b.getSubmittedAt() != null ? b.getSubmittedAt() : b.getDate();
+                if (aTime == null && bTime == null) return 0;
+                if (aTime == null) return 1;
+                if (bTime == null) return -1;
+                return bTime.compareTo(aTime);
             });
         } else {
-            filtered.addAll(allPendingList);
+            // "all" = every event regardless of status
+            filtered.addAll(allEventsList);
         }
 
         pendingList.clear();
@@ -352,11 +374,15 @@ public class AdminDashboardActivity extends BaseSessionActivity {
      * Listens to Firestore stats in real-time.
      */
     private void listenToStats() {
+        // Count both pending_approval and pending statuses
         db.collection("events")
-                .whereEqualTo("status", "pending_approval")
                 .addSnapshotListener((snap, e) -> {
                     if (snap != null) {
-                        int count = snap.size();
+                        int count = 0;
+                        for (com.google.firebase.firestore.DocumentSnapshot d : snap.getDocuments()) {
+                            String st = d.getString("status");
+                            if ("pending_approval".equals(st) || "pending".equals(st)) count++;
+                        }
                         animateCounter(tvPendingCount, count);
                     }
                 });
@@ -403,7 +429,6 @@ public class AdminDashboardActivity extends BaseSessionActivity {
      */
     private void listenToPendingEvents() {
         pendingListener = db.collection("events")
-                .whereEqualTo("status", "pending_approval")
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null) {
                         Toast.makeText(this, "Error loading events", Toast.LENGTH_SHORT).show();
@@ -412,11 +437,16 @@ public class AdminDashboardActivity extends BaseSessionActivity {
                     if (snapshots == null) return;
 
                     allPendingList.clear();
+                    allEventsList.clear();
                     for (DocumentSnapshot doc : snapshots.getDocuments()) {
                         Event event = doc.toObject(Event.class);
                         if (event != null) {
                             event.setId(doc.getId());
-                            allPendingList.add(event);
+                            allEventsList.add(event); // ALL events for "All" filter
+                            String st = event.getStatus();
+                            if ("pending_approval".equals(st) || "pending".equals(st)) {
+                                allPendingList.add(event); // only pending for "Pending" filter
+                            }
                         }
                     }
                     applyFilter();
@@ -444,9 +474,52 @@ public class AdminDashboardActivity extends BaseSessionActivity {
                 .addOnSuccessListener(v -> {
                     String msg = "active".equals(status) ? "✅ Event approved!" : "Event declined";
                     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                    sendNotificationToEventManager(eventId, status);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    /**
+     * Listens for unread notifications and shows/hides the red badge on the bell icon.
+     */
+    private void listenForUnreadNotifBadge() {
+        if (mAuth.getCurrentUser() == null) return;
+        db.collection("users")
+                .document(mAuth.getCurrentUser().getUid())
+                .collection("notifications")
+                .whereEqualTo("read", false)
+                .addSnapshotListener((snap, e) -> {
+                    if (notifBadge == null) return;
+                    boolean hasUnread = snap != null && !snap.isEmpty();
+                    notifBadge.setVisibility(hasUnread ? View.VISIBLE : View.GONE);
+                });
+    }
+
+    private void sendNotificationToEventManager(String eventId, String status) {
+        db.collection("events").document(eventId).get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists()) return;
+                    String createdBy = doc.getString("createdBy");
+                    String title     = doc.getString("title");
+                    if (createdBy == null || title == null) return;
+
+                    String notifTitle = "active".equals(status) ? "Event Approved ✅" : "Event Declined ❌";
+                    String notifMsg   = "active".equals(status)
+                            ? "Your event \"" + title + "\" has been approved and is now live!"
+                            : "Your event \"" + title + "\" was not approved by the admin.";
+
+                    java.util.Map<String, Object> notif = new java.util.HashMap<>();
+                    notif.put("title",     notifTitle);
+                    notif.put("message",   notifMsg);
+                    notif.put("read",      false);
+                    notif.put("timestamp", com.google.firebase.Timestamp.now());
+                    notif.put("eventId",   eventId);
+
+                    db.collection("users").document(createdBy)
+                            .collection("notifications")
+                            .add(notif);
+                });
     }
 
     /**

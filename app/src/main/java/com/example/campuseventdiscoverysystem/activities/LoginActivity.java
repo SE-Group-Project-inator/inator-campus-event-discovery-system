@@ -392,13 +392,42 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void showForgotPasswordDialog() {
         final TextInputEditText emailInput = new TextInputEditText(this);
+        emailInput.setHint("Enter your email address");
+        emailInput.setPadding(40, 20, 40, 20);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Reset Password")
+                .setMessage("Enter your email and we will send you a reset link.")
                 .setView(emailInput)
-                .setPositiveButton("Send Reset Link", null)
+                .setPositiveButton("Send Reset Link", null) // set to null first to prevent auto-dismiss
                 .setNegativeButton("Cancel", null)
                 .create();
+
+        dialog.setOnShowListener(d -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                String email = emailInput.getText() != null
+                        ? emailInput.getText().toString().trim() : "";
+                if (email.isEmpty()) {
+                    emailInput.setError("Enter your email");
+                    return;
+                }
+                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    emailInput.setError("Enter a valid email address");
+                    return;
+                }
+                mAuth.sendPasswordResetEmail(email)
+                        .addOnSuccessListener(unused -> {
+                            dialog.dismiss();
+                            Toast.makeText(this,
+                                    "✅ Password reset email sent. Check your inbox.",
+                                    Toast.LENGTH_LONG).show();
+                        })
+                        .addOnFailureListener(e ->
+                                Toast.makeText(this,
+                                        "Failed: " + e.getMessage(),
+                                        Toast.LENGTH_LONG).show());
+            });
+        });
 
         dialog.show();
     }

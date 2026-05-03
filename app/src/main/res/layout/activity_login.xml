@@ -42,11 +42,12 @@
             android:background="@drawable/bg_auth_logo_circle">
 
             <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
                 android:layout_gravity="center"
                 android:contentDescription="Logo"
-                android:scaleType="fitCenter"
+                android:scaleType="centerInside"
+                android:adjustViewBounds="true"
                 android:src="@drawable/app_logo"/>
         </FrameLayout>
 
@@ -240,44 +241,7 @@
                         android:elevation="4dp"
                         android:letterSpacing="0.01"/>
 
-                    <!-- Divider OR -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginTop="24dp"
-                        android:layout_marginBottom="20dp">
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1"
-                            android:background="#E2E8F0"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="  or  "
-                            android:textSize="12sp"
-                            android:textColor="@color/admin_text_hint"/>
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1"
-                            android:background="#E2E8F0"/>
-                    </LinearLayout>
 
-                    <!-- SSO placeholder button (UI only) -->
-                    <Button
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:text="🔒  Continue with University SSO"
-                        android:textColor="@color/admin_text_primary"
-                        android:textSize="14sp"
-                        android:textAllCaps="false"
-                        android:backgroundTint="#F1F5F9"
-                        android:stateListAnimator="@null"
-                        app:cornerRadius="12dp"
-                        android:elevation="0dp"/>
 
                     <!-- Sign Up link -->
                     <LinearLayout

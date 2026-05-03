@@ -77,8 +77,65 @@ public class PendingEventAdapter extends
             h.tvMonth.setText("TBD");
         }
 
-        // Status-based button rendering
+        // Event details: time
+        if (h.tvEventTime != null) {
+            String start = event.getStartTime();
+            String end   = event.getEndTime();
+            if (start != null && end != null) {
+                h.tvEventTime.setText(start + " – " + end);
+            } else if (start != null) {
+                h.tvEventTime.setText(start);
+            } else {
+                h.tvEventTime.setText("Time TBD");
+            }
+        }
+
+        // Capacity
+        if (h.tvEventCapacity != null) {
+            int cap = event.getCapacity();
+            h.tvEventCapacity.setText(cap > 0 ? "Capacity: " + cap : "Capacity: Unlimited");
+        }
+
+        // Price
+        if (h.tvEventPrice != null) {
+            h.tvEventPrice.setText(event.getPriceDisplay());
+        }
+
+        // Description
+        if (h.tvEventDescription != null) {
+            String desc = event.getDescription();
+            if (desc != null && !desc.isEmpty()) {
+                h.tvEventDescription.setText(desc);
+                h.tvEventDescription.setVisibility(View.VISIBLE);
+            } else {
+                h.tvEventDescription.setVisibility(View.GONE);
+            }
+        }
+
+        // Dynamic status badge
         String status = event.getStatus();
+        if (h.tvStatusBadge != null) {
+            android.content.Context ctx = h.itemView.getContext();
+            if ("active".equals(status)) {
+                h.tvStatusBadge.setText("Approved");
+                h.tvStatusBadge.setBackgroundResource(R.drawable.bg_status_approved);
+                h.tvStatusBadge.setTextColor(ctx.getColor(R.color.admin_success));
+            } else if ("rejected".equals(status)) {
+                h.tvStatusBadge.setText("Declined");
+                h.tvStatusBadge.setBackgroundResource(R.drawable.bg_status_rejected);
+                h.tvStatusBadge.setTextColor(ctx.getColor(R.color.admin_error));
+            } else {
+                // pending_approval, pending, or any unknown status → show Pending
+                h.tvStatusBadge.setText("Pending");
+                h.tvStatusBadge.setBackgroundResource(R.drawable.bg_status_pending);
+                h.tvStatusBadge.setTextColor(ctx.getColor(R.color.admin_warning));
+            }
+        }
+
+        // Status-based button rendering — always reset visibility first to fix recycling bugs
+        h.btnAccept.setVisibility(View.VISIBLE);
+        h.btnDecline.setVisibility(View.VISIBLE);
+
         if ("active".equals(status)) {
             h.btnAccept.setText("Approved ✓");
             h.btnAccept.setEnabled(false);
@@ -88,17 +145,16 @@ public class PendingEventAdapter extends
             h.btnDecline.setEnabled(false);
             h.btnAccept.setVisibility(View.GONE);
         } else {
-            // pending_approval — default
+            // pending_approval, pending, or unknown — show both action buttons
             h.btnAccept.setText("Approve ✓");
             h.btnAccept.setEnabled(true);
-            h.btnAccept.setVisibility(View.VISIBLE);
             h.btnDecline.setText("Decline");
             h.btnDecline.setEnabled(true);
-            h.btnDecline.setVisibility(View.VISIBLE);
 
             h.btnAccept.setOnClickListener(v -> onAccept.onAction(event.getId()));
             h.btnDecline.setOnClickListener(v -> onDecline.onAction(event.getId()));
         }
+
 
         // Subtle entry animation
         h.itemView.setAlpha(0f);
@@ -111,19 +167,25 @@ public class PendingEventAdapter extends
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle, tvSubmittedBy, tvEmail, tvVenue, tvDay, tvMonth, tvSubmitterInitial;
+        TextView tvStatusBadge, tvEventTime, tvEventCapacity, tvEventPrice, tvEventDescription;
         MaterialButton btnAccept, btnDecline;
 
         public ViewHolder(@NonNull View v) {
             super(v);
-            tvTitle            = v.findViewById(R.id.tvEventTitle);
-            tvSubmittedBy      = v.findViewById(R.id.tvSubmittedBy);
-            tvEmail            = v.findViewById(R.id.tvEmail);
-            tvVenue            = v.findViewById(R.id.tvVenue);
-            tvDay              = v.findViewById(R.id.tvDay);
-            tvMonth            = v.findViewById(R.id.tvMonth);
-            tvSubmitterInitial = v.findViewById(R.id.tvSubmitterInitial);
-            btnAccept          = v.findViewById(R.id.btnAccept);
-            btnDecline         = v.findViewById(R.id.btnDecline);
+            tvTitle              = v.findViewById(R.id.tvEventTitle);
+            tvSubmittedBy        = v.findViewById(R.id.tvSubmittedBy);
+            tvEmail              = v.findViewById(R.id.tvEmail);
+            tvVenue              = v.findViewById(R.id.tvVenue);
+            tvDay                = v.findViewById(R.id.tvDay);
+            tvMonth              = v.findViewById(R.id.tvMonth);
+            tvSubmitterInitial   = v.findViewById(R.id.tvSubmitterInitial);
+            tvStatusBadge        = v.findViewById(R.id.tvStatusBadge);
+            tvEventTime          = v.findViewById(R.id.tvEventTime);
+            tvEventCapacity      = v.findViewById(R.id.tvEventCapacity);
+            tvEventPrice         = v.findViewById(R.id.tvEventPrice);
+            tvEventDescription   = v.findViewById(R.id.tvEventDescription);
+            btnAccept            = v.findViewById(R.id.btnAccept);
+            btnDecline           = v.findViewById(R.id.btnDecline);
         }
     }
 }
