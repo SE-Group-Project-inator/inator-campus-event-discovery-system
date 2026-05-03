@@ -197,10 +197,31 @@
             android:layout_width="match_parent"
             android:layout_height="44dp"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:layout_marginBottom="2dp">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⬇" android:textSize="14sp"/>
             <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Sort" android:textSize="13sp" android:textColor="#0D9488" android:textStyle="bold" android:layout_marginStart="8dp"/>
             <TextView android:id="@+id/tvSort" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Latest" android:textSize="12sp" android:textColor="#0D9488" android:textStyle="bold"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" ›" android:textSize="16sp" android:textColor="#0D9488" android:layout_marginStart="4dp"/>
+        </LinearLayout>
+
+        <!-- ✅ FIX: Society filter row — was missing, caused CI build failure -->
+        <LinearLayout
+            android:id="@+id/btnSocietyFilter"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🏛" android:textSize="14sp"/>
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Society" android:textSize="13sp" android:textColor="#0D9488" android:textStyle="bold" android:layout_marginStart="8dp"/>
+            <TextView
+                android:id="@+id/tvSocietyValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All"
+                android:textSize="12sp"
+                android:textColor="#0D9488"
+                android:textStyle="bold"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" ›" android:textSize="16sp" android:textColor="#0D9488" android:layout_marginStart="4dp"/>
         </LinearLayout>
 
