@@ -7,31 +7,33 @@
     android:orientation="vertical"
     android:background="#EBF8F5">
 
+    <!-- Hero Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="#0D9488"
-        android:paddingTop="44dp"
-        android:paddingBottom="24dp"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp">
+        android:paddingTop="56dp"
+        android:paddingBottom="28dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Welcome! 👋"
+            android:text="Welcome to Campus-Inator"
             android:textColor="#FFFFFF"
-            android:textSize="24sp"
+            android:textSize="22sp"
             android:textStyle="bold"
-            android:layout_marginBottom="6dp"/>
+            android:layout_marginBottom="8dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tell us what you're into so we can recommend events you'll love."
+            android:text="Tell us what you&#39;re into so we can recommend events you&#39;ll love."
             android:textColor="#B2F0EB"
-            android:textSize="13sp"/>
+            android:textSize="13sp"
+            android:lineSpacingMultiplier="1.4"/>
     </LinearLayout>
 
     <ScrollView
@@ -45,59 +47,63 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="24dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Pick your interests"
                 android:textColor="#134E4A"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="6dp"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Choose at least one. You can change these later in your profile."
+                android:text="Choose at least one. Tap to select — tap again to deselect."
                 android:textColor="#475569"
                 android:textSize="12sp"
-                android:layout_marginBottom="18dp"/>
+                android:layout_marginBottom="20dp"/>
 
+            <!-- ChipGroup renders as a wrapping grid automatically -->
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/chipGroupInterests"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:chipSpacingHorizontal="8dp"
-                app:chipSpacingVertical="8dp"
+                app:chipSpacingVertical="10dp"
                 app:singleSelection="false"/>
 
         </LinearLayout>
     </ScrollView>
 
+    <!-- Action strip -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="20dp"
         android:background="#FFFFFF"
-        android:elevation="8dp">
+        android:elevation="12dp">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnContinue"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="54dp"
             android:text="CONTINUE"
             android:textStyle="bold"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#0D9488"/>
+            android:textSize="15sp"
+            app:backgroundTint="#0D9488"
+            app:cornerRadius="14dp"/>
 
         <TextView
             android:id="@+id/tvSkip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="12dp"
             android:padding="6dp"
             android:text="Skip for now"
             android:textColor="#0D9488"

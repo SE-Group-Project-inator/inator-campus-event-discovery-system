@@ -4,36 +4,37 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/bg_student">
+    android:background="#EBF8F5">
 
     <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/student_blue_dark"
+        android:background="#0D9488"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingTop="44dp"
+        android:paddingBottom="20dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="My Tickets"
-            android:textColor="@color/white"
+            android:textColor="#FFFFFF"
             android:textSize="22sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/tvTicketCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0 Upcoming"
-            android:textColor="@color/white"
-            android:alpha="0.8"
+            android:textColor="#B2F0EB"
             android:textSize="13sp"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="4dp"/>
     </LinearLayout>
 
-    <!-- Ticket list — inflates item_search_result cards at runtime -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -45,106 +46,38 @@
             android:id="@+id/ticketsList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            android:orientation="vertical"/>
     </ScrollView>
 
-    <!-- Bottom Navigation -->
+    <!-- ══════════════ PREMIUM BOTTOM NAV — STUDENT ══════════════ -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="72dp"
         android:orientation="horizontal"
-        android:background="@color/white"
-        android:elevation="8dp">
-
-        <LinearLayout
-            android:id="@+id/navHome"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center">
-
-            <ImageView
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@android:drawable/ic_menu_compass"
-                app:tint="@color/text_dark" />
-
-            <TextView
-                android:text="Home"
-                android:textSize="10sp"
-                android:textColor="@color/text_dark"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+        android:background="@drawable/bg_bottom_nav"
+        android:elevation="20dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+        <LinearLayout android:id="@+id/navHome" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:background="?attr/selectableItemBackgroundBorderless">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_nav_home" app:tint="#94A3B8"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Home" android:textSize="10sp" android:textColor="#94A3B8" android:layout_marginTop="3dp"/>
         </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navSearch"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center">
-
-            <ImageView
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@android:drawable/ic_menu_search"
-                app:tint="@color/text_dark" />
-
-            <TextView
-                android:text="Search"
-                android:textSize="10sp"
-                android:textColor="@color/text_dark"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+        <LinearLayout android:id="@+id/navSearch" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:background="?attr/selectableItemBackgroundBorderless">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_nav_search" app:tint="#94A3B8"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Explore" android:textSize="10sp" android:textColor="#94A3B8" android:layout_marginTop="3dp"/>
         </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navTickets"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center">
-
-            <ImageView
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@android:drawable/ic_menu_agenda"
-                app:tint="@color/nav_active" />
-
-            <TextView
-                android:text="Tickets"
-                android:textSize="10sp"
-                android:textColor="@color/nav_active"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+        <LinearLayout android:id="@+id/navTickets" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:background="?attr/selectableItemBackgroundBorderless">
+            <FrameLayout android:layout_width="48dp" android:layout_height="32dp" android:background="@drawable/bg_nav_item_active_student">
+                <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_gravity="center" android:src="@drawable/ic_nav_ticket" app:tint="#0D9488"/>
+            </FrameLayout>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Payments" android:textSize="10sp" android:textStyle="bold" android:textColor="#0D9488" android:layout_marginTop="2dp"/>
         </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navProfile"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center">
-
-            <ImageView
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@android:drawable/ic_menu_myplaces"
-                app:tint="@color/text_dark" />
-
-            <TextView
-                android:text="Profile"
-                android:textSize="10sp"
-                android:textColor="@color/text_dark"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+        <LinearLayout android:id="@+id/navProfile" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:background="?attr/selectableItemBackgroundBorderless">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_nav_profile" app:tint="#94A3B8"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Profile" android:textSize="10sp" android:textColor="#94A3B8" android:layout_marginTop="3dp"/>
         </LinearLayout>
 
     </LinearLayout>
-
 </LinearLayout>

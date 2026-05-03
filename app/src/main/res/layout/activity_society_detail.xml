@@ -4,16 +4,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/bg_student">
+    android:background="#EBF8F5">
 
     <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/student_blue_dark"
+        android:background="#0D9488"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="20dp">
+        android:paddingTop="44dp"
+        android:paddingBottom="20dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
 
         <ImageButton
             android:id="@+id/btnBack"
@@ -68,7 +71,7 @@
                         android:layout_height="72dp"
                         android:layout_marginBottom="12dp"
                         app:cardCornerRadius="36dp"
-                        app:cardBackgroundColor="@color/btn_student"
+                        app:cardBackgroundColor="#0D9488"
                         app:cardElevation="0dp">
                         <TextView
                             android:id="@+id/tvSocietyInitials"
