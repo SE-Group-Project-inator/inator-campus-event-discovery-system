@@ -5,37 +5,42 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#E8F0F3">
+    android:background="#EBF8F5">
 
-    <!-- Dark teal header -->
-    <RelativeLayout
+    <!-- Teal header matching homepage -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="#0E3D4F"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:layout_height="wrap_content"
+        android:background="#0D9488"
+        android:orientation="vertical"
+        android:paddingTop="44dp"
+        android:paddingBottom="20dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp">
 
-        <ImageButton
-            android:id="@+id/btnBack"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_centerVertical="true"
-            android:layout_alignParentStart="true"
-            android:src="@drawable/ic_arrow_back"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@color/white"
-            android:contentDescription="Back"
-            android:scaleType="fitCenter" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Attendees"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/white" />
-    </RelativeLayout>
+        <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:src="@drawable/ic_arrow_back"
+                android:background="#1AFFFFFF"
+                app:tint="@color/white"
+                android:contentDescription="Back"
+                android:scaleType="fitCenter"
+                android:padding="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Attendees"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"/>
+        </RelativeLayout>
+    </LinearLayout>
 
     <!-- Search bar -->
     <androidx.cardview.widget.CardView
@@ -64,58 +69,49 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Search by Name or Roll Number"
+                android:hint="Search by name or email"
                 android:textSize="13sp"
-                android:textColorHint="#AAAAAA"
+                android:textColorHint="#94A3B8"
+                android:textColor="#134E4A"
                 android:background="@android:color/transparent"
                 android:inputType="text"
                 android:maxLines="1"
-                android:imeOptions="actionSearch" />
+                android:imeOptions="actionSearch"/>
 
             <ImageView
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:src="@android:drawable/ic_menu_search"
                 android:contentDescription="Search"
-                app:tint="#888888" />
+                app:tint="#0D9488"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Attendee list card -->
-    <androidx.cardview.widget.CardView
+    <!-- Attendee list -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvAttendees"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="12dp"
-        app:cardBackgroundColor="#C8D8DF"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="0dp">
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="8dp"
+        android:clipToPadding="false"/>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvAttendees"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:clipToPadding="false" />
+    <TextView
+        android:id="@+id/tvEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="No attendees registered yet."
+        android:textAlignment="center"
+        android:textColor="#94A3B8"
+        android:textSize="14sp"
+        android:visibility="gone"/>
 
-        <TextView
-            android:id="@+id/tvEmpty"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="No attendees registered yet."
-            android:textAlignment="center"
-            android:textColor="@color/text_dark"
-            android:alpha="0.5"
-            android:textSize="13sp"
-            android:visibility="gone" />
-
-    </androidx.cardview.widget.CardView>
-
-    <!-- Bottom action button -->
+    <!-- Reserve a spot button (student view only) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnReserve"
         android:layout_width="match_parent"
@@ -127,7 +123,7 @@
         android:textColor="@color/white"
         android:textSize="15sp"
         android:textStyle="bold"
-        android:backgroundTint="@color/green_accept"
-        app:cornerRadius="26dp" />
+        app:backgroundTint="#0D9488"
+        app:cornerRadius="26dp"/>
 
 </LinearLayout>

@@ -233,6 +233,39 @@
                     android:paddingHorizontal="12dp"
                     android:layout_marginBottom="16dp"/>
 
+                <!-- Waitlist Toggle -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:text="Allow Waitlist"
+                            android:textColor="@color/text_dark"
+                            android:textStyle="bold"
+                            android:textSize="14sp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                        <TextView
+                            android:text="Students can join a waitlist when event is full"
+                            android:textColor="@color/text_grey"
+                            android:textSize="12sp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switchWaitlist"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false"/>
+                </LinearLayout>
+
                 <TextView android:text="Ticket Price (Rs.) — leave 0 for FREE" android:textColor="@color/text_dark" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                 <EditText
                     android:id="@+id/etPrice"

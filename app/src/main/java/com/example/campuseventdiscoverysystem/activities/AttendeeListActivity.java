@@ -189,6 +189,19 @@ public class AttendeeListActivity extends AppCompatActivity {
         displayList.addAll(regs);
         adapter.notifyDataSetChanged();
         updateEmptyState();
+        // Self-heal: write the true confirmed count back to the event document
+        if (eventId != null && !eventId.isEmpty()) {
+            int trueCount = regs.size();
+            db.collection("events").document(eventId).get()
+                    .addOnSuccessListener(evDoc -> {
+                        if (!evDoc.exists()) return;
+                        Long cap = evDoc.getLong("capacity");
+                        int clamped = cap != null && cap > 0
+                                ? Math.min(trueCount, cap.intValue()) : trueCount;
+                        db.collection("events").document(eventId)
+                                .update("registeredCount", Math.max(0, clamped));
+                    });
+        }
     }
 
     private void updateEmptyState() {

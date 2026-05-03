@@ -21,31 +21,13 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Shows a society's description and its upcoming events.
- * Events are fetched from the events collection filtered by societyId field.
- * Tapping an event navigates to EventDetailActivity for normal RSVP flow.
+ * Shows a society's name, abbreviation, description (all from Firestore),
+ * and its upcoming events (events where societyId == this society's doc ID).
  */
 public class SocietyDetailActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private LinearLayout eventsList;
-
-    // Society descriptions — keyed by society id
-    private static final java.util.Map<String, String> DESCRIPTIONS = new java.util.HashMap<>();
-    static {
-        DESCRIPTIONS.put("spades",
-                "SPADES (Student Programming And Dev Society) is LUMS's premier tech society. " +
-                        "We run hackathons, coding competitions, workshops on cutting-edge technologies, " +
-                        "and connect students with industry professionals.");
-        DESCRIPTIONS.put("lrs",
-                "The LUMS Religious Society (LRS) fosters spiritual growth and interfaith dialogue " +
-                        "on campus. We host discussions, talks, and events that bring together students " +
-                        "from all faiths in a respectful and inclusive environment.");
-        DESCRIPTIONS.put("lwic",
-                "LUMS Women In Computing (LWIC) is dedicated to empowering women in tech at LUMS. " +
-                        "We run mentorship programs, networking events, and skill-building workshops " +
-                        "to support women pursuing careers in computing and technology.");
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,36 +36,49 @@ public class SocietyDetailActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
-        String societyId       = getIntent().getStringExtra("societyId");
-        String societyName     = getIntent().getStringExtra("societyName");
-        String societyTagline  = getIntent().getStringExtra("societyTagline");
-        String societyInitials = getIntent().getStringExtra("societyInitials");
+        String societyId          = getIntent().getStringExtra("societyId");
+        String societyName        = getIntent().getStringExtra("societyName");
+        String societyDescription = getIntent().getStringExtra("societyDescription");
+        String societyInitials    = getIntent().getStringExtra("societyInitials");
 
         ImageButton btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> finish());
+        if (btnBack != null) btnBack.setOnClickListener(v -> finish());
 
-        // Header
-        TextView tvName = findViewById(R.id.tvSocietyName);
-        TextView tvTagline = findViewById(R.id.tvSocietyTagline);
+        // Populate header from intent data (already loaded by SocietiesActivity)
+        TextView tvName     = findViewById(R.id.tvSocietyName);
+        TextView tvTagline  = findViewById(R.id.tvSocietyTagline);
         TextView tvInitials = findViewById(R.id.tvSocietyInitials);
-        TextView tvDesc = findViewById(R.id.tvSocietyDescription);
+        TextView tvDesc     = findViewById(R.id.tvSocietyDescription);
 
-        if (tvName     != null) tvName.setText(societyName);
-        if (tvTagline  != null) tvTagline.setText(societyTagline);
-        if (tvInitials != null) tvInitials.setText(societyInitials);
+        if (tvName     != null) tvName.setText(societyName     != null ? societyName     : "");
+        if (tvTagline  != null) tvTagline.setText(societyInitials != null ? societyInitials : "");
+        if (tvInitials != null) tvInitials.setText(societyInitials != null ? societyInitials : "");
         if (tvDesc     != null) tvDesc.setText(
-                DESCRIPTIONS.containsKey(societyId)
-                        ? DESCRIPTIONS.get(societyId)
+                societyDescription != null && !societyDescription.isEmpty()
+                        ? societyDescription
                         : "No description available.");
 
-        eventsList = findViewById(R.id.societyEventsList);
+        // If description wasn't passed (e.g. deep link), fetch it from Firestore
+        if ((societyDescription == null || societyDescription.isEmpty()) && societyId != null) {
+            db.collection("societies").document(societyId).get()
+                    .addOnSuccessListener(doc -> {
+                        String desc = doc.getString("description");
+                        if (tvDesc != null && desc != null) tvDesc.setText(desc);
+                        String abbr = doc.getString("abbr");
+                        if (tvTagline != null && abbr != null) tvTagline.setText(abbr);
+                        if (tvInitials != null && abbr != null) tvInitials.setText(abbr);
+                        String name = doc.getString("name");
+                        if (tvName != null && name != null) tvName.setText(name);
+                    });
+        }
 
+        eventsList = findViewById(R.id.societyEventsList);
         if (societyId != null) loadSocietyEvents(societyId);
     }
 
     /**
-     * Fetches active future events where the "society" field matches societyId.
-     * Event managers tag their events with a societyId when creating them.
+     * Fetches active future events where the "societyId" field matches this society's doc ID.
+     * Event managers tag events with societyId when creating them.
      */
     private void loadSocietyEvents(String societyId) {
         Timestamp now = new Timestamp(new Date());
@@ -94,6 +89,7 @@ public class SocietyDetailActivity extends AppCompatActivity {
                 .whereGreaterThanOrEqualTo("date", now)
                 .get()
                 .addOnSuccessListener(query -> {
+                    if (eventsList == null) return;
                     eventsList.removeAllViews();
 
                     if (query.isEmpty()) {
@@ -107,9 +103,9 @@ public class SocietyDetailActivity extends AppCompatActivity {
                     }
 
                     for (QueryDocumentSnapshot doc : query) {
-                        String title = doc.getString("title");
-                        String venue = doc.getString("venue");
-                        String desc  = doc.getString("description");
+                        String title    = doc.getString("title");
+                        String venue    = doc.getString("venue");
+                        String desc     = doc.getString("description");
                         String orgName  = doc.getString("submittedByName");
                         String orgEmail = doc.getString("submittedByEmail");
                         Timestamp date  = doc.getTimestamp("date");
@@ -119,10 +115,9 @@ public class SocietyDetailActivity extends AppCompatActivity {
                         int reg = doc.getLong("registeredCount") != null
                                 ? doc.getLong("registeredCount").intValue() : 0;
                         long millis = date != null ? date.toDate().getTime() : 0;
-                        double price = doc.getDouble("price") != null ? doc.getDouble("price") :
-                                doc.getDouble("ticketPrice") != null ? doc.getDouble("ticketPrice") : 0.0;
+                        double price = doc.getDouble("price") != null ? doc.getDouble("price")
+                                : doc.getDouble("ticketPrice") != null ? doc.getDouble("ticketPrice") : 0.0;
 
-                        // Inflate the same item_search_result card used everywhere else
                         View card = LayoutInflater.from(this)
                                 .inflate(R.layout.item_search_result, eventsList, false);
 
@@ -144,17 +139,16 @@ public class SocietyDetailActivity extends AppCompatActivity {
                             if (tvMonth != null) tvMonth.setText(new SimpleDateFormat("MMM", Locale.getDefault()).format(d).toUpperCase());
                         }
 
-                        // Click → normal EventDetailActivity with full RSVP flow
-                        String fId      = doc.getId();
-                        String fTitle   = title;
-                        String fVenue   = venue;
-                        String fDesc    = desc;
-                        String fOrgName = orgName;
-                        String fOrgEmail= orgEmail;
-                        int    fCap     = cap;
-                        int    fReg     = reg;
-                        long   fMillis  = millis;
-                        double fPrice   = price;
+                        String fId       = doc.getId();
+                        String fTitle    = title;
+                        String fVenue    = venue;
+                        String fDesc     = desc;
+                        String fOrgName  = orgName;
+                        String fOrgEmail = orgEmail;
+                        int    fCap      = cap;
+                        int    fReg      = reg;
+                        long   fMillis   = millis;
+                        double fPrice    = price;
 
                         card.setOnClickListener(v -> {
                             Intent intent = new Intent(this, EventDetailActivity.class);
@@ -175,7 +169,6 @@ public class SocietyDetailActivity extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Could not load events", Toast.LENGTH_SHORT).show()
-                );
+                        Toast.makeText(this, "Could not load events", Toast.LENGTH_SHORT).show());
     }
 }

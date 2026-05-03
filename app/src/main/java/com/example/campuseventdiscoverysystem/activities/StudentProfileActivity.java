@@ -65,7 +65,7 @@ public class StudentProfileActivity extends BaseSessionActivity {
         loadFollowingCount();
 
         btnNotification.setOnClickListener(v ->
-                Toast.makeText(this, "Notifications coming soon!", Toast.LENGTH_SHORT).show()
+                startActivity(new Intent(this, NotificationsActivity.class))
         );
 
         // Attendance History → EventHistoryActivity

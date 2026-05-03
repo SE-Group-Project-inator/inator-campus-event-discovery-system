@@ -179,25 +179,44 @@ public class EventDetailActivity extends AppCompatActivity {
         android.widget.Button btnConfirmRsvp = findViewById(R.id.btnConfirmRsvp);
         android.widget.CheckBox cbWaitlist = findViewById(R.id.cbWaitlist);
 
-        // Auto-close logic: If the event is full, disable the button by default
-        if (capacity > 0 && registered >= capacity) {
+        // Waitlist-aware capacity check: read waitlistEnabled from Firestore
+        boolean isFull = capacity > 0 && registered >= capacity;
+        if (isFull) {
             btnConfirmRsvp.setText("Event Full");
             btnConfirmRsvp.setEnabled(false);
             btnConfirmRsvp.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.GRAY));
+            if (cbWaitlist != null) cbWaitlist.setVisibility(android.view.View.GONE); // hide until we check
 
-            // Make the button react to the waitlist checkbox
-            if (cbWaitlist != null) {
-                cbWaitlist.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    if (isChecked) {
-                        btnConfirmRsvp.setText("Join Waitlist");
-                        btnConfirmRsvp.setEnabled(true);
-                        btnConfirmRsvp.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.green_accept, getTheme())));
-                    } else {
-                        btnConfirmRsvp.setText("Event Full");
-                        btnConfirmRsvp.setEnabled(false);
-                        btnConfirmRsvp.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.GRAY));
-                    }
-                });
+            // Read waitlistEnabled from Firestore
+            if (eventId != null) {
+                FirebaseFirestore.getInstance().collection("events").document(eventId).get()
+                    .addOnSuccessListener(doc -> {
+                        Boolean waitlistEnabled = doc.getBoolean("waitlistEnabled");
+                        if (Boolean.TRUE.equals(waitlistEnabled) && cbWaitlist != null) {
+                            cbWaitlist.setVisibility(android.view.View.VISIBLE);
+                            cbWaitlist.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                                if (isChecked) {
+                                    btnConfirmRsvp.setText("Join Waitlist");
+                                    btnConfirmRsvp.setEnabled(true);
+                                    btnConfirmRsvp.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.btn_student, getTheme())));
+                                } else {
+                                    btnConfirmRsvp.setText("Event Full");
+                                    btnConfirmRsvp.setEnabled(false);
+                                    btnConfirmRsvp.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.GRAY));
+                                }
+                            });
+                        }
+                    });
+            }
+        } else {
+            // Event not full — show waitlist option only if manager enabled it
+            if (cbWaitlist != null) cbWaitlist.setVisibility(android.view.View.GONE);
+            if (eventId != null) {
+                FirebaseFirestore.getInstance().collection("events").document(eventId).get()
+                    .addOnSuccessListener(doc -> {
+                        Boolean waitlistEnabled = doc.getBoolean("waitlistEnabled");
+                        // Only show when full; keep hidden otherwise
+                    });
             }
         }
 

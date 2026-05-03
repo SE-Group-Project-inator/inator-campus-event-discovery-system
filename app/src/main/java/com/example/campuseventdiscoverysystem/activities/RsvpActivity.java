@@ -300,18 +300,51 @@ public class RsvpActivity extends AppCompatActivity {
             db.collection("rsvps").document(rsvpDocId)
                     .get()
                     .addOnSuccessListener(rsvpDoc -> {
-                        boolean wasWaitlist = Boolean.TRUE.equals(rsvpDoc.getBoolean("optInWaitlist"));
+                        // Use the actual RSVP status, not the optInWaitlist preference flag.
+                        // A student may have ticked the waitlist box but still got a confirmed spot.
+                        boolean wasWaitlisted = "waitlisted".equals(rsvpDoc.getString("status"));
 
                         // Delete from the correct top-level rsvps collection
                         db.collection("rsvps").document(rsvpDocId)
                                 .delete()
                                 .addOnSuccessListener(aVoid -> {
-                                    // Decrement only if they were NOT on the waitlist
-                                    if (!wasWaitlist) {
-                                        db.collection("events").document(eventId)
-                                                .update("registeredCount",
-                                                        FieldValue.increment(-1));
+                                    if (!wasWaitlisted) {
+                                        // Confirmed spot cancelled — check if someone is waiting
+                                        db.collection("rsvps")
+                                                .whereEqualTo("eventId", eventId)
+                                                .whereEqualTo("status", "waitlisted")
+                                                .limit(1)
+                                                .get()
+                                                .addOnSuccessListener(waitlistSnap -> {
+                                                    if (!waitlistSnap.isEmpty()) {
+                                                        // Promote first waitlisted user, count stays same
+                                                        com.google.firebase.firestore.DocumentSnapshot wDoc =
+                                                                waitlistSnap.getDocuments().get(0);
+                                                        String promotedId = wDoc.getId();
+                                                        String promotedUserId = wDoc.getString("userId");
+                                                        db.collection("rsvps").document(promotedId)
+                                                                .update("status", "confirmed");
+                                                        // Notify promoted user
+                                                        if (promotedUserId != null) {
+                                                            java.util.Map<String, Object> notif = new java.util.HashMap<>();
+                                                            notif.put("title", "Waitlist Update 🎉");
+                                                            notif.put("message", "A spot opened up! You are now confirmed.");
+                                                            notif.put("read", false);
+                                                            notif.put("timestamp", com.google.firebase.firestore.FieldValue.serverTimestamp());
+                                                            db.collection("users").document(promotedUserId)
+                                                                    .collection("notifications").add(notif);
+                                                        }
+                                                    } else {
+                                                        // No waitlisted users — recalculate from actual rsvps
+                                                        recalculateRegisteredCount(eventId);
+                                                    }
+                                                })
+                                                .addOnFailureListener(e2 -> {
+                                                    // Query failed — still recalculate
+                                                    recalculateRegisteredCount(eventId);
+                                                });
                                     }
+                                    // wasWaitlisted=true: no count change needed
                                     dialog.dismiss();
                                     layoutRsvpSuccess.setVisibility(View.GONE);
                                     layoutRsvpForm.setVisibility(View.VISIBLE);
@@ -459,4 +492,26 @@ public class RsvpActivity extends AppCompatActivity {
             Toast.makeText(this, "No calendar app found on this device.", Toast.LENGTH_SHORT).show();
         }
     }
+    /** Recalculates registeredCount from actual confirmed rsvps, clamped to [0, capacity]. */
+    private void recalculateRegisteredCount(String eventId) {
+        if (eventId == null) return;
+        com.google.firebase.firestore.FirebaseFirestore db2 =
+                com.google.firebase.firestore.FirebaseFirestore.getInstance();
+        db2.collection("rsvps")
+                .whereEqualTo("eventId", eventId)
+                .whereEqualTo("status", "confirmed")
+                .get()
+                .addOnSuccessListener(snap -> {
+                    int trueCount = snap.size();
+                    db2.collection("events").document(eventId).get()
+                            .addOnSuccessListener(evDoc -> {
+                                Long cap = evDoc.getLong("capacity");
+                                int clamped = cap != null && cap > 0
+                                        ? Math.min(trueCount, cap.intValue()) : trueCount;
+                                db2.collection("events").document(eventId)
+                                        .update("registeredCount", Math.max(0, clamped));
+                            });
+                });
+    }
+
 }

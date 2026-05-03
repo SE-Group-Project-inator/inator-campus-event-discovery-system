@@ -15,6 +15,13 @@ public class NotificationItem {
 
     public NotificationItem() {}
 
+    public NotificationItem(String title, String message, boolean unread, Timestamp timestamp) {
+        this.title = title;
+        this.message = message;
+        this.read = !unread;
+        this.timestamp = timestamp;
+    }
+
     public String getId()        { return id; }
     public String getTitle()     { return title; }
     public String getMessage()   { return message; }

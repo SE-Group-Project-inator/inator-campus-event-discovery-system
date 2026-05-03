@@ -140,6 +140,16 @@ public class EventAnalyticsActivity extends AppCompatActivity {
                         }
                     }
 
+                    // Write true count back to fix any drift from the event doc field
+                    int finalRegistered = registered;
+                    db.collection("events").document(eventID).get()
+                            .addOnSuccessListener(evDoc -> {
+                                Long cap = evDoc.getLong("capacity");
+                                int clamped = cap != null && cap > 0
+                                        ? Math.min(finalRegistered, cap.intValue()) : finalRegistered;
+                                db.collection("events").document(eventID)
+                                        .update("registeredCount", Math.max(0, clamped));
+                            });
                     // Update Raw Number UIs
                     tvTotalRegistered.setText(String.valueOf(registered));
                     tvTotalWaitlist.setText(String.valueOf(waitlisted));
