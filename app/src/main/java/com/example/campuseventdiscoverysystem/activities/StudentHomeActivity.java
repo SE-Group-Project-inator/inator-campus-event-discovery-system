@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.campuseventdiscoverysystem.R;
 import com.example.campuseventdiscoverysystem.activities.MyPaymentsActivity;
+import com.example.campuseventdiscoverysystem.models.Event;
+import com.example.campuseventdiscoverysystem.recommendations.RecommendationEngine;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,14 +26,17 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class StudentHomeActivity extends BaseSessionActivity {
 
-    private TextView tvEventsThisWeek, tvRegistered, tvSaved, tvGreeting;
+    private static final int HOME_RECS_PREVIEW = 3;
+
+    private TextView tvEventsThisWeek, tvRegistered, tvSaved, tvGreeting, tvRecsReason;
     private ImageButton btnNotification;
     private LinearLayout navHome, navSearch, navTickets, navProfile;
-    private LinearLayout upcomingEventsList;
+    private LinearLayout upcomingEventsList, recsList;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -55,12 +60,21 @@ public class StudentHomeActivity extends BaseSessionActivity {
         navTickets         = findViewById(R.id.navTickets);
         navProfile         = findViewById(R.id.navProfile);
         upcomingEventsList = findViewById(R.id.upcomingEventsList);
+        recsList           = findViewById(R.id.recsList);
+        tvRecsReason       = findViewById(R.id.tvRecsReason);
 
         loadGreeting();
         loadEventsThisWeek();
         loadRegisteredCount();
         loadSavedCount();
         listenToUpcomingEvents();
+        loadRecommendationsPreview();
+
+        TextView tvSeeAllRecs = findViewById(R.id.tvSeeAllRecs);
+        if (tvSeeAllRecs != null) {
+            tvSeeAllRecs.setOnClickListener(v ->
+                    startActivity(new Intent(this, RecommendationsActivity.class)));
+        }
 
         View cardMyPayments = findViewById(R.id.cardMyPayments);
         if (cardMyPayments != null) {
@@ -214,6 +228,73 @@ public class StudentHomeActivity extends BaseSessionActivity {
                         upcomingEventsList.addView(itemView);
                     }
                 });
+    }
+
+    private void loadRecommendationsPreview() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return;
+
+        RecommendationEngine engine = new RecommendationEngine(db, HOME_RECS_PREVIEW);
+        engine.getRecommendations(user.getUid(), new RecommendationEngine.Callback() {
+            @Override
+            public void onRecommendations(List<Event> recs, String reason) {
+                if (isFinishing() || isDestroyed()) return;
+                recsList.removeAllViews();
+
+                if (recs.isEmpty()) {
+                    tvRecsReason.setText("RSVP to a few events and we'll start picking for you.");
+                    return;
+                }
+
+                tvRecsReason.setText(reason);
+                for (Event e : recs) recsList.addView(buildRecCard(e));
+            }
+
+            @Override
+            public void onError(Exception e) {
+                if (isFinishing() || isDestroyed()) return;
+                tvRecsReason.setText("Couldn't load recommendations.");
+            }
+        });
+    }
+
+    private View buildRecCard(Event e) {
+        View v = LayoutInflater.from(this).inflate(R.layout.item_upcoming, recsList, false);
+        TextView tvTitle = v.findViewById(R.id.tvTitle);
+        TextView tvLocation = v.findViewById(R.id.tvLocation);
+        TextView tvDay = v.findViewById(R.id.tvDay);
+        TextView tvMonth = v.findViewById(R.id.tvMonth);
+        TextView tvPrice = v.findViewById(R.id.tvPrice);
+
+        if (tvTitle != null) tvTitle.setText(e.getTitle());
+        if (tvLocation != null) tvLocation.setText("📍 " + (e.getVenue() != null ? e.getVenue() : ""));
+        if (tvPrice != null) tvPrice.setText(e.getPriceDisplay());
+
+        Timestamp ts = e.getDate();
+        if (ts != null) {
+            Date d = ts.toDate();
+            if (tvDay != null)
+                tvDay.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(d));
+            if (tvMonth != null)
+                tvMonth.setText(new SimpleDateFormat("MMM", Locale.getDefault()).format(d).toUpperCase());
+        }
+
+        long dateMillis = ts != null ? ts.toDate().getTime() : 0L;
+        v.setOnClickListener(view -> {
+            Intent intent = new Intent(this, EventDetailActivity.class);
+            intent.putExtra("eventId", e.getId());
+            intent.putExtra("eventTitle", e.getTitle());
+            intent.putExtra("eventVenue", e.getVenue());
+            intent.putExtra("eventDescription", e.getDescription());
+            intent.putExtra("eventCapacity", e.getCapacity());
+            intent.putExtra("eventRegistered", e.getRegisteredCount());
+            intent.putExtra("eventDateMillis", dateMillis);
+            intent.putExtra("eventOrganizerName", e.getSubmittedByName());
+            intent.putExtra("eventOrganizerEmail", e.getSubmittedByEmail());
+            intent.putExtra("eventTicketPrice", e.getPrice());
+            startActivity(intent);
+        });
+        return v;
     }
 
     @Override
