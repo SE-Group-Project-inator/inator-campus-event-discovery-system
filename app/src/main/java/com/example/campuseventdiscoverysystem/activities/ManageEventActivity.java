@@ -56,12 +56,11 @@ public class ManageEventActivity extends AppCompatActivity {
     private String eventID;
     private boolean isEditMode = false;
     private int currentRegisteredCount = 0;
+    private String originalStatus = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Bind activity to its corresponding XML layout file
         setContentView(R.layout.activity_manage_event);
 
         // Initialize firebase instances
@@ -109,9 +108,10 @@ public class ManageEventActivity extends AppCompatActivity {
 
         if (isEditMode) {
             tvToolbarTitle.setText("Edit Event");
-            tvSubtitle.setText("Students will be notified of changes!");
             btnSubmit.setText("Save Changes");
             btnDelete.setVisibility(View.VISIBLE);
+            // Subtitle text is cleared here and set dynamically in loadEventData()
+            tvSubtitle.setText("Loading details...");
             loadEventData();
         } else {
             tvToolbarTitle.setText("Create New Event");
@@ -147,6 +147,7 @@ public class ManageEventActivity extends AppCompatActivity {
             Calendar c = Calendar.getInstance();
             DatePickerDialog dpd = new DatePickerDialog(this, R.style.PurplePickerTheme, (view, year, month, dayOfMonth) -> {
                 etDate.setText(String.format(Locale.getDefault(), "%02d/%02d/%04d", dayOfMonth, month + 1, year));
+                etDate.setError(null);
             }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
 
             // Prevent selecting past dates
@@ -159,6 +160,7 @@ public class ManageEventActivity extends AppCompatActivity {
             Calendar c = Calendar.getInstance();
             new TimePickerDialog(this, R.style.PurplePickerTheme, (view, hourOfDay, minute) -> {
                 etStartTime.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
+                etStartTime.setError(null);
             }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false).show();
         });
 
@@ -167,6 +169,7 @@ public class ManageEventActivity extends AppCompatActivity {
             Calendar c = Calendar.getInstance();
             new TimePickerDialog(this, R.style.PurplePickerTheme, (view, hourOfDay, minute) -> {
                 etEndTime.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
+                etEndTime.setError(null);
             }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), false).show();
         });
     }
@@ -177,7 +180,19 @@ public class ManageEventActivity extends AppCompatActivity {
     private void loadEventData() {
         db.collection("events").document(eventID).get().addOnSuccessListener(d -> {
             if (d.exists()) {
-                // Populate text fields
+
+                originalStatus = d.getString("status") != null ? d.getString("status") : "";
+
+                // Dynamically update the subtitle based on the status
+                TextView tvSubtitle = findViewById(R.id.tvSubtitle);
+                if ("approved".equals(originalStatus) || "active".equals(originalStatus)) {
+                    tvSubtitle.setText("Registered students will be notified of changes.");
+                } else if ("rejected".equals(originalStatus) || "declined".equals(originalStatus)) {
+                    tvSubtitle.setText("Update the details to resubmit for admin approval.");
+                } else {
+                    tvSubtitle.setText("Update your event details for admin review.");
+                }
+
                 etTitle.setText(d.getString("title"));
                 etDescription.setText(d.getString("description"));
                 etStartTime.setText(d.getString("startTime") != null ? d.getString("startTime") : "");
@@ -196,7 +211,6 @@ public class ManageEventActivity extends AppCompatActivity {
                     etPrice.setText(String.valueOf(price));
                 }
 
-                // Fetch registered count for capacity validation later
                 Long regCount = d.getLong("registeredCount");
                 currentRegisteredCount = regCount != null ? regCount.intValue() : 0;
 
@@ -226,39 +240,43 @@ public class ManageEventActivity extends AppCompatActivity {
         String priceStr = etPrice != null ? etPrice.getText().toString().trim() : "0";
         String venue = spVenue.getSelectedItem().toString();
         String category = spCategory.getSelectedItem().toString();
+        boolean hasError = false;
 
         // Validate to ensure fields are not empty
-        if (title.isEmpty()) { etTitle.setError("Title is required"); return; }
-        if (description.isEmpty()) { etDescription.setError("Description is required"); return; }
-        if (dateStr.isEmpty()) { etDate.setError("Date is required"); return; }
-        if (startTime.isEmpty()) { etStartTime.setError("Start time is required"); return; }
-        if (endTime.isEmpty()) { etEndTime.setError("End time is required"); return; }
-        if (capacityStr.isEmpty()) { etCapacity.setError("Capacity is required"); return; }
+        if (title.isEmpty()) { etTitle.setError("Title is required"); hasError = true; }
+        if (description.isEmpty()) { etDescription.setError("Description is required"); hasError = true; }
+        if (dateStr.isEmpty()) { etDate.setError("Date is required"); hasError = true; }
+        if (startTime.isEmpty()) { etStartTime.setError("Start time is required"); hasError = true; }
+        if (endTime.isEmpty()) { etEndTime.setError("End time is required"); hasError = true; }
 
         // Time logic check
-        if (startTime.compareTo(endTime) >= 0) {
+        if (!startTime.isEmpty() && !endTime.isEmpty() && startTime.compareTo(endTime) >= 0) {
             etEndTime.setError("End time must be after start time");
-            return;
+            hasError = true;
         }
 
         // Convert variables to required formats from string
-        int capacity;
-        try {
-            capacity = Integer.parseInt(capacityStr);
-            if (capacity <= 0 && !isEditMode) {
-                etCapacity.setError("Capacity must be greater than 0");
-                return;
+        int capacity = 0;
+        if (capacityStr.isEmpty()) {
+            etCapacity.setError("Capacity is required");
+            hasError = true;
+        } else {
+            try {
+                capacity = Integer.parseInt(capacityStr);
+                if (capacity <= 0 && !isEditMode) {
+                    etCapacity.setError("Capacity must be greater than 0");
+                    hasError = true;
+                } else if (capacity < currentRegisteredCount) {
+                    etCapacity.setError("Capacity cannot be less than current registrations (" + currentRegisteredCount + ")");
+                    hasError = true;
+                }
+            } catch (NumberFormatException e) {
+                etCapacity.setError("Capacity must be a valid number");
+                hasError = true;
             }
-        } catch (NumberFormatException e) {
-            etCapacity.setError("Capacity must be a valid number");
-            return;
         }
 
-        // Validate capacity isn't lowered below current registrations (Applies mostly to Edit Mode)
-        if (capacity < currentRegisteredCount) {
-            etCapacity.setError("Capacity cannot be less than current registrations (" + currentRegisteredCount + ")");
-            return;
-        }
+        if (hasError) return;
 
         Timestamp date = null;
         try {
@@ -448,8 +466,17 @@ public class ManageEventActivity extends AppCompatActivity {
         db.collection("events").document(eventID).update(updates)
                 .addOnSuccessListener(dr -> {
                     setLoading(false);
-                    notifyRegisteredStudentsOfUpdate(title);
-                    showSuccessDialog("Changes saved successfully!", "The event is now pending re-approval. Registered students have been notified.");
+
+                    // Dynamic Success Dialog based on originalStatus
+                    String successMsg;
+                    if ("approved".equals(originalStatus) || "active".equals(originalStatus)) {
+                        notifyRegisteredStudentsOfUpdate(title);
+                        successMsg = "The event is now pending re-approval. Registered students have been notified.";
+                    } else {
+                        successMsg = "Changes saved successfully! The event is now pending admin approval.";
+                    }
+
+                    showSuccessDialog("Changes saved successfully!", successMsg);
                 })
                 .addOnFailureListener(e -> {
                     setLoading(false);
@@ -498,7 +525,13 @@ public class ManageEventActivity extends AppCompatActivity {
                     batch.commit()
                             .addOnSuccessListener(v -> {
                                 setLoading(false);
-                                showSuccessDialog("Event deleted successfully!", "Registered students will be notified.");
+
+                                // Dynamic Delete Success Message based on originalStatus
+                                String successMsg = ("approved".equals(originalStatus) || "active".equals(originalStatus))
+                                        ? "Registered students will be notified."
+                                        : "The event has been removed from your history.";
+
+                                showSuccessDialog("Event deleted successfully!", successMsg);
                             })
                             .addOnFailureListener(e -> {
                                 setLoading(false);
@@ -555,9 +588,17 @@ public class ManageEventActivity extends AppCompatActivity {
      * Popup dialog asking event deletion confirmation
      */
     private void showDeleteConfirmDialog() {
+        // Dynamic Delete Confirm Dialog based on originalStatus
+        String message;
+        if ("approved".equals(originalStatus) || "active".equals(originalStatus)) {
+            message = "This cannot be undone. All " + currentRegisteredCount + " registered student(s) will be notified of event cancellation!";
+        } else {
+            message = "This cannot be undone. Are you sure you want to delete this event?";
+        }
+
         new AlertDialog.Builder(this)
                 .setTitle("Delete this event?")
-                .setMessage("This cannot be undone. All " + currentRegisteredCount + " registered student(s) will be notified of event cancellation!")
+                .setMessage(message)
                 .setPositiveButton("Yes, Delete!", ((dialog, which) -> deleteEvent()))
                 .setNegativeButton("No, Cancel!", null)
                 .show();

@@ -233,17 +233,6 @@
                     android:paddingHorizontal="12dp"
                     android:layout_marginBottom="16dp"/>
 
-                <TextView android:text="Society / Organizer Name" android:textColor="@color/text_dark" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                <EditText
-                    android:id="@+id/etSocietyName"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:background="@android:drawable/editbox_background"
-                    android:hint="e.g. LUMS Drama Club, ACM LUMS"
-                    android:inputType="textCapWords"
-                    android:paddingHorizontal="12dp"
-                    android:layout_marginBottom="16dp"/>
-
                 <TextView android:text="Ticket Price (Rs.) — leave 0 for FREE" android:textColor="@color/text_dark" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                 <EditText
                     android:id="@+id/etPrice"

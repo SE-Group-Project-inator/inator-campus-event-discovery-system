@@ -1,268 +1,626 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_event">
 
+    <!-- Main Content -->
     <LinearLayout
-        android:id="@+id/topHeader"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:background="@color/btn_eventmgr"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
+        <!-- Top App Bar -->
         <RelativeLayout
+            android:id="@+id/topAppBar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="64dp"
+            android:background="@drawable/bg_admin_header"
+            android:paddingStart="20dp"
+            android:paddingEnd="16dp">
 
+            <!-- Screen Title -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dashboard"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:letterSpacing="0.01"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Event Manager"
+                    android:textSize="12sp"
+                    android:textColor="#CCffffff"/>
+            </LinearLayout>
+
+            <!-- Notification Bell -->
             <ImageButton
                 android:id="@+id/btnNotifications"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Notifications"
-                android:scaleType="fitCenter"
-                android:src="@drawable/notificaiton" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="Event Manager"
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
-
-            <!-- LOGOUT BUTTON (right) -->
-            <ImageButton
-                android:id="@+id/btnLogout"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
                 android:layout_centerVertical="true"
                 android:layout_alignParentEnd="true"
-                android:src="@android:drawable/ic_lock_power_off"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Sign Out"
-                android:scaleType="fitCenter"
-                app:tint="@color/white" />
-
+                android:src="@drawable/notificaiton"
+                android:scaleType="centerInside" />
         </RelativeLayout>
 
-        <TextView
-            android:id="@+id/tvGreeting"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Hello, Manager!"
-            android:textColor="@color/white"
-            android:textSize="22sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:alpha="0.85"
-            android:text="Create and manage events on campus"
-            android:textColor="@color/white"
-            android:textSize="14sp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/bottomNav"
-        android:layout_below="@id/topHeader"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <androidx.cardview.widget.CardView
+        <!-- Scrollable Content -->
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp">
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:overScrollMode="never"
+            android:fillViewport="false">
 
-            <CalendarView
-                android:id="@+id/calendarView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:theme="@style/PurpleCalendarTheme" />
-        </androidx.cardview.widget.CardView>
-
-        <!-- Payment Verification quick-action -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/btnPaymentVerification"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:foreground="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="#4F46E5">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="14dp"
-                android:gravity="center_vertical">
-                <TextView
-                    android:layout_width="0dp"
+                android:orientation="vertical"
+                android:paddingBottom="24dp">
+
+                <!-- Welcome Banner -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Payment Verification Panel"
-                    android:textColor="#FFFFFF"
-                    android:textSize="15sp"
-                    android:textStyle="bold"/>
+                    android:background="@drawable/bg_admin_header"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="28dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvGreeting"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Good morning, Manager 👋"
+                        android:textSize="17sp"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Here is an overview of your events"
+                        android:textSize="13sp"
+                        android:textColor="#CCffffff"
+                        android:layout_marginTop="2dp"/>
+                </LinearLayout>
+
+                <!-- Overlapping Stat Cards -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:layout_marginTop="-16dp">
+
+                    <!-- Total Managed -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="0dp"
+                        android:layout_height="100dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="8dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="12dp">
+                            <TextView
+                                android:id="@+id/tvTotalManaged"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="32sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/btn_eventmgr"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Total"
+                                android:textSize="12sp"
+                                android:textColor="@color/text_grey"/>
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- This Month -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="0dp"
+                        android:layout_height="100dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="8dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="12dp">
+                            <TextView
+                                android:id="@+id/tvThisMonth"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="32sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/green_accept"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="This Month"
+                                android:textSize="12sp"
+                                android:textColor="@color/text_grey"/>
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Pending Approval -->
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="0dp"
+                        android:layout_height="100dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="8dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="12dp">
+                            <TextView
+                                android:id="@+id/tvPendingCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="32sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/admin_warning"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Pending"
+                                android:textSize="12sp"
+                                android:textColor="@color/text_grey"/>
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
+
+                <!-- Quick Actions Card -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="24dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Quick Actions"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_dark"
+                        android:layout_marginBottom="12dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <!-- Create Event -->
+                        <LinearLayout
+                            android:id="@+id/btnQuickCreate"
+                            android:layout_width="0dp"
+                            android:layout_height="80dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/bg_admin_card_purple"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="12dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="➕"
+                                android:textSize="22sp"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Create Event"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/white"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+
+                        <!-- Payments -->
+                        <LinearLayout
+                            android:id="@+id/btnQuickPayments"
+                            android:layout_width="0dp"
+                            android:layout_height="80dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/bg_admin_card_rose"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="12dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="💸"
+                                android:textSize="22sp"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Payments"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/white"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+
+                        <!-- Scan QR -->
+                        <LinearLayout
+                            android:id="@+id/btnQuickScanQR"
+                            android:layout_width="0dp"
+                            android:layout_height="80dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_admin_card_green"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="12dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="📷"
+                                android:textSize="22sp"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Scan QR"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/white"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Calendar Feed Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="24dp">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="2dp">
+
+                        <CalendarView
+                            android:id="@+id/calendarView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:theme="@style/PurpleCalendarTheme" />
+                    </androidx.cardview.widget.CardView>
+
+                    <TextView
+                        android:id="@+id/tvSelectedDateHeader"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:text="Events on Selected Date"
+                        android:textColor="@color/text_dark"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvDateEvents"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        android:clipToPadding="false"/>
+
+                    <TextView
+                        android:id="@+id/tvEmpty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:paddingTop="20dp"
+                        android:text="No events scheduled for this date."
+                        android:textColor="@color/text_dark"
+                        android:alpha="0.5"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Bottom Navigation -->
+        <LinearLayout
+            android:id="@+id/bottomNav"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_bottom_nav"
+            android:elevation="20dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <LinearLayout
+                android:id="@+id/navHome"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless">
+                <FrameLayout
+                    android:layout_width="56dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/bg_nav_item_active">
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_nav_dashboard"
+                        app:tint="@color/btn_eventmgr"/>
+                </FrameLayout>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="View →"
-                    android:textColor="#B3FFFFFF"
-                    android:textSize="13sp"/>
+                    android:text="Dashboard"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/btn_eventmgr"
+                    android:layout_marginTop="2dp"/>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
 
-        <TextView
-            android:id="@+id/tvSelectedDateHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:text="Events on Selected Date"
-            android:textColor="@color/text_dark"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            <LinearLayout
+                android:id="@+id/navEvents"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless">
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_nav_events"
+                    app:tint="@color/text_grey"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="My Events"
+                    android:textSize="10sp"
+                    android:textColor="@color/text_grey"
+                    android:layout_marginTop="3dp"/>
+            </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvDateEvents"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:clipToPadding="false"
-            android:paddingBottom="80dp" />
-
-        <TextView
-            android:id="@+id/tvEmpty"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="No events scheduled for this date."
-            android:textAlignment="center"
-            android:textColor="@color/text_dark"
-            android:alpha="0.5"
-            android:textSize="14sp"
-            android:visibility="gone" />
-
+            <!-- Profile Nav Button (Triggers Bottom Sheet) -->
+            <LinearLayout
+                android:id="@+id/navProfile"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless">
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_nav_profile"
+                    app:tint="@color/text_grey"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Profile"
+                    android:textSize="10sp"
+                    android:textColor="@color/text_grey"
+                    android:layout_marginTop="3dp"/>
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabCreate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/bottomNav"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
-        android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="@color/btn_eventmgr"
-        app:tint="@color/white" />
+    <!-- Manager Profile Bottom Sheet ===== -->
+    <FrameLayout
+        android:id="@+id/profileSheetScrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/admin_scrim"
+        android:visibility="gone"
+        android:elevation="22dp"/>
 
     <LinearLayout
-        android:id="@+id/bottomNav"
+        android:id="@+id/managerProfileSheet"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/bg_bottom_nav"
-        android:elevation="20dp"
-        android:orientation="horizontal"
-        android:paddingTop="4dp"
-        android:paddingBottom="8dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp">
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_bottom_sheet"
+        android:orientation="vertical"
+        android:paddingBottom="32dp"
+        android:translationY="1000dp"
+        android:elevation="24dp">
 
-        <!-- Home (active) -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="20dp"
+            android:background="@color/admin_divider"/>
+
         <LinearLayout
-            android:id="@+id/navHome"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:gravity="center"
-            android:orientation="vertical">
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="20dp">
+
+            <!-- Circular Avatar Adapter -->
             <FrameLayout
-                android:layout_width="56dp"
-                android:layout_height="32dp"
-                android:background="@drawable/bg_nav_item_active">
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="90dp"
+                    android:layout_height="90dp"
+                    app:cardCornerRadius="45dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="#E0E0E0">
+                    <ImageView
+                        android:id="@+id/imgSheetAvatar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_launcher_foreground"
+                        android:scaleType="centerCrop"
+                        android:clickable="true"
+                        android:focusable="true"/>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Small camera icon indicator -->
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_nav_dashboard"
-                    app:tint="@color/btn_eventmgr"/>
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="bottom|end"
+                    android:background="@drawable/circle_avatar_bg"
+                    android:padding="4dp"
+                    android:src="@android:drawable/ic_menu_camera"
+                    app:tint="@color/btn_eventmgr" />
             </FrameLayout>
+
             <TextView
+                android:id="@+id/tvSheetManagerName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Dashboard"
-                android:textColor="@color/btn_eventmgr"
-                android:textSize="10sp"
+                android:text="Manager Name"
+                android:textSize="20sp"
                 android:textStyle="bold"
-                android:layout_marginTop="2dp"/>
+                android:textColor="@color/text_dark"
+                android:layout_marginTop="12dp"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etSheetSocietyName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Society Name (Tap to edit)"
+                    android:inputType="text"
+                    android:imeOptions="actionDone"
+                    android:maxLines="1"
+                    android:textColor="@color/text_dark" />
+            </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
-        <!-- My Events -->
-        <LinearLayout
-            android:id="@+id/navEvents"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:gravity="center"
-            android:orientation="vertical">
-            <ImageView
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_nav_events"
-                app:tint="@color/admin_nav_inactive"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="My Events"
-                android:textColor="@color/admin_nav_inactive"
-                android:textSize="10sp"
-                android:layout_marginTop="3dp"/>
-        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/admin_divider"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"/>
 
-        <!-- Profile -->
         <LinearLayout
-            android:id="@+id/navProfile"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:gravity="center"
-            android:orientation="vertical">
-            <ImageView
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:src="@drawable/ic_nav_profile"
-                app:tint="@color/admin_nav_inactive"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Profile"
-                android:textColor="@color/admin_nav_inactive"
-                android:textSize="10sp"
-                android:layout_marginTop="3dp"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingTop="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="@drawable/bg_info_row"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:layout_marginBottom="16dp">
+                <TextView
+                    android:layout_width="24dp"
+                    android:layout_height="wrap_content"
+                    android:text="✉️"
+                    android:textSize="16sp"/>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="12dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Email"
+                        android:textSize="10sp"
+                        android:textColor="@color/text_grey"/>
+                    <TextView
+                        android:id="@+id/tvSheetEmail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="manager@campus.edu"
+                        android:textSize="14sp"
+                        android:textColor="@color/text_dark"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/btnSheetLogout"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="@drawable/bg_logout_btn"
+                android:gravity="center"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🚪"
+                    android:textSize="16sp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sign Out"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/red_decline"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-</RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
