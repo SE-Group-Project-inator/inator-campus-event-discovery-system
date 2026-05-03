@@ -28,6 +28,11 @@ jobs:
       - name: Run Tests
         run: ./gradlew test --continue
 
+      # Debug: print what XML files were actually generated
+      - name: List test result files
+        if: always()
+        run: find . -name "*.xml" -path "*/test-results/*" | sort
+
       - name: Upload Test Report
         if: always()
         uses: actions/upload-artifact@v4
@@ -35,11 +40,11 @@ jobs:
           name: unit-test-reports
           path: app/build/reports/tests/
 
-      # ── NEW: shows pass/fail per test in the Actions summary ──
       - name: Publish Test Results
         uses: dorny/test-reporter@v1
         if: always()
         with:
           name: Test Results
-          path: app/build/test-results/**/*.xml
+          path: "**/build/test-results/**/*.xml"   # ** prefix finds it regardless of exact path
           reporter: java-junit
+          fail-on-error: false                      # don't fail the whole workflow if reporter has issues
