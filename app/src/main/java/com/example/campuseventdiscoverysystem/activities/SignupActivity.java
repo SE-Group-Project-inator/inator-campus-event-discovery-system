@@ -255,6 +255,8 @@ public class SignupActivity extends AppCompatActivity {
                 extraData.put("studentId",  sid);
                 extraData.put("department", spinnerDept  != null ? spinnerDept.getText().toString()  : "");
                 extraData.put("batch",      spinnerBatch != null ? spinnerBatch.getText().toString() : "");
+                // Drives the post-login routing into StudentOnboardingActivity.
+                extraData.put("onboardingComplete", false);
             } else if ("event_manager".equals(selectedRole)) {
                 String sname = etSocietyName.getText().toString().trim();
                 if (TextUtils.isEmpty(sname)) { etSocietyName.setError("Society name required"); return; }

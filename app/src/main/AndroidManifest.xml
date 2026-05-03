@@ -26,14 +26,17 @@
         <!-- Keep MainActivity so teammates don't lose their work -->
         <activity android:name=".MainActivity"/>
 
-        <!-- Login — needed before we build it so app doesn't crash -->
-        <activity android:name=".activities.LoginActivity"/>
+        <!-- Login — pinned to a Light theme so dark-mode devices don't render
+             white text on the white form fields (boxBackgroundColor is forced white). -->
+        <activity android:name=".activities.LoginActivity"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
         <activity android:name=".activities.AdminDashboardActivity"
             android:theme="@style/Theme.Admin"/>
         <activity android:name=".activities.EventsListActivity"
             android:theme="@style/Theme.Admin"/>
         <activity android:name=".activities.PrivacySettingsActivity"/>
-        <activity android:name=".activities.SignupActivity"/>
+        <activity android:name=".activities.SignupActivity"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"/>
 
         <activity android:name=".activities.EventManagerDashboardActivity"/>
         <activity android:name=".activities.CreateEventActivity"/>
@@ -47,6 +50,10 @@
         <activity android:name=".activities.StudentProfileActivity" android:theme="@style/Theme.Student"/>
         <activity android:name=".activities.StudentHomeActivity" android:theme="@style/Theme.Student"/>
         <activity android:name=".activities.SearchActivity" android:theme="@style/Theme.Student"/>
+
+        <!-- US-22: Personalised Recommendations + first-login interest capture -->
+        <activity android:name=".activities.StudentOnboardingActivity" android:theme="@style/Theme.Student"/>
+        <activity android:name=".activities.RecommendationsActivity" android:theme="@style/Theme.Student"/>
 
         <!-- US-10: Trending Events (Student home) -->
         <activity android:name=".activities.TrendingEventsActivity"/>

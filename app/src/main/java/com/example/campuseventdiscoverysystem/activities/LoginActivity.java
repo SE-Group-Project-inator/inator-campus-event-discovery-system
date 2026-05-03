@@ -356,7 +356,13 @@ public class LoginActivity extends AppCompatActivity {
                             intent = new Intent(this, AdminDashboardActivity.class);
                             break;
                         case "student":
-                            intent = new Intent(this, StudentHomeActivity.class);
+                            // First-login students must complete interest onboarding
+                            // before recommendations can show anything useful.
+                            Boolean done = doc.getBoolean("onboardingComplete");
+                            intent = new Intent(this,
+                                    Boolean.TRUE.equals(done)
+                                            ? StudentHomeActivity.class
+                                            : StudentOnboardingActivity.class);
                             break;
                         case "event_manager":
                             intent = new Intent(this, EventManagerDashboardActivity.class);
