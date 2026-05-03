@@ -253,7 +253,7 @@
         </LinearLayout>
         <LinearLayout android:id="@+id/navTickets" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:background="?attr/selectableItemBackgroundBorderless">
             <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_nav_ticket" app:tint="#94A3B8"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Payments" android:textSize="10sp" android:textColor="#94A3B8" android:layout_marginTop="3dp"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tickets" android:textSize="10sp" android:textColor="#94A3B8" android:layout_marginTop="3dp"/>
         </LinearLayout>
         <LinearLayout android:id="@+id/navProfile" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:background="?attr/selectableItemBackgroundBorderless">
             <FrameLayout android:layout_width="48dp" android:layout_height="32dp" android:background="@drawable/bg_nav_item_active_student">

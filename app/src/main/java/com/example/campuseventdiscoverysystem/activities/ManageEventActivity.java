@@ -454,6 +454,10 @@ public class ManageEventActivity extends AppCompatActivity {
         updates.put("startTime", startTime);
         updates.put("endTime", endTime);
         updates.put("capacity", capacity);
+            // Save waitlist enabled state
+            androidx.appcompat.widget.SwitchCompat switchWaitlist = findViewById(R.id.switchWaitlist);
+            boolean waitlistEnabled = switchWaitlist != null && switchWaitlist.isChecked();
+            updates.put("waitlistEnabled", waitlistEnabled);
         updates.put("venue", venue);
         updates.put("category", category);
         updates.put("price", price);

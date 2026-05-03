@@ -149,15 +149,16 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
                                             .delete();
 
                                     if (!wasWaitlisted) {
+                                        // Check for waitlisted users to promote. Avoid orderBy to
+                                        // prevent requiring a composite Firestore index.
                                         db.collection("rsvps")
                                                 .whereEqualTo("eventId", eventId)
                                                 .whereEqualTo("status", "waitlisted")
-                                                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.ASCENDING)
                                                 .limit(1)
                                                 .get()
                                                 .addOnSuccessListener(querySnapshots -> {
-
                                                     if (!querySnapshots.isEmpty()) {
+                                                        // Promote the first waitlisted user — count stays same
                                                         var waitlistDoc = querySnapshots.getDocuments().get(0);
                                                         String promotedRsvpId = waitlistDoc.getId();
                                                         String promotedUserId = waitlistDoc.getString("userId");
@@ -168,7 +169,6 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
                                                         java.util.Map<String, Object> attendee = new java.util.HashMap<>();
                                                         attendee.put("userId", promotedUserId);
                                                         attendee.put("joinedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
-
                                                         db.collection("event_attendees").document(eventId)
                                                                 .collection("attendees").document(promotedUserId)
                                                                 .set(attendee);
@@ -178,21 +178,23 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
                                                         notif.put("message", "A spot opened up! You are now confirmed for \"" + title + "\".");
                                                         notif.put("read", false);
                                                         notif.put("timestamp", com.google.firebase.firestore.FieldValue.serverTimestamp());
-
                                                         db.collection("users").document(promotedUserId)
                                                                 .collection("notifications")
                                                                 .add(notif);
-
                                                     } else {
-                                                        db.collection("events").document(eventId)
-                                                                .update("registeredCount",
-                                                                        com.google.firebase.firestore.FieldValue.increment(-1));
+                                                        // No waitlisted users — recalculate from actual rsvps
+                                                        recalculateRegisteredCount(eventId);
                                                     }
-
+                                                    finishFlow();
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    // Waitlist query failed — still recalculate
+                                                    recalculateRegisteredCount(eventId);
                                                     finishFlow();
                                                 });
 
                                     } else {
+                                        // Was waitlisted — no count change needed
                                         finishFlow();
                                     }
                                 });
@@ -210,4 +212,24 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+    /** Recalculates registeredCount from actual confirmed rsvps, clamped to [0, capacity]. */
+    private void recalculateRegisteredCount(String eventId) {
+        if (eventId == null) return;
+        db.collection("rsvps")
+                .whereEqualTo("eventId", eventId)
+                .whereEqualTo("status", "confirmed")
+                .get()
+                .addOnSuccessListener(snap -> {
+                    int trueCount = snap.size();
+                    db.collection("events").document(eventId).get()
+                            .addOnSuccessListener(evDoc -> {
+                                Long cap = evDoc.getLong("capacity");
+                                int clamped = cap != null && cap > 0
+                                        ? Math.min(trueCount, cap.intValue()) : trueCount;
+                                db.collection("events").document(eventId)
+                                        .update("registeredCount", Math.max(0, clamped));
+                            });
+                });
+    }
+
 }

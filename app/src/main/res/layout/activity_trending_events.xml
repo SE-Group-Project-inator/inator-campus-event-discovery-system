@@ -8,61 +8,42 @@
     android:background="#EBF8F5">
 
     <!-- Header -->
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="76dp"
-        android:background="#0D9488"
-        android:paddingTop="28dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="16dp">
-
-        <ImageButton
-            android:id="@+id/btnBack"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_centerVertical="true"
-            android:layout_alignParentStart="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_arrow_back"
-            android:contentDescription="Back"
-            app:tint="#FFFFFF"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Trending Events"
-            android:textSize="17sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"/>
-    </RelativeLayout>
-
-    <!-- Section Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="8dp">
+        android:background="#0D9488"
+        android:paddingTop="44dp"
+        android:paddingBottom="20dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Top Events This Week"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#134E4A"/>
+        <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:background="#1AFFFFFF"
+                android:src="@drawable/ic_arrow_back"
+                android:contentDescription="Back"
+                android:padding="8dp"
+                app:tint="#FFFFFF"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Trending Events"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"/>
+        </RelativeLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Ranked by student registrations"
-            android:textSize="12sp"
-            android:alpha="0.6"
-            android:textColor="@color/text_dark"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="14dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🔥 Top Events This Week" android:textSize="18sp" android:textStyle="bold" android:textColor="#FFFFFF"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="Ranked by student registrations" android:textSize="12sp" android:textColor="#B2F0EB"/>
+        </LinearLayout>
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -70,9 +51,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="8dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="12dp"
         android:paddingBottom="8dp"
         android:clipToPadding="false"/>
 
@@ -83,13 +64,12 @@
         android:gravity="center"
         android:text="No active events right now.\nCheck back soon!"
         android:textAlignment="center"
-        android:textColor="@color/text_dark"
-        android:alpha="0.5"
+        android:textColor="#94A3B8"
         android:textSize="14sp"
         android:padding="32dp"
         android:visibility="gone"/>
 
-    <!-- ══════════════ PREMIUM BOTTOM NAV — STUDENT ══════════════ -->
+    <!-- Bottom Nav -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="72dp"
@@ -100,24 +80,27 @@
         android:paddingBottom="8dp"
         android:paddingStart="8dp"
         android:paddingEnd="8dp">
+
         <LinearLayout android:id="@+id/navHome" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:background="?attr/selectableItemBackgroundBorderless">
-            <FrameLayout android:layout_width="48dp" android:layout_height="32dp" android:background="@drawable/bg_nav_item_active_student">
-                <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_gravity="center" android:src="@drawable/ic_nav_home" app:tint="#0D9488"/>
-            </FrameLayout>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Home" android:textSize="10sp" android:textStyle="bold" android:textColor="#0D9488" android:layout_marginTop="2dp"/>
+            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_nav_home" app:tint="#94A3B8"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Home" android:textSize="10sp" android:textColor="#94A3B8" android:layout_marginTop="3dp"/>
         </LinearLayout>
+
         <LinearLayout android:id="@+id/navSearch" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:background="?attr/selectableItemBackgroundBorderless">
             <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_nav_search" app:tint="#94A3B8"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Explore" android:textSize="10sp" android:textColor="#94A3B8" android:layout_marginTop="3dp"/>
         </LinearLayout>
+
         <LinearLayout android:id="@+id/navTickets" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:background="?attr/selectableItemBackgroundBorderless">
-            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_nav_ticket" app:tint="#94A3B8"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Payments" android:textSize="10sp" android:textColor="#94A3B8" android:layout_marginTop="3dp"/>
+            <FrameLayout android:layout_width="48dp" android:layout_height="32dp" android:background="@drawable/bg_nav_item_active_student">
+                <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_gravity="center" android:src="@drawable/ic_nav_ticket" app:tint="#0D9488"/>
+            </FrameLayout>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tickets" android:textSize="10sp" android:textStyle="bold" android:textColor="#0D9488" android:layout_marginTop="2dp"/>
         </LinearLayout>
+
         <LinearLayout android:id="@+id/navProfile" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:background="?attr/selectableItemBackgroundBorderless">
             <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_nav_profile" app:tint="#94A3B8"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Profile" android:textSize="10sp" android:textColor="#94A3B8" android:layout_marginTop="3dp"/>
         </LinearLayout>
-
     </LinearLayout>
 </LinearLayout>

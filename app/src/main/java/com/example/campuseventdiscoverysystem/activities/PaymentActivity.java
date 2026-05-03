@@ -331,7 +331,23 @@ public class PaymentActivity extends AppCompatActivity {
 
                     if (!isWaitlist) {
                         // Only increment count and add to roster if they secured a spot
-                        db.collection("events").document(eventId).update("registeredCount", FieldValue.increment(1));
+                        // Recalculate from actual rsvps to stay accurate
+                        db.collection("rsvps")
+                                .whereEqualTo("eventId", eventId)
+                                .whereEqualTo("status", "confirmed")
+                                .get()
+                                .addOnSuccessListener(snap -> {
+                                    int trueCount = snap.size();
+                                    // Clamp to [0, capacity]
+                                    db.collection("events").document(eventId).get()
+                                            .addOnSuccessListener(evDoc -> {
+                                                Long cap = evDoc.getLong("capacity");
+                                                int clamped = cap != null && cap > 0
+                                                        ? Math.min(trueCount, cap.intValue()) : trueCount;
+                                                db.collection("events").document(eventId)
+                                                        .update("registeredCount", Math.max(0, clamped));
+                                            });
+                                });
 
                         // Write to event_attendees
                         Map<String, Object> attendee = new HashMap<>();

@@ -41,6 +41,7 @@ public class StudentHomeActivity extends BaseSessionActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private ListenerRegistration upcomingEventsListener;
+    private ListenerRegistration registeredCountListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -311,6 +312,7 @@ public class StudentHomeActivity extends BaseSessionActivity {
     protected void onStop() {
         super.onStop();
         if (upcomingEventsListener != null) upcomingEventsListener.remove();
+        if (registeredCountListener != null) registeredCountListener.remove();
     }
 
     private void loadGreeting() {
@@ -383,12 +385,35 @@ public class StudentHomeActivity extends BaseSessionActivity {
     private void loadRegisteredCount() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) { tvRegistered.setText("0"); return; }
-        db.collection("rsvps")
+        // Only count FUTURE confirmed RSVPs to match what the Tickets screen shows
+        com.google.firebase.Timestamp now = new com.google.firebase.Timestamp(new java.util.Date());
+        registeredCountListener = db.collection("rsvps")
                 .whereEqualTo("userId", user.getUid())
                 .whereEqualTo("status", "confirmed")
-                .get()
-                .addOnSuccessListener(query -> tvRegistered.setText(String.valueOf(query.size())))
-                .addOnFailureListener(e -> tvRegistered.setText("0"));
+                .addSnapshotListener((query, error) -> {
+                    if (error != null || query == null) { tvRegistered.setText("0"); return; }
+                    // Fan-out: check each event's date to only count future events
+                    java.util.List<com.google.firebase.firestore.DocumentSnapshot> docs = query.getDocuments();
+                    if (docs.isEmpty()) { tvRegistered.setText("0"); return; }
+                    java.util.concurrent.atomic.AtomicInteger count = new java.util.concurrent.atomic.AtomicInteger(0);
+                    java.util.concurrent.atomic.AtomicInteger remaining = new java.util.concurrent.atomic.AtomicInteger(docs.size());
+                    for (com.google.firebase.firestore.DocumentSnapshot rsvp : docs) {
+                        String eventId = rsvp.getString("eventId");
+                        if (eventId == null) {
+                            if (remaining.decrementAndGet() == 0) tvRegistered.setText(String.valueOf(count.get()));
+                            continue;
+                        }
+                        db.collection("events").document(eventId).get()
+                                .addOnSuccessListener(eventDoc -> {
+                                    com.google.firebase.Timestamp date = eventDoc.getTimestamp("date");
+                                    if (date != null && date.compareTo(now) >= 0) count.incrementAndGet();
+                                    if (remaining.decrementAndGet() == 0) tvRegistered.setText(String.valueOf(count.get()));
+                                })
+                                .addOnFailureListener(e -> {
+                                    if (remaining.decrementAndGet() == 0) tvRegistered.setText(String.valueOf(count.get()));
+                                });
+                    }
+                });
     }
 
     private void loadSavedCount() {

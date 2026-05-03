@@ -577,7 +577,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Payments"
+                android:text="Tickets"
                 android:textSize="10sp"
                 android:textColor="#94A3B8"
                 android:layout_marginTop="3dp"/>

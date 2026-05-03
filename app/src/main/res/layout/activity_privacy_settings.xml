@@ -11,7 +11,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="@color/btn_student"
+        android:background="#0D9488"
         android:paddingLeft="8dp"
         android:paddingRight="8dp">
 
