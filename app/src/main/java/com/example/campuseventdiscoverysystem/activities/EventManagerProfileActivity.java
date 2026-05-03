@@ -2,14 +2,21 @@ package com.example.campuseventdiscoverysystem.activities;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Base64;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.cardview.widget.CardView;
 
 import com.example.campuseventdiscoverysystem.R;
@@ -17,8 +24,9 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Event Manager Profile Activity
@@ -32,6 +40,7 @@ public class EventManagerProfileActivity extends BaseSessionActivity {
 
     // UI Elements
     private ImageButton btnNotificationsTop;
+    private ImageView imgAvatar;
     private TextView tvProfileName, tvProfileEmail;
 
     // Statistics Counters
@@ -41,7 +50,16 @@ public class EventManagerProfileActivity extends BaseSessionActivity {
     private EditText etSocietyName;
 
     // Quick Access Cards
-    private CardView btnQuickCreate, btnQuickHistory, btnPrivacySettings, btnSignOut;
+    private CardView btnQuickCreate, btnQuickHistory, btnSignOut;
+
+    // Image Picker Launcher for Profile Picture
+    private final ActivityResultLauncher<Intent> imagePickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Uri selectedImageUri = result.getData().getData();
+                    uploadProfilePicture(selectedImageUri);
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,8 +86,8 @@ public class EventManagerProfileActivity extends BaseSessionActivity {
      * Maps all the XML UI components to Java variables
      */
     private void bindViews() {
-
         btnNotificationsTop = findViewById(R.id.btnNotificationsTop);
+        imgAvatar = findViewById(R.id.imgAvatar);
         tvProfileName = findViewById(R.id.tvProfileName);
         tvProfileEmail = findViewById(R.id.tvProfileEmail);
         tvManagedCount = findViewById(R.id.tvManagedCount);
@@ -78,18 +96,15 @@ public class EventManagerProfileActivity extends BaseSessionActivity {
         etSocietyName = findViewById(R.id.etSocietyName);
         btnQuickCreate = findViewById(R.id.btnQuickCreate);
         btnQuickHistory = findViewById(R.id.btnQuickHistory);
-        btnPrivacySettings = findViewById(R.id.btnPrivacySettings);
         btnSignOut = findViewById(R.id.btnSignOut);
     }
 
     /**
-     * Fetches the manager's name, email, and society name from database
+     * Fetches the manager's name, email, society name, and avatar from the database
      */
     private void loadProfileData() {
-
         // Ensure user is logged in
-        if (mAuth.getCurrentUser() == null)
-            return;
+        if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
 
         // Fetch the details from the database
@@ -98,14 +113,24 @@ public class EventManagerProfileActivity extends BaseSessionActivity {
                 String name = doc.getString("name");
                 String email = doc.getString("email");
                 String society = doc.getString("societyName");
+                String profilePicBase64 = doc.getString("profilePicture");
 
-                // Update UI if the data exists in the database
-                if (name != null)
-                    tvProfileName.setText(name);
-                if (email != null)
-                    tvProfileEmail.setText(email);
-                if (society != null)
-                    etSocietyName.setText(society);
+                // Update UI
+                if (name != null) tvProfileName.setText(name);
+                if (email != null) tvProfileEmail.setText(email);
+                if (society != null) etSocietyName.setText(society);
+
+                // Decode and display Profile Picture if it exists
+                if (profilePicBase64 != null && profilePicBase64.startsWith("data:image")) {
+                    try {
+                        String cleanBase64 = profilePicBase64.substring(profilePicBase64.indexOf(",") + 1);
+                        byte[] decodedString = Base64.decode(cleanBase64, Base64.DEFAULT);
+                        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                        imgAvatar.setImageBitmap(decodedByte);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }).addOnFailureListener(e -> {
             Toast.makeText(this, "Failed to load profile data!", Toast.LENGTH_SHORT).show();
@@ -113,14 +138,13 @@ public class EventManagerProfileActivity extends BaseSessionActivity {
     }
 
     /**
-     * Fetches statistics for the profile cards
+     * Fetches statistics for the profile cards (Managed, This Month, Followers)
      */
     private void loadStatistics() {
-        if (mAuth.getCurrentUser() == null)
-            return;
+        if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
 
-        // Get current month and year
+        // Get Event Statistics (Total and This Month)
         Calendar now = Calendar.getInstance();
         int currentMonth = now.get(Calendar.MONTH);
         int currentYear = now.get(Calendar.YEAR);
@@ -142,9 +166,7 @@ public class EventManagerProfileActivity extends BaseSessionActivity {
                         Timestamp dateTs = doc.getTimestamp("date");
                         if (dateTs != null) {
                             eventCal.setTime(dateTs.toDate());
-                            int eventMonth = eventCal.get(Calendar.MONTH);
-                            int eventYear = eventCal.get(Calendar.YEAR);
-                            if (eventMonth == currentMonth && eventYear == currentYear) {
+                            if (eventCal.get(Calendar.MONTH) == currentMonth && eventCal.get(Calendar.YEAR) == currentYear) {
                                 thisMonthCount++;
                             }
                         }
@@ -153,16 +175,41 @@ public class EventManagerProfileActivity extends BaseSessionActivity {
                     tvThisMonthCount.setText(String.valueOf(thisMonthCount));
                 });
 
-        // Will implement the follower count feature here later
+        // Get Followers Count
+        db.collection("users").document(uid).collection("followers").get()
+                .addOnSuccessListener(snapshots -> {
+                    tvFollowersCount.setText(String.valueOf(snapshots.size()));
+                })
+                .addOnFailureListener(e -> tvFollowersCount.setText("0"));
     }
 
     /**
      * Sets up the listeners for the interactive elements
      */
     private void setupInteractions() {
+        String uid = mAuth.getCurrentUser().getUid();
 
-        // Will implement the society name change feature later
+        // Trigger Image Picker when avatar is clicked
+        imgAvatar.setOnClickListener(v -> {
+            Intent pick = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            pick.setType("image/*");
+            imagePickerLauncher.launch(pick);
+        });
+
+        // Save Society Name when the "Done" or "Enter" button is pressed on the keyboard
         etSocietyName.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                String newSocietyName = etSocietyName.getText().toString().trim();
+
+                db.collection("users").document(uid)
+                        .update("societyName", newSocietyName)
+                        .addOnSuccessListener(a -> {
+                            Toast.makeText(this, "Society name updated successfully!", Toast.LENGTH_SHORT).show();
+                            etSocietyName.clearFocus(); // Remove cursor
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(this, "Failed to update society name.", Toast.LENGTH_SHORT).show());
+                return true;
+            }
             return false;
         });
 
@@ -171,29 +218,55 @@ public class EventManagerProfileActivity extends BaseSessionActivity {
             Toast.makeText(this, "Will set to notifications screen!", Toast.LENGTH_SHORT).show();
         });
 
-        // Create Event Quick Access Card
-        btnQuickCreate.setOnClickListener(v -> {
-            startActivity(new Intent(this, CreateEventActivity.class));
-        });
-
-        // Events History Quick Access Card
-        btnQuickHistory.setOnClickListener(v -> {
-            startActivity(new Intent(this, EventManagerEventsActivity.class));
-        });
-
-        // Privacy Settings Quick Access Card — navigate to shared PrivacySettingsActivity
-        btnPrivacySettings.setOnClickListener(v ->
-                startActivity(new Intent(this, PrivacySettingsActivity.class))
-        );
+        // Quick Access Cards
+        btnQuickCreate.setOnClickListener(v -> startActivity(new Intent(this, ManageEventActivity.class)));
+        btnQuickHistory.setOnClickListener(v -> startActivity(new Intent(this, EventManagerEventsActivity.class)));
 
         // Sign Out Button
         btnSignOut.setOnClickListener(v -> {
             mAuth.signOut();
-
-            // Route back to the Role Selection screen
             startActivity(new Intent(this, RoleSelectActivity.class));
             finish();
         });
+    }
+
+    /**
+     * Converts the selected image to a Base64 string and uploads it to Firestore.
+     */
+    private void uploadProfilePicture(Uri imageUri) {
+        if (mAuth.getCurrentUser() == null) return;
+        String uid = mAuth.getCurrentUser().getUid();
+
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(imageUri);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) baos.write(buffer, 0, bytesRead);
+            inputStream.close();
+
+            byte[] imageBytes = baos.toByteArray();
+
+            // Basic compression check (prevent exceeding Firestore 1MB limit)
+            if (imageBytes.length > 800_000) {
+                Toast.makeText(this, "Image too large. Please select a smaller picture.", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            String base64Image = "data:image/jpeg;base64," + Base64.encodeToString(imageBytes, Base64.DEFAULT);
+
+            db.collection("users").document(uid)
+                    .update("profilePicture", base64Image)
+                    .addOnSuccessListener(a -> {
+                        Toast.makeText(this, "Profile picture updated!", Toast.LENGTH_SHORT).show();
+                        // Instantly show the new image
+                        imgAvatar.setImageURI(imageUri);
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(this, "Failed to save profile picture.", Toast.LENGTH_SHORT).show());
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Error processing image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**

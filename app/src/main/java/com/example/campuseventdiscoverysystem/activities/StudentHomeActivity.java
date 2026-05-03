@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.campuseventdiscoverysystem.R;
 import com.example.campuseventdiscoverysystem.activities.MyPaymentsActivity;
+import com.example.campuseventdiscoverysystem.models.Event;
+import com.example.campuseventdiscoverysystem.recommendations.RecommendationEngine;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,14 +26,17 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class StudentHomeActivity extends BaseSessionActivity {
 
-    private TextView tvEventsThisWeek, tvRegistered, tvSaved, tvGreeting;
+    private static final int HOME_RECS_PREVIEW = 3;
+
+    private TextView tvEventsThisWeek, tvRegistered, tvSaved, tvGreeting, tvRecsReason;
     private ImageButton btnNotification;
     private LinearLayout navHome, navSearch, navTickets, navProfile;
-    private LinearLayout upcomingEventsList;
+    private LinearLayout upcomingEventsList, recsList;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -55,12 +60,27 @@ public class StudentHomeActivity extends BaseSessionActivity {
         navTickets         = findViewById(R.id.navTickets);
         navProfile         = findViewById(R.id.navProfile);
         upcomingEventsList = findViewById(R.id.upcomingEventsList);
+        recsList           = findViewById(R.id.recsList);
+        tvRecsReason       = findViewById(R.id.tvRecsReason);
 
         loadGreeting();
         loadEventsThisWeek();
         loadRegisteredCount();
         loadSavedCount();
         listenToUpcomingEvents();
+        loadRecommendationsPreview();
+
+        TextView tvSeeAllRecs = findViewById(R.id.tvSeeAllRecs);
+        if (tvSeeAllRecs != null) {
+            tvSeeAllRecs.setOnClickListener(v ->
+                    startActivity(new Intent(this, RecommendationsActivity.class)));
+        }
+
+        View cardCampusAssistant = findViewById(R.id.cardCampusAssistant);
+        if (cardCampusAssistant != null) {
+            cardCampusAssistant.setOnClickListener(v ->
+                    startActivity(new Intent(this, CampusAssistantActivity.class)));
+        }
 
         View cardMyPayments = findViewById(R.id.cardMyPayments);
         if (cardMyPayments != null) {
@@ -79,6 +99,10 @@ public class StudentHomeActivity extends BaseSessionActivity {
         View cardQuickProfile = findViewById(R.id.cardQuickProfile);
         if (cardQuickProfile != null) cardQuickProfile.setOnClickListener(v ->
                 startActivity(new Intent(this, StudentProfileActivity.class)));
+
+        View cardQuickSocieties = findViewById(R.id.cardQuickSocieties);
+        if (cardQuickSocieties != null) cardQuickSocieties.setOnClickListener(v ->
+                startActivity(new Intent(this, SocietiesActivity.class)));
 
         btnNotification.setOnClickListener(v ->
                 startActivity(new Intent(this, NotificationsActivity.class)));
@@ -216,14 +240,158 @@ public class StudentHomeActivity extends BaseSessionActivity {
                 });
     }
 
+    private void loadRecommendationsPreview() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return;
+
+        RecommendationEngine engine = new RecommendationEngine(db, HOME_RECS_PREVIEW);
+        engine.getRecommendations(user.getUid(), new RecommendationEngine.Callback() {
+            @Override
+            public void onRecommendations(List<Event> recs, String reason) {
+                if (isFinishing() || isDestroyed()) return;
+                recsList.removeAllViews();
+
+                if (recs.isEmpty()) {
+                    tvRecsReason.setText("RSVP to a few events and we'll start picking for you.");
+                    return;
+                }
+
+                tvRecsReason.setText(reason);
+                for (Event e : recs) recsList.addView(buildRecCard(e));
+            }
+
+            @Override
+            public void onError(Exception e) {
+                if (isFinishing() || isDestroyed()) return;
+                tvRecsReason.setText("Couldn't load recommendations.");
+            }
+        });
+    }
+
+    private View buildRecCard(Event e) {
+        View v = LayoutInflater.from(this).inflate(R.layout.item_upcoming, recsList, false);
+        TextView tvTitle = v.findViewById(R.id.tvTitle);
+        TextView tvLocation = v.findViewById(R.id.tvLocation);
+        TextView tvDay = v.findViewById(R.id.tvDay);
+        TextView tvMonth = v.findViewById(R.id.tvMonth);
+        TextView tvPrice = v.findViewById(R.id.tvPrice);
+
+        if (tvTitle != null) tvTitle.setText(e.getTitle());
+        if (tvLocation != null) tvLocation.setText("📍 " + (e.getVenue() != null ? e.getVenue() : ""));
+        if (tvPrice != null) tvPrice.setText(e.getPriceDisplay());
+
+        Timestamp ts = e.getDate();
+        if (ts != null) {
+            Date d = ts.toDate();
+            if (tvDay != null)
+                tvDay.setText(new SimpleDateFormat("dd", Locale.getDefault()).format(d));
+            if (tvMonth != null)
+                tvMonth.setText(new SimpleDateFormat("MMM", Locale.getDefault()).format(d).toUpperCase());
+        }
+
+        long dateMillis = ts != null ? ts.toDate().getTime() : 0L;
+        v.setOnClickListener(view -> {
+            Intent intent = new Intent(this, EventDetailActivity.class);
+            intent.putExtra("eventId", e.getId());
+            intent.putExtra("eventTitle", e.getTitle());
+            intent.putExtra("eventVenue", e.getVenue());
+            intent.putExtra("eventDescription", e.getDescription());
+            intent.putExtra("eventCapacity", e.getCapacity());
+            intent.putExtra("eventRegistered", e.getRegisteredCount());
+            intent.putExtra("eventDateMillis", dateMillis);
+            intent.putExtra("eventOrganizerName", e.getSubmittedByName());
+            intent.putExtra("eventOrganizerEmail", e.getSubmittedByEmail());
+            intent.putExtra("eventTicketPrice", e.getPrice());
+            startActivity(intent);
+        });
+        return v;
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
         if (upcomingEventsListener != null) upcomingEventsListener.remove();
     }
 
-    private void loadGreeting() {}
-    private void loadEventsThisWeek() {}
-    private void loadRegisteredCount() {}
-    private void loadSavedCount() {}
+    private void loadGreeting() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return;
+        db.collection("users").document(user.getUid()).get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        String name = doc.getString("name");
+                        if (name != null) tvGreeting.setText("Hello, " + name.split(" ")[0] + "!");
+                    }
+                });
+    }
+
+    private void loadEventsThisWeek() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) { tvEventsThisWeek.setText("0"); return; }
+
+        Calendar startOfWeek = Calendar.getInstance();
+        startOfWeek.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        startOfWeek.set(Calendar.HOUR_OF_DAY, 0);
+        startOfWeek.set(Calendar.MINUTE, 0);
+        startOfWeek.set(Calendar.SECOND, 0);
+        startOfWeek.set(Calendar.MILLISECOND, 0);
+        Calendar endOfWeek = (Calendar) startOfWeek.clone();
+        endOfWeek.add(Calendar.DAY_OF_WEEK, 6);
+        endOfWeek.set(Calendar.HOUR_OF_DAY, 23);
+        endOfWeek.set(Calendar.MINUTE, 59);
+        endOfWeek.set(Calendar.SECOND, 59);
+
+        Timestamp weekStart = new Timestamp(startOfWeek.getTime());
+        Timestamp weekEnd   = new Timestamp(endOfWeek.getTime());
+
+        db.collection("rsvps")
+                .whereEqualTo("userId", user.getUid())
+                .whereEqualTo("status", "confirmed")
+                .get()
+                .addOnSuccessListener(rsvpQuery -> {
+                    java.util.List<DocumentSnapshot> docs = rsvpQuery.getDocuments();
+                    if (docs.isEmpty()) { tvEventsThisWeek.setText("0"); return; }
+
+                    java.util.concurrent.atomic.AtomicInteger count     = new java.util.concurrent.atomic.AtomicInteger(0);
+                    java.util.concurrent.atomic.AtomicInteger remaining = new java.util.concurrent.atomic.AtomicInteger(docs.size());
+
+                    for (DocumentSnapshot rsvp : docs) {
+                        String eventId = rsvp.getString("eventId");
+                        if (eventId == null) {
+                            if (remaining.decrementAndGet() == 0) tvEventsThisWeek.setText(String.valueOf(count.get()));
+                            continue;
+                        }
+                        db.collection("events").document(eventId).get()
+                                .addOnSuccessListener(eventDoc -> {
+                                    Timestamp eventDate = eventDoc.getTimestamp("date");
+                                    if (eventDate != null
+                                            && eventDate.compareTo(weekStart) >= 0
+                                            && eventDate.compareTo(weekEnd) <= 0)
+                                        count.incrementAndGet();
+                                    if (remaining.decrementAndGet() == 0)
+                                        tvEventsThisWeek.setText(String.valueOf(count.get()));
+                                })
+                                .addOnFailureListener(e -> {
+                                    if (remaining.decrementAndGet() == 0)
+                                        tvEventsThisWeek.setText(String.valueOf(count.get()));
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> tvEventsThisWeek.setText("0"));
+    }
+
+    private void loadRegisteredCount() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) { tvRegistered.setText("0"); return; }
+        db.collection("rsvps")
+                .whereEqualTo("userId", user.getUid())
+                .whereEqualTo("status", "confirmed")
+                .get()
+                .addOnSuccessListener(query -> tvRegistered.setText(String.valueOf(query.size())))
+                .addOnFailureListener(e -> tvRegistered.setText("0"));
+    }
+
+    private void loadSavedCount() {
+        tvSaved.setText("0");
+    }
 }

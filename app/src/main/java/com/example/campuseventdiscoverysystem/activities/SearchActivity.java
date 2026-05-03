@@ -152,7 +152,7 @@ public class SearchActivity extends AppCompatActivity {
             finish();
         });
         navTickets.setOnClickListener(v ->
-                startActivity(new Intent(this, MyPaymentsActivity.class))
+                startActivity(new Intent(this, TicketsActivity.class))
         );
         navProfile.setOnClickListener(v ->
                 startActivity(new Intent(this, StudentProfileActivity.class))

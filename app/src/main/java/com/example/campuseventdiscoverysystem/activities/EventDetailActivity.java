@@ -3,6 +3,7 @@ package com.example.campuseventdiscoverysystem.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -21,15 +22,15 @@ import java.util.Locale;
  */
 public class EventDetailActivity extends AppCompatActivity {
 
-    /** Loads real attendee count from event_attendees sub-collection */
+    /** Counts confirmed RSVPs from the canonical `rsvps` collection. */
     private void loadAttendeeCount() {
         String eventId = getIntent().getStringExtra("eventId");
         if (eventId == null) return;
 
         FirebaseFirestore.getInstance()
-                .collection("event_attendees")
-                .document(eventId)
-                .collection("attendees")
+                .collection("rsvps")
+                .whereEqualTo("eventId", eventId)
+                .whereEqualTo("status", "confirmed")
                 .get()
                 .addOnSuccessListener(snap -> {
                     int count = snap.size();
@@ -171,12 +172,52 @@ public class EventDetailActivity extends AppCompatActivity {
         double ticketPrice = getIntent().getDoubleExtra("eventTicketPrice", 0.0);
         String formattedDate = eventDate != null ? eventDate : "";
 
+        // Get capacity and registered count
+        int capacity = getIntent().getIntExtra("eventCapacity", 0);
+        int registered = getIntent().getIntExtra("eventRegistered", 0);
+
+        android.widget.Button btnConfirmRsvp = findViewById(R.id.btnConfirmRsvp);
+        android.widget.CheckBox cbWaitlist = findViewById(R.id.cbWaitlist);
+
+        // Auto-close logic: If the event is full, disable the button by default
+        if (capacity > 0 && registered >= capacity) {
+            btnConfirmRsvp.setText("Event Full");
+            btnConfirmRsvp.setEnabled(false);
+            btnConfirmRsvp.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.GRAY));
+
+            // Make the button react to the waitlist checkbox
+            if (cbWaitlist != null) {
+                cbWaitlist.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    if (isChecked) {
+                        btnConfirmRsvp.setText("Join Waitlist");
+                        btnConfirmRsvp.setEnabled(true);
+                        btnConfirmRsvp.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.green_accept, getTheme())));
+                    } else {
+                        btnConfirmRsvp.setText("Event Full");
+                        btnConfirmRsvp.setEnabled(false);
+                        btnConfirmRsvp.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.GRAY));
+                    }
+                });
+            }
+        }
+
         findViewById(R.id.btnConfirmRsvp).setOnClickListener(v -> {
+
+            // Find the newly added checkboxes
+            CheckBox cbName = findViewById(R.id.cbVisibleName);
+            CheckBox cbRoll = findViewById(R.id.cbVisibleRollNo);
+            CheckBox cbWait = findViewById(R.id.cbWaitlist);
+
             Intent payIntent = new Intent(this, PaymentActivity.class);
             payIntent.putExtra(PaymentActivity.KEY_EVENT_ID,     eventId);
             payIntent.putExtra(PaymentActivity.KEY_EVENT_TITLE,  eventTitle);
             payIntent.putExtra(PaymentActivity.KEY_EVENT_DATE,   formattedDate);
             payIntent.putExtra(PaymentActivity.KEY_TICKET_PRICE, ticketPrice);
+
+            // Pass the checkbox states to the PaymentActivity
+            payIntent.putExtra("isNameVisible", cbName != null && cbName.isChecked());
+            payIntent.putExtra("isRollNoVisible", cbRoll != null && cbRoll.isChecked());
+            payIntent.putExtra("optInWaitlist", cbWait != null && cbWait.isChecked());
             startActivity(payIntent);
         });
     }

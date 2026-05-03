@@ -75,6 +75,14 @@ public class StudentProfileActivity extends BaseSessionActivity {
                 startActivity(new Intent(this, EventHistoryActivity.class))
         );
 
+        btnMySocieties.setOnClickListener(v ->
+                startActivity(new Intent(this, MySocietiesActivity.class))
+        );
+
+        btnQRCheckIn.setOnClickListener(v ->
+                startActivity(new Intent(this, TicketsActivity.class))
+        );
+
         // My Payments → MyPaymentsActivity
         if (btnMyPayments != null) {
             btnMyPayments.setOnClickListener(v ->

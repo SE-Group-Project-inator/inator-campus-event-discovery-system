@@ -22,4 +22,15 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <!-- The Dialog Theme (sets the window background to transparent) -->
+    <style name="TransparentBottomSheetDialog" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/CustomBottomSheet</item>
+    </style>
+
+    <!-- The BottomSheet Style (removes the default white background) -->
+    <style name="CustomBottomSheet" parent="Widget.MaterialComponents.BottomSheet">
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
 </resources>
