@@ -5,6 +5,13 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+
+# ✅ Required for dorny/test-reporter to post results
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
 
 jobs:
   test:
@@ -28,11 +35,6 @@ jobs:
       - name: Run Tests
         run: ./gradlew test --continue
 
-      # Debug: print what XML files were actually generated
-      - name: List test result files
-        if: always()
-        run: find . -name "*.xml" -path "*/test-results/*" | sort
-
       - name: Upload Test Report
         if: always()
         uses: actions/upload-artifact@v4
@@ -45,6 +47,6 @@ jobs:
         if: always()
         with:
           name: Test Results
-          path: "**/build/test-results/**/*.xml"   # ** prefix finds it regardless of exact path
+          path: "**/build/test-results/**/*.xml"
           reporter: java-junit
-          fail-on-error: false                      # don't fail the whole workflow if reporter has issues
+          fail-on-error: false
