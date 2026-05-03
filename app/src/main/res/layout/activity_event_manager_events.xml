@@ -31,7 +31,7 @@
             android:layout_centerVertical="true"
             android:background="?attr/selectableItemBackground"
             android:padding="8dp"
-            android:text="Edit"
+            android:text="Manage"
             android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold" />

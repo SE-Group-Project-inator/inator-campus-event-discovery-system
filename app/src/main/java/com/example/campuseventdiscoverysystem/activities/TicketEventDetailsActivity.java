@@ -87,10 +87,10 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
     }
 
     private void setupButtons() {
-        Intent in      = getIntent();
-        String rsvpId  = in.getStringExtra("rsvpId");
+        Intent in = getIntent();
+        String rsvpId = in.getStringExtra("rsvpId");
         String eventId = in.getStringExtra("eventId");
-        String title   = in.getStringExtra("eventTitle");
+        String title = in.getStringExtra("eventTitle");
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
@@ -110,7 +110,7 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
             }
         });
 
-        // Show My QR — opens StudentQRActivity with this student's personal QR
+        // Show My QR
         findViewById(R.id.btnShowQR).setOnClickListener(v -> {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user == null) {
@@ -118,54 +118,96 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
                 return;
             }
             Intent qrIntent = new Intent(this, StudentQRActivity.class);
-            qrIntent.putExtra("userId",     user.getUid());
-            qrIntent.putExtra("eventId",    eventId);
+            qrIntent.putExtra("userId", user.getUid());
+            qrIntent.putExtra("eventId", eventId);
             qrIntent.putExtra("eventTitle", title);
             startActivity(qrIntent);
         });
 
-        // Cancel RSVP — reads the RSVP first to check waitlist before decrementing
+        // Cancel RSVP
         findViewById(R.id.btnCancelRsvp).setOnClickListener(v -> {
-            if (rsvpId == null) {
+            if (rsvpId == null || eventId == null) {
                 Toast.makeText(this, "Could not find RSVP", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
             db.collection("rsvps").document(rsvpId)
                     .get()
                     .addOnSuccessListener(rsvpDoc -> {
-                        boolean wasWaitlist = Boolean.TRUE.equals(
-                                rsvpDoc.getBoolean("optInWaitlist"));
+
+                        boolean wasWaitlisted = "waitlisted".equals(rsvpDoc.getString("status"));
 
                         db.collection("rsvps").document(rsvpId)
                                 .delete()
                                 .addOnSuccessListener(unused -> {
-                                    // Only decrement if they weren't on the waitlist
-                                    if (!wasWaitlist && eventId != null) {
-                                        db.collection("events").document(eventId)
-                                                .update("registeredCount",
-                                                        com.google.firebase.firestore.FieldValue
-                                                                .increment(-1));
+
+                                    // Remove from attendees
+                                    db.collection("event_attendees").document(eventId)
+                                            .collection("attendees").document(currentUserId)
+                                            .delete();
+
+                                    if (!wasWaitlisted) {
+                                        db.collection("rsvps")
+                                                .whereEqualTo("eventId", eventId)
+                                                .whereEqualTo("status", "waitlisted")
+                                                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.ASCENDING)
+                                                .limit(1)
+                                                .get()
+                                                .addOnSuccessListener(querySnapshots -> {
+
+                                                    if (!querySnapshots.isEmpty()) {
+                                                        var waitlistDoc = querySnapshots.getDocuments().get(0);
+                                                        String promotedRsvpId = waitlistDoc.getId();
+                                                        String promotedUserId = waitlistDoc.getString("userId");
+
+                                                        db.collection("rsvps").document(promotedRsvpId)
+                                                                .update("status", "confirmed");
+
+                                                        java.util.Map<String, Object> attendee = new java.util.HashMap<>();
+                                                        attendee.put("userId", promotedUserId);
+                                                        attendee.put("joinedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
+
+                                                        db.collection("event_attendees").document(eventId)
+                                                                .collection("attendees").document(promotedUserId)
+                                                                .set(attendee);
+
+                                                        java.util.Map<String, Object> notif = new java.util.HashMap<>();
+                                                        notif.put("title", "Waitlist Update 🎉");
+                                                        notif.put("message", "A spot opened up! You are now confirmed for \"" + title + "\".");
+                                                        notif.put("read", false);
+                                                        notif.put("timestamp", com.google.firebase.firestore.FieldValue.serverTimestamp());
+
+                                                        db.collection("users").document(promotedUserId)
+                                                                .collection("notifications")
+                                                                .add(notif);
+
+                                                    } else {
+                                                        db.collection("events").document(eventId)
+                                                                .update("registeredCount",
+                                                                        com.google.firebase.firestore.FieldValue.increment(-1));
+                                                    }
+
+                                                    finishFlow();
+                                                });
+
+                                    } else {
+                                        finishFlow();
                                     }
-                                    Toast.makeText(this,
-                                            "RSVP cancelled successfully",
-                                            Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(this, TicketsActivity.class);
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                    startActivity(intent);
-                                    finish();
-                                })
-                                .addOnFailureListener(e ->
-                                        Toast.makeText(this,
-                                                "Failed to cancel RSVP",
-                                                Toast.LENGTH_SHORT).show()
-                                );
+                                });
                     })
                     .addOnFailureListener(e ->
-                            Toast.makeText(this,
-                                    "Failed to cancel RSVP",
-                                    Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Failed to cancel RSVP", Toast.LENGTH_SHORT).show()
                     );
         });
+    }
+
+    private void finishFlow() {
+        Toast.makeText(this, "RSVP cancelled successfully", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, TicketsActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
     }
 }

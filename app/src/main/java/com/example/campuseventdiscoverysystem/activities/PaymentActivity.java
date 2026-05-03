@@ -51,6 +51,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private FirebaseUser currentUser;
+    private boolean isNameVisible, isRollNoVisible, optInWaitlist;
 
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -86,6 +87,11 @@ public class PaymentActivity extends AppCompatActivity {
         eventTitle  = in.getStringExtra(KEY_EVENT_TITLE);
         eventDate   = in.getStringExtra(KEY_EVENT_DATE);
         ticketPrice = in.getDoubleExtra(KEY_TICKET_PRICE, 0.0);
+
+        // Read the consent checkboxes
+        isNameVisible   = in.getBooleanExtra("isNameVisible", false);
+        isRollNoVisible = in.getBooleanExtra("isRollNoVisible", false);
+        optInWaitlist   = in.getBooleanExtra("optInWaitlist", false);
     }
 
     private void bindViews() {
@@ -173,14 +179,41 @@ public class PaymentActivity extends AppCompatActivity {
             return;
         }
         setLoading(true);
-        if (selectedImageUri != null) {
-            encodeImageAndSubmit();
-        } else {
-            createPaymentDocument(null);
-        }
+
+        // Check Capacity before doing anything else
+        db.collection("events").document(eventId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    Long capacity = documentSnapshot.getLong("capacity");
+                    Long registeredCount = documentSnapshot.getLong("registeredCount");
+
+                    if (capacity == null) capacity = 0L;
+                    if (registeredCount == null) registeredCount = 0L;
+
+                    boolean isEventFull = (capacity > 0 && registeredCount >= capacity);
+
+                    // If event is full and they didn't check the waitlist box, abort!
+                    if (isEventFull && !optInWaitlist) {
+                        Toast.makeText(this, "Sorry, this event just filled up!", Toast.LENGTH_LONG).show();
+                        setLoading(false);
+                        return;
+                    }
+
+                    boolean isWaitlist = isEventFull && optInWaitlist;
+
+                    // Proceed to image processing / document creation
+                    if (selectedImageUri != null) {
+                        encodeImageAndSubmit(isWaitlist);
+                    } else {
+                        createPaymentDocument(null, isWaitlist);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    setLoading(false);
+                    Toast.makeText(this, "Failed to verify event capacity.", Toast.LENGTH_SHORT).show();
+                });
     }
 
-    private void encodeImageAndSubmit() {
+    private void encodeImageAndSubmit(boolean isWaitlist) {
         try {
             InputStream inputStream = getContentResolver().openInputStream(selectedImageUri);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -197,14 +230,14 @@ public class PaymentActivity extends AppCompatActivity {
                 return;
             }
             String base64Image = "data:image/jpeg;base64," + Base64.encodeToString(imageBytes, Base64.DEFAULT);
-            createPaymentDocument(base64Image);
+            createPaymentDocument(base64Image, isWaitlist);
         } catch (Exception e) {
             Toast.makeText(this, "Failed to read image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             setLoading(false);
         }
     }
 
-    private void createPaymentDocument(String screenshotData) {
+    private void createPaymentDocument(String screenshotData, boolean isWaitlist) {
         // Cash = immediately registered; online = pending manager verification
         String status = selectedMethod.equals(Payment.METHOD_CASH)
                 ? Payment.STATUS_REGISTERED
@@ -233,15 +266,15 @@ public class PaymentActivity extends AppCompatActivity {
                     paymentData.put("studentName", name != null ? name
                             : (currentUser.getEmail() != null ? currentUser.getEmail().split("@")[0] : "Student"));
                     if (rollNo != null) paymentData.put("studentRollNo", rollNo);
-                    writePaymentAndRegister(paymentData, status);
+                    writePaymentAndRegister(paymentData, status, isWaitlist);
                 })
                 .addOnFailureListener(e -> {
                     paymentData.put("studentName", "Student");
-                    writePaymentAndRegister(paymentData, status);
+                    writePaymentAndRegister(paymentData, status, isWaitlist);
                 });
     }
 
-    private void writePaymentAndRegister(Map<String, Object> paymentData, String status) {
+    private void writePaymentAndRegister(Map<String, Object> paymentData, String status, boolean isWaitlist) {
         db.collection("payments")
                 .add(paymentData)
                 .addOnSuccessListener(docRef -> {
@@ -250,12 +283,14 @@ public class PaymentActivity extends AppCompatActivity {
 
                     if (Payment.STATUS_REGISTERED.equals(status)) {
                         // Cash: directly register student
-                        registerStudentForEvent(paymentId, status);
+                        registerStudentForEvent(paymentId, status, isWaitlist);
                     } else {
                         // Online: just record the payment, manager verifies later
-                        updateRsvpRecord(paymentId, status, false);
-                        sendNotificationToStudent("Payment Submitted ✅",
-                                "Your " + getMethodLabel() + " payment for \"" + eventTitle + "\" has been submitted. Awaiting verification.");
+                        updateRsvpRecord(paymentId, status, isWaitlist);
+                        String msg = isWaitlist
+                                ? "Your payment is submitted. You are on the waitlist pending verification."
+                                : "Your payment has been submitted. Awaiting verification.";
+                        sendNotificationToStudent("Payment Submitted ✅", msg);
                         setLoading(false);
                         navigateToStatus(paymentId, status);
                     }
@@ -270,41 +305,53 @@ public class PaymentActivity extends AppCompatActivity {
      * For CASH payments: directly confirm the RSVP, add to event_attendees,
      * increment count, send notification, navigate to success.
      */
-    private void registerStudentForEvent(String paymentId, String status) {
+    private void registerStudentForEvent(String paymentId, String status, boolean isWaitlist) {
         String rsvpDocId = currentUser.getUid() + "_" + eventId;
+        String finalStatus = isWaitlist ? "waitlisted" : "confirmed";
 
         Map<String, Object> rsvp = new HashMap<>();
         rsvp.put("userId",         currentUser.getUid());
         rsvp.put("eventId",        eventId);
         rsvp.put("eventName",      eventTitle != null ? eventTitle : "");
-        rsvp.put("status",         "confirmed");
+        rsvp.put("status",         finalStatus); // Set to waitlisted or confirmed
         rsvp.put("paymentId",      paymentId);
         rsvp.put("paymentStatus",  status);
         rsvp.put("paymentMethod",  selectedMethod);
         rsvp.put("createdAt",      FieldValue.serverTimestamp());
 
+        // Save Consents
+        rsvp.put("isNameVisible",   isNameVisible);
+        rsvp.put("isRollNoVisible", isRollNoVisible);
+        rsvp.put("optInWaitlist",   optInWaitlist);
+
         // Use set() with merge to avoid permission errors on missing doc
         db.collection("rsvps").document(rsvpDocId)
                 .set(rsvp, SetOptions.merge())
                 .addOnSuccessListener(v -> {
-                    // Increment registeredCount
-                    db.collection("events").document(eventId)
-                            .update("registeredCount", FieldValue.increment(1));
 
-                    // Write to event_attendees
-                    Map<String, Object> attendee = new HashMap<>();
-                    attendee.put("userId",       currentUser.getUid());
-                    attendee.put("studentEmail", currentUser.getEmail());
-                    attendee.put("joinedAt",     FieldValue.serverTimestamp());
-                    db.collection("event_attendees")
-                            .document(eventId)
-                            .collection("attendees")
-                            .document(currentUser.getUid())
-                            .set(attendee, SetOptions.merge());
+                    if (!isWaitlist) {
+                        // Only increment count and add to roster if they secured a spot
+                        db.collection("events").document(eventId).update("registeredCount", FieldValue.increment(1));
 
-                    // Send success notification
-                    sendNotificationToStudent("🎉 Registration Confirmed!",
-                            "You are registered for \"" + eventTitle + "\". Pay cash at the entrance. See you there!");
+                        // Write to event_attendees
+                        Map<String, Object> attendee = new HashMap<>();
+                        attendee.put("userId",       currentUser.getUid());
+                        attendee.put("studentEmail", currentUser.getEmail());
+                        attendee.put("joinedAt",     FieldValue.serverTimestamp());
+                        db.collection("event_attendees")
+                                .document(eventId)
+                                .collection("attendees")
+                                .document(currentUser.getUid())
+                                .set(attendee, SetOptions.merge());
+
+                        // Send success notification
+                        sendNotificationToStudent("🎉 Registration Confirmed!",
+                                "You are registered for \"" + eventTitle + "\". Pay cash at the entrance. See you there!");
+                    } else {
+                        // Notification for waitlist
+                        sendNotificationToStudent("⏳ Waitlisted",
+                                "You are on the waitlist for \"" + eventTitle + "\". You will be notified if a spot opens up.");
+                    }
 
                     setLoading(false);
                     navigateToStatus(paymentId, status);
@@ -315,19 +362,28 @@ public class PaymentActivity extends AppCompatActivity {
                 });
     }
 
-    private void updateRsvpRecord(String paymentId, String paymentStatus, boolean confirmed) {
+    /**
+     * For online payments
+     */
+    private void updateRsvpRecord(String paymentId, String paymentStatus, boolean isWaitlist) {
         if (eventId == null || currentUser == null) return;
         String rsvpDocId = currentUser.getUid() + "_" + eventId;
+        String finalStatus = isWaitlist ? "waitlisted" : "payment_pending";
 
         Map<String, Object> rsvp = new HashMap<>();
         rsvp.put("userId",        currentUser.getUid());
         rsvp.put("eventId",       eventId);
         rsvp.put("eventName",     eventTitle != null ? eventTitle : "");
-        rsvp.put("status",        confirmed ? "confirmed" : "payment_pending");
+        rsvp.put("status",        finalStatus); // Set to waitlisted or payment_pending
         rsvp.put("paymentId",     paymentId);
         rsvp.put("paymentStatus", paymentStatus);
         rsvp.put("paymentMethod", selectedMethod);
         rsvp.put("createdAt",     FieldValue.serverTimestamp());
+
+        // Save Consents
+        rsvp.put("isNameVisible",   isNameVisible);
+        rsvp.put("isRollNoVisible", isRollNoVisible);
+        rsvp.put("optInWaitlist",   optInWaitlist);
 
         db.collection("rsvps").document(rsvpDocId).set(rsvp, SetOptions.merge());
     }

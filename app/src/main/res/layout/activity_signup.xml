@@ -1,79 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- activity_signup.xml — All IDs match SignupActivity.java exactly. Premium redesign. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/bg_beige">
+    android:background="@drawable/bg_auth_background"
+    android:fitsSystemWindows="true">
 
-    <!-- Top Bar — color set in Java via applyRoleTheme() -->
+    <!-- ══════════════════════════════════════════
+         HERO HEADER
+         ══════════════════════════════════════════ -->
     <RelativeLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/btn_student"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp">
+        android:layout_height="190dp"
+        android:background="@drawable/bg_auth_header">
 
+        <!-- Back Button -->
         <ImageButton
             android:id="@+id/btnBack"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_centerVertical="true"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:layout_alignParentStart="true"
-            android:src="@drawable/ic_arrow_back"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Back"
+            android:padding="10dp"
+            android:src="@drawable/ic_arrow_back"
             app:tint="@color/white"/>
 
+        <!-- Logo circle -->
+        <FrameLayout
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="36dp"
+            android:background="@drawable/bg_auth_logo_circle">
+
+            <ImageView
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_gravity="center"
+                android:contentDescription="Logo"
+                android:scaleType="fitCenter"
+                android:src="@drawable/app_logo"/>
+        </FrameLayout>
+
+        <!-- Create Account heading -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="114dp"
+            android:text="Create Account ✨"
+            android:textColor="#FFFFFF"
+            android:textSize="21sp"
+            android:textStyle="bold"/>
+
+        <!-- Role subtitle — controlled by Java -->
         <TextView
             android:id="@+id/tvRoleTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Create Account"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/white"/>
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="146dp"
+            android:text="Join as a student"
+            android:textColor="#C7D2FE"
+            android:textSize="13sp"
+            android:alpha="0.92"/>
+
     </RelativeLayout>
 
+    <!-- ══════════════════════════════════════════
+         SCROLLABLE CONTENT
+         ══════════════════════════════════════════ -->
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:overScrollMode="never">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:paddingLeft="28dp"
-            android:paddingRight="28dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
             android:paddingTop="24dp"
-            android:paddingBottom="40dp">
-
-            <TextView
-                android:id="@+id/tvSubtitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Create your account"
-                android:textSize="13sp"
-                android:textColor="@color/text_dark"
-                android:alpha="0.7"
-                android:layout_marginBottom="24dp"/>
+            android:paddingBottom="56dp">
 
             <!-- ══════════════════════════════════════════
-                 SIGNUP CARD — card color set in Java
+                 MAIN SIGNUP CARD
                  ══════════════════════════════════════════ -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/signupCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/card_student"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="10dp">
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="8dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -81,42 +111,51 @@
                     android:orientation="vertical"
                     android:padding="28dp">
 
+                    <!-- Card header -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Sign Up"
+                        android:text="Your Details"
                         android:textSize="22sp"
                         android:textStyle="bold"
-                        android:textColor="@color/text_dark"/>
+                        android:textColor="@color/admin_text_primary"/>
 
                     <TextView
+                        android:id="@+id/tvSubtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Fill in your details to get started"
                         android:textSize="13sp"
-                        android:textColor="@color/text_dark"
-                        android:alpha="0.6"
+                        android:textColor="@color/admin_text_secondary"
                         android:layout_marginTop="4dp"
                         android:layout_marginBottom="24dp"/>
 
-                    <!-- ─────────────────────────────────
-                         SHARED FIELDS (all roles see these)
-                         ───────────────────────────────── -->
+                    <!-- ══════ SHARED FIELDS ══════ -->
 
                     <!-- Full Name -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="14dp"
-                        app:boxBackgroundColor="@color/white"
+                        android:hint="Full Name"
+                        app:startIconDrawable="@android:drawable/ic_menu_my_calendar"
+                        app:startIconTint="@color/admin_primary"
+                        app:boxStrokeColor="@color/admin_primary"
+                        app:hintTextColor="@color/admin_primary"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxBackgroundColor="#FAFBFF"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etFullName"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Full Name"
-                            android:inputType="textPersonName"
-                            android:textSize="14sp"/>
+                            android:inputType="textPersonName|textCapWords"
+                            android:textSize="15sp"
+                            android:textColor="@color/admin_text_primary"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Email -->
@@ -124,65 +163,94 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="14dp"
-                        app:boxBackgroundColor="@color/white"
+                        android:hint="University Email (@lums.edu.pk)"
+                        app:startIconDrawable="@android:drawable/ic_dialog_email"
+                        app:startIconTint="@color/admin_primary"
+                        app:boxStrokeColor="@color/admin_primary"
+                        app:hintTextColor="@color/admin_primary"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxBackgroundColor="#FAFBFF"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etEmail"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="LUMS Email"
                             android:inputType="textEmailAddress"
-                            android:textSize="14sp"/>
+                            android:textSize="15sp"
+                            android:textColor="@color/admin_text_primary"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Password -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        app:boxBackgroundColor="@color/white"
+                        android:layout_marginBottom="6dp"
+                        android:hint="Password"
+                        app:startIconDrawable="@android:drawable/ic_lock_lock"
+                        app:startIconTint="@color/admin_primary"
+                        app:boxStrokeColor="@color/admin_primary"
+                        app:hintTextColor="@color/admin_primary"
                         app:passwordToggleEnabled="true"
+                        app:passwordToggleTint="@color/admin_text_hint"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxBackgroundColor="#FAFBFF"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etPassword"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Password"
                             android:inputType="textPassword"
-                            android:textSize="14sp"/>
+                            android:textSize="15sp"
+                            android:textColor="@color/admin_text_primary"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Password Strength -->
+                    <!-- Password Strength Meter -->
                     <TextView
                         android:id="@+id/tvPasswordStrength"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Strength: Weak"
-                        android:textColor="@color/red_decline"
                         android:textSize="12sp"
-                        android:layout_marginBottom="12dp"/>
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginStart="4dp"
+                        android:visibility="gone"/>
 
                     <!-- Confirm Password -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="20dp"
-                        app:boxBackgroundColor="@color/white"
+                        android:hint="Confirm Password"
+                        app:startIconDrawable="@android:drawable/ic_lock_lock"
+                        app:startIconTint="@color/admin_primary"
+                        app:boxStrokeColor="@color/admin_primary"
+                        app:hintTextColor="@color/admin_primary"
                         app:passwordToggleEnabled="true"
+                        app:passwordToggleTint="@color/admin_text_hint"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxBackgroundColor="#FAFBFF"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etConfirmPassword"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Confirm Password"
                             android:inputType="textPassword"
-                            android:textSize="14sp"/>
+                            android:textSize="15sp"
+                            android:textColor="@color/admin_text_primary"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- ─────────────────────────────────
-                         STUDENT-ONLY SECTION
-                         Visibility: VISIBLE for student, GONE for others
-                         ───────────────────────────────── -->
+                    <!-- ══════ STUDENT SECTION (hidden by default) ══════ -->
                     <LinearLayout
                         android:id="@+id/sectionStudent"
                         android:layout_width="match_parent"
@@ -190,70 +258,138 @@
                         android:orientation="vertical"
                         android:visibility="gone">
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <!-- Section divider -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="STUDENT DETAILS"
-                            android:textSize="11sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/btn_student"
-                            android:letterSpacing="0.08"
-                            android:layout_marginBottom="12dp"/>
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="16dp">
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="1dp"
+                                android:layout_weight="1"
+                                android:background="#E2E8F0"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="  Student Info  "
+                                android:textSize="11sp"
+                                android:textColor="@color/admin_text_hint"
+                                android:textAllCaps="true"
+                                android:letterSpacing="0.1"/>
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="1dp"
+                                android:layout_weight="1"
+                                android:background="#E2E8F0"/>
+                        </LinearLayout>
 
-                        <!-- Student ID -->
+                        <!-- Student ID — Java uses etStudentId -->
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="14dp"
-                            app:boxBackgroundColor="@color/white"
+                            android:hint="Student ID"
+                            app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+                            app:startIconTint="@color/btn_student"
+                            app:boxStrokeColor="@color/btn_student"
+                            app:hintTextColor="@color/btn_student"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:boxBackgroundColor="#FAFBFF"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/etStudentId"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Student ID (e.g. 23100123)"
-                                android:inputType="number"
-                                android:textSize="14sp"/>
+                                android:inputType="text"
+                                android:textSize="15sp"
+                                android:textColor="@color/admin_text_primary"/>
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <!-- Department dropdown -->
+                        <!-- School picker — Java uses spinnerSchool -->
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="14dp"
-                            app:boxBackgroundColor="@color/white"
+                            android:hint="School"
+                            app:startIconDrawable="@android:drawable/ic_menu_agenda"
+                            app:startIconTint="@color/btn_student"
+                            app:boxStrokeColor="@color/btn_student"
+                            app:hintTextColor="@color/btn_student"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
                             <AutoCompleteTextView
-                                android:id="@+id/spinnerDepartment"
+                                android:id="@+id/spinnerSchool"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Department / Program"
                                 android:inputType="none"
-                                android:textSize="14sp"/>
+                                android:textSize="15sp"
+                                android:textColor="@color/admin_text_primary"/>
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <!-- Batch Year dropdown -->
+                        <!-- Batch Year — Java uses spinnerBatchYear -->
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="20dp"
-                            app:boxBackgroundColor="@color/white"
+                            android:layout_marginBottom="14dp"
+                            android:hint="Batch Year"
+                            app:startIconDrawable="@android:drawable/ic_menu_my_calendar"
+                            app:startIconTint="@color/btn_student"
+                            app:boxStrokeColor="@color/btn_student"
+                            app:hintTextColor="@color/btn_student"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
                             <AutoCompleteTextView
                                 android:id="@+id/spinnerBatchYear"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Batch Year"
                                 android:inputType="none"
-                                android:textSize="14sp"/>
+                                android:textSize="15sp"
+                                android:textColor="@color/admin_text_primary"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <!-- Program/Major — Java uses etProgram -->
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="14dp"
+                            android:hint="Program / Major"
+                            app:startIconDrawable="@android:drawable/ic_menu_compass"
+                            app:startIconTint="@color/btn_student"
+                            app:boxStrokeColor="@color/btn_student"
+                            app:hintTextColor="@color/btn_student"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:boxBackgroundColor="#FAFBFF"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etProgram"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textCapWords"
+                                android:textSize="15sp"
+                                android:textColor="@color/admin_text_primary"/>
                         </com.google.android.material.textfield.TextInputLayout>
 
                     </LinearLayout>
 
-                    <!-- ─────────────────────────────────
-                         EVENT MANAGER-ONLY SECTION
-                         Visibility: VISIBLE for event_manager, GONE for others
-                         ───────────────────────────────── -->
+                    <!-- ══════ EVENT MANAGER SECTION (hidden by default) ══════ -->
                     <LinearLayout
                         android:id="@+id/sectionEventManager"
                         android:layout_width="match_parent"
@@ -261,71 +397,112 @@
                         android:orientation="vertical"
                         android:visibility="gone">
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="SOCIETY DETAILS"
-                            android:textSize="11sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/btn_eventmgr"
-                            android:letterSpacing="0.08"
-                            android:layout_marginBottom="12dp"/>
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="16dp">
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="1dp"
+                                android:layout_weight="1"
+                                android:background="#E2E8F0"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="  Society Info  "
+                                android:textSize="11sp"
+                                android:textColor="@color/admin_text_hint"
+                                android:textAllCaps="true"
+                                android:letterSpacing="0.1"/>
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="1dp"
+                                android:layout_weight="1"
+                                android:background="#E2E8F0"/>
+                        </LinearLayout>
 
-                        <!-- Society Name -->
+                        <!-- Society Name — Java uses etSocietyName -->
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="14dp"
-                            app:boxBackgroundColor="@color/white"
-                            app:helperText="e.g. LUMS Drama Club, ACM LUMS, SPADES"
+                            android:hint="Society / Club Name"
+                            app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+                            app:startIconTint="@color/btn_eventmgr"
+                            app:boxStrokeColor="@color/btn_eventmgr"
+                            app:hintTextColor="@color/btn_eventmgr"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:boxBackgroundColor="#FAFBFF"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/etSocietyName"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Society Name"
                                 android:inputType="textCapWords"
-                                android:textSize="14sp"/>
+                                android:textSize="15sp"
+                                android:textColor="@color/admin_text_primary"/>
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <!-- Society Position dropdown -->
+                        <!-- Society Position — Java uses spinnerSocietyPosition -->
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="14dp"
-                            app:boxBackgroundColor="@color/white"
+                            android:hint="Your Position"
+                            app:startIconDrawable="@android:drawable/ic_menu_agenda"
+                            app:startIconTint="@color/btn_eventmgr"
+                            app:boxStrokeColor="@color/btn_eventmgr"
+                            app:hintTextColor="@color/btn_eventmgr"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
                             <AutoCompleteTextView
                                 android:id="@+id/spinnerSocietyPosition"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Your Position in Society"
                                 android:inputType="none"
-                                android:textSize="14sp"/>
+                                android:textSize="15sp"
+                                android:textColor="@color/admin_text_primary"/>
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <!-- Contact Number -->
+                        <!-- Phone — Java uses etPhone -->
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="20dp"
-                            app:boxBackgroundColor="@color/white"
+                            android:layout_marginBottom="14dp"
+                            android:hint="Phone Number"
+                            app:startIconDrawable="@android:drawable/ic_menu_call"
+                            app:startIconTint="@color/btn_eventmgr"
+                            app:boxStrokeColor="@color/btn_eventmgr"
+                            app:hintTextColor="@color/btn_eventmgr"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:boxBackgroundColor="#FAFBFF"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/etPhone"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Contact Number"
                                 android:inputType="phone"
-                                android:textSize="14sp"/>
+                                android:textSize="15sp"
+                                android:textColor="@color/admin_text_primary"/>
                         </com.google.android.material.textfield.TextInputLayout>
 
                     </LinearLayout>
 
-                    <!-- ─────────────────────────────────
-                         ADMIN-ONLY SECTION
-                         Visibility: VISIBLE for admin, GONE for others
-                         ───────────────────────────────── -->
+                    <!-- ══════ ADMIN SECTION (hidden by default) ══════ -->
                     <LinearLayout
                         android:id="@+id/sectionAdmin"
                         android:layout_width="match_parent"
@@ -333,114 +510,164 @@
                         android:orientation="vertical"
                         android:visibility="gone">
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="ADMIN DETAILS"
-                            android:textSize="11sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/btn_admin"
-                            android:letterSpacing="0.08"
-                            android:layout_marginBottom="12dp"/>
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="16dp">
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="1dp"
+                                android:layout_weight="1"
+                                android:background="#E2E8F0"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="  Admin Info  "
+                                android:textSize="11sp"
+                                android:textColor="@color/admin_text_hint"
+                                android:textAllCaps="true"
+                                android:letterSpacing="0.1"/>
+                            <View
+                                android:layout_width="0dp"
+                                android:layout_height="1dp"
+                                android:layout_weight="1"
+                                android:background="#E2E8F0"/>
+                        </LinearLayout>
 
-                        <!-- Employee ID -->
+                        <!-- Employee ID — Java uses etEmployeeId -->
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="14dp"
-                            app:boxBackgroundColor="@color/white"
+                            android:hint="Employee ID"
+                            app:startIconDrawable="@android:drawable/ic_menu_myplaces"
+                            app:startIconTint="@color/btn_admin"
+                            app:boxStrokeColor="@color/btn_admin"
+                            app:hintTextColor="@color/btn_admin"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:boxBackgroundColor="#FAFBFF"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/etEmployeeId"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Employee / Staff ID"
-                                android:inputType="textCapCharacters"
-                                android:textSize="14sp"/>
+                                android:inputType="text"
+                                android:textSize="15sp"
+                                android:textColor="@color/admin_text_primary"/>
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <!-- Admin Department dropdown -->
+                        <!-- Admin Department — Java uses spinnerAdminDepartment -->
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="20dp"
-                            app:boxBackgroundColor="@color/white"
+                            android:layout_marginBottom="14dp"
+                            android:hint="Department"
+                            app:startIconDrawable="@android:drawable/ic_menu_agenda"
+                            app:startIconTint="@color/btn_admin"
+                            app:boxStrokeColor="@color/btn_admin"
+                            app:hintTextColor="@color/btn_admin"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusBottomEnd="12dp"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
                             <AutoCompleteTextView
                                 android:id="@+id/spinnerAdminDepartment"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Department"
                                 android:inputType="none"
-                                android:textSize="14sp"/>
+                                android:textSize="15sp"
+                                android:textColor="@color/admin_text_primary"/>
                         </com.google.android.material.textfield.TextInputLayout>
 
                     </LinearLayout>
 
-                    <!-- ─────────────────────────────────
-                         BOTTOM — shared across all roles
-                         ───────────────────────────────── -->
-
-                    <!-- Terms Checkbox -->
+                    <!-- Terms checkbox — Java uses cbAgreeTerms -->
                     <CheckBox
                         android:id="@+id/cbAgreeTerms"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="I agree to the Terms and Conditions"
-                        android:textSize="12sp"
-                        android:textColor="@color/text_dark"
-                        android:layout_marginBottom="20dp"/>
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="20dp"
+                        android:text="I agree to the Terms &amp; Privacy Policy"
+                        android:textSize="13sp"
+                        android:textColor="@color/admin_text_secondary"
+                        android:buttonTint="@color/admin_primary"/>
 
-                    <!-- Sign Up Button — backgroundTint set in Java -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSignUp"
-                        android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:text="CREATE ACCOUNT"
-                        android:textColor="@color/white"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        app:backgroundTint="@color/btn_student"
-                        app:cornerRadius="12dp"/>
-
-                    <!-- Loading spinner -->
+                    <!-- Loading indicator -->
                     <ProgressBar
                         android:id="@+id/progressBar"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginTop="12dp"
-                        android:visibility="gone"/>
+                        android:layout_marginBottom="10dp"
+                        android:visibility="gone"
+                        android:indeterminateTint="@color/admin_primary"/>
+
+                    <!-- CREATE ACCOUNT BUTTON — Java uses btnSignUp -->
+                    <Button
+                        android:id="@+id/btnSignUp"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:text="Create Account"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        android:background="@drawable/bg_auth_button"
+                        android:stateListAnimator="@null"
+                        android:elevation="4dp"
+                        android:letterSpacing="0.01"/>
+
+                    <!-- Already have account link — Java uses tvLogin -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="20dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Already have an account? "
+                            android:textSize="14sp"
+                            android:textColor="@color/admin_text_secondary"/>
+
+                        <TextView
+                            android:id="@+id/tvLogin"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sign In"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/admin_primary"
+                            android:clickable="true"
+                            android:focusable="true"/>
+                    </LinearLayout>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Login link -->
-            <LinearLayout
+            <!-- Footer note -->
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:text="Your data is secure and encrypted."
+                android:textSize="11sp"
+                android:textColor="@color/admin_text_hint"
+                android:gravity="center"
                 android:layout_marginTop="20dp"
-                android:gravity="center">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Already have an account? "
-                    android:textSize="13sp"
-                    android:textColor="@color/text_dark"/>
-
-                <TextView
-                    android:id="@+id/tvLogin"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Log In"
-                    android:textColor="@color/text_link"
-                    android:textSize="13sp"
-                    android:textStyle="bold"/>
-
-            </LinearLayout>
+                android:layout_gravity="center_horizontal"/>
 
         </LinearLayout>
     </ScrollView>
+
 </LinearLayout>

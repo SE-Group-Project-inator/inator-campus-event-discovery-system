@@ -141,8 +141,8 @@ public class LoginActivity extends AppCompatActivity {
             case "admin":
                 topBar.setBackgroundColor(getColor(R.color.btn_admin));
                 tvRole.setText("Admin");
-                scrollView.setBackgroundColor(getColor(R.color.bg_beige));
-                loginCard.setCardBackgroundColor(getColor(R.color.card_tan));
+                scrollView.setBackgroundColor(getColor(R.color.bg_admin_login));
+                loginCard.setCardBackgroundColor(getColor(R.color.card_admin_login));
                 tvSubtitle.setText("Monitor and approve campus events.");
                 tvSignIn.setText("Sign in with your admin account");
                 btnLogin.setBackgroundTintList(getColorStateList(R.color.btn_admin));

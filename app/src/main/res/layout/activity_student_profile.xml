@@ -611,12 +611,12 @@
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:src="@android:drawable/ic_menu_myplaces"
-                app:tint="@color/btn_student" />
+                app:tint="@color/nav_active" />
 
             <TextView
                 android:text="Profile"
                 android:textSize="10sp"
-                android:textColor="@color/btn_student"
+                android:textColor="@color/nav_active"
                 android:textStyle="bold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>

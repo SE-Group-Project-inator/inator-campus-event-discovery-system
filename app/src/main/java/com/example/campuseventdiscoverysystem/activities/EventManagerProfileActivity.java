@@ -173,7 +173,7 @@ public class EventManagerProfileActivity extends BaseSessionActivity {
 
         // Create Event Quick Access Card
         btnQuickCreate.setOnClickListener(v -> {
-            startActivity(new Intent(this, CreateEventActivity.class));
+            startActivity(new Intent(this, ManageEventActivity.class));
         });
 
         // Events History Quick Access Card
