@@ -21,15 +21,15 @@ import java.util.Locale;
  */
 public class EventDetailActivity extends AppCompatActivity {
 
-    /** Loads real attendee count from event_attendees sub-collection */
+    /** Counts confirmed RSVPs from the canonical `rsvps` collection. */
     private void loadAttendeeCount() {
         String eventId = getIntent().getStringExtra("eventId");
         if (eventId == null) return;
 
         FirebaseFirestore.getInstance()
-                .collection("event_attendees")
-                .document(eventId)
-                .collection("attendees")
+                .collection("rsvps")
+                .whereEqualTo("eventId", eventId)
+                .whereEqualTo("status", "confirmed")
                 .get()
                 .addOnSuccessListener(snap -> {
                     int count = snap.size();
