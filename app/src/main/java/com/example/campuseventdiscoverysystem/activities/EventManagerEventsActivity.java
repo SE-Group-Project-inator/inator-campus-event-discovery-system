@@ -277,37 +277,36 @@ public class EventManagerEventsActivity extends BaseSessionActivity {
         if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
 
-        db.collection("events")
-                .whereEqualTo("createdBy", uid)
-                .orderBy("date", Query.Direction.DESCENDING)
-                .addSnapshotListener((snapshots, error) -> {
-                    if (error != null) {
-                        Toast.makeText(this, "Failed to load events", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    if (snapshots == null) return;
+        // Resolve societyId first, then query events by society so all co-managers see same list
+        db.collection("users").document(uid).get().addOnSuccessListener(userDoc -> {
+            String societyId = userDoc.getString("societyId");
+            String filterField = (societyId != null && !societyId.isEmpty()) ? "societyId" : "createdBy";
+            String filterValue = (societyId != null && !societyId.isEmpty()) ? societyId : uid;
 
-                    allEventsList.clear();
-                    int totalCount = 0;
-                    int pendingCount = 0;
+            db.collection("events")
+                    .whereEqualTo(filterField, filterValue)
+                    .orderBy("date", Query.Direction.DESCENDING)
+                    .addSnapshotListener((snapshots, error) -> {
+                        if (error != null) { Toast.makeText(this, "Failed to load events", Toast.LENGTH_SHORT).show(); return; }
+                        if (snapshots == null) return;
 
-                    for (DocumentSnapshot doc : snapshots) {
-                        Event event = doc.toObject(Event.class);
-                        if (event == null) continue;
+                        allEventsList.clear();
+                        int totalCount = 0, pendingCount = 0;
 
-                        event.setId(doc.getId());
-                        allEventsList.add(event);
-                        totalCount++;
-
-                        if ("pending_approval".equals(event.getStatus())) {
-                            pendingCount++;
+                        for (DocumentSnapshot doc : snapshots) {
+                            Event event = doc.toObject(Event.class);
+                            if (event == null) continue;
+                            event.setId(doc.getId());
+                            allEventsList.add(event);
+                            totalCount++;
+                            if ("pending_approval".equals(event.getStatus())) pendingCount++;
                         }
-                    }
 
-                    tvTotalCount.setText(String.valueOf(totalCount));
-                    tvPendingCount.setText(String.valueOf(pendingCount));
-                    applyFilter();
-                });
+                        tvTotalCount.setText(String.valueOf(totalCount));
+                        tvPendingCount.setText(String.valueOf(pendingCount));
+                        applyFilter();
+                    });
+        });
     }
 
     /**

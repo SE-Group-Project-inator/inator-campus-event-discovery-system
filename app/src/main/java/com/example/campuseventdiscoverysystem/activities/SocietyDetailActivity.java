@@ -58,17 +58,21 @@ public class SocietyDetailActivity extends AppCompatActivity {
                         ? societyDescription
                         : "No description available.");
 
-        // If description wasn't passed (e.g. deep link), fetch it from Firestore
-        if ((societyDescription == null || societyDescription.isEmpty()) && societyId != null) {
+        // Always fetch from Firestore to get latest data including category
+        if (societyId != null) {
             db.collection("societies").document(societyId).get()
                     .addOnSuccessListener(doc -> {
-                        String desc = doc.getString("description");
-                        if (tvDesc != null && desc != null) tvDesc.setText(desc);
-                        String abbr = doc.getString("abbr");
-                        if (tvTagline != null && abbr != null) tvTagline.setText(abbr);
-                        if (tvInitials != null && abbr != null) tvInitials.setText(abbr);
                         String name = doc.getString("name");
+                        String desc = doc.getString("description");
+                        String cat  = doc.getString("category");
                         if (tvName != null && name != null) tvName.setText(name);
+                        // Description falls back to category if empty
+                        String displayDesc = (desc != null && !desc.isEmpty()) ? desc
+                                : cat != null ? cat : "";
+                        if (tvDesc != null) tvDesc.setText(displayDesc.isEmpty()
+                                ? "No description available." : displayDesc);
+                        // Category badge under the title
+                        if (tvTagline != null && cat != null) tvTagline.setText(cat);
                     });
         }
 
@@ -81,7 +85,13 @@ public class SocietyDetailActivity extends AppCompatActivity {
      * Event managers tag events with societyId when creating them.
      */
     private void loadSocietyEvents(String societyId) {
-        Timestamp now = new Timestamp(new Date());
+        // Start-of-today so events happening later today are included
+        java.util.Calendar todayCal = java.util.Calendar.getInstance();
+        todayCal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        todayCal.set(java.util.Calendar.MINUTE, 0);
+        todayCal.set(java.util.Calendar.SECOND, 0);
+        todayCal.set(java.util.Calendar.MILLISECOND, 0);
+        Timestamp now = new Timestamp(todayCal.getTime());
 
         db.collection("events")
                 .whereEqualTo("status", "active")

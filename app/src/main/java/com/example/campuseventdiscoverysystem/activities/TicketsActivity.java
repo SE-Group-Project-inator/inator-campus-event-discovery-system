@@ -92,6 +92,11 @@ public class TicketsActivity extends AppCompatActivity {
 
                         db.collection("events").document(eventId).get()
                                 .addOnSuccessListener(eventDoc -> {
+                                    // Skip stale RSVPs that point to deleted events
+                                    if (!eventDoc.exists()) {
+                                        if (remaining.decrementAndGet() == 0) finalise(shown);
+                                        return;
+                                    }
                                     Timestamp ts = eventDoc.getTimestamp("date");
 
                                     // Only future events shown here, only confirmed RSVPs

@@ -13,7 +13,8 @@
         android:layout_alignParentTop="true"
         android:background="@color/btn_eventmgr"
         android:orientation="vertical"
-        android:paddingBottom="20dp">
+        android:paddingBottom="20dp"
+        android:fitsSystemWindows="true">
 
         <!-- Top App Bar -->
         <RelativeLayout

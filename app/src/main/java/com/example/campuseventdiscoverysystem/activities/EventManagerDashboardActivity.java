@@ -195,13 +195,26 @@ public class EventManagerDashboardActivity extends BaseSessionActivity {
         if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
 
+        // First fetch this manager's societyId, then query events by society
+        db.collection("users").document(uid).get().addOnSuccessListener(userDoc -> {
+            String societyId = userDoc.getString("societyId");
+            if (societyId == null || societyId.isEmpty()) {
+                // fallback: show only own events if no societyId set
+                listenForStatsByField("createdBy", uid);
+            } else {
+                listenForStatsByField("societyId", societyId);
+            }
+        });
+    }
+
+    private void listenForStatsByField(String field, String value) {
         Calendar now = Calendar.getInstance();
         int currentMonth = now.get(Calendar.MONTH);
-        int currentYear = now.get(Calendar.YEAR);
+        int currentYear  = now.get(Calendar.YEAR);
         Calendar eventCal = Calendar.getInstance();
 
         db.collection("events")
-                .whereEqualTo("createdBy", uid)
+                .whereEqualTo(field, value)
                 .addSnapshotListener((snapshots, error) -> {
                     if (snapshots == null) return;
 
@@ -287,60 +300,46 @@ public class EventManagerDashboardActivity extends BaseSessionActivity {
      * Fetches events for the selected date on the calendar.
      */
     private void loadEventsForDate(Date selectedDate) {
-
-        // Update the header text to reflect the selected date
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
         tvSelectedDateHeader.setText("Events on " + sdf.format(selectedDate));
 
-        // Define the start of the selected day
         Calendar start = Calendar.getInstance();
         start.setTime(selectedDate);
-        start.set(Calendar.HOUR_OF_DAY, 0);
-        start.set(Calendar.MINUTE, 0);
-        start.set(Calendar.SECOND, 0);
-        start.set(Calendar.MILLISECOND, 0);
+        start.set(Calendar.HOUR_OF_DAY, 0); start.set(Calendar.MINUTE, 0);
+        start.set(Calendar.SECOND, 0); start.set(Calendar.MILLISECOND, 0);
 
-        // Define the end of the selected day
         Calendar end = Calendar.getInstance();
         end.setTime(selectedDate);
-        end.set(Calendar.HOUR_OF_DAY, 23);
-        end.set(Calendar.MINUTE, 59);
-        end.set(Calendar.SECOND, 59);
-        end.set(Calendar.MILLISECOND, 999);
+        end.set(Calendar.HOUR_OF_DAY, 23); end.set(Calendar.MINUTE, 59);
+        end.set(Calendar.SECOND, 59); end.set(Calendar.MILLISECOND, 999);
 
-        // Query against the "events" collection in database
-        db.collection("events")
-                .whereEqualTo("status", "active")
-                .whereGreaterThanOrEqualTo("date", start.getTime())
-                .whereLessThanOrEqualTo("date", end.getTime())
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
+        if (mAuth.getCurrentUser() == null) return;
+        String uid = mAuth.getCurrentUser().getUid();
 
-                    // Clear the last day's events
-                    dateEventsList.clear();
+        db.collection("users").document(uid).get().addOnSuccessListener(userDoc -> {
+            String societyId = userDoc.getString("societyId");
+            String filterField = (societyId != null && !societyId.isEmpty()) ? "societyId" : "createdBy";
+            String filterValue = (societyId != null && !societyId.isEmpty()) ? societyId : uid;
 
-                    // Iterate through the fetched documents and add events to the list
-                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                        Event event = doc.toObject(Event.class);
-                        if (event != null) {
-                            event.setId(doc.getId());
-                            dateEventsList.add(event);
+            db.collection("events")
+                    .whereEqualTo("status", "active")
+                    .whereEqualTo(filterField, filterValue)
+                    .whereGreaterThanOrEqualTo("date", start.getTime())
+                    .whereLessThanOrEqualTo("date", end.getTime())
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        dateEventsList.clear();
+                        for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                            Event event = doc.toObject(Event.class);
+                            if (event != null) { event.setId(doc.getId()); dateEventsList.add(event); }
                         }
-                    }
-
-                    // Notify the adapter
-                    adapter.notifyDataSetChanged();
-
-                    if (tvEmpty != null) {
-                        if (dateEventsList.isEmpty()) {
-                            tvEmpty.setVisibility(View.VISIBLE);
-                            rvDateEvents.setVisibility(View.GONE);
-                        } else {
-                            tvEmpty.setVisibility(View.GONE);
-                            rvDateEvents.setVisibility(View.VISIBLE);
+                        adapter.notifyDataSetChanged();
+                        if (tvEmpty != null) {
+                            tvEmpty.setVisibility(dateEventsList.isEmpty() ? View.VISIBLE : View.GONE);
+                            rvDateEvents.setVisibility(dateEventsList.isEmpty() ? View.GONE : View.VISIBLE);
                         }
-                    }
-                });
+                    });
+        });
     }
 
     /**

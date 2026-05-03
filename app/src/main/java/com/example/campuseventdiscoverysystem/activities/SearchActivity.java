@@ -41,12 +41,16 @@ public class SearchActivity extends AppCompatActivity {
     private TextView tvSort;
     private TextView tvDateValue;
     private TextView tvPriceValue;
+    private TextView tvSocietyValue;
+    private LinearLayout btnSocietyFilter;
     private TextView chipAll, chipSports, chipAcademic, chipCultural;
     private LinearLayout btnDateRange, btnPriceRange, btnSort;
     private LinearLayout navHome, navSearch, navTickets, navProfile;
 
     private FirebaseFirestore db;
     private String selectedCategory = "All";
+    private String selectedSocietyId = null;   // null = no society filter
+    private String selectedSocietyName = null;
     private String sortOrder = "Latest";
     private Timestamp filterDateStart = null;
     private Timestamp filterDateEnd = null;
@@ -68,6 +72,8 @@ public class SearchActivity extends AppCompatActivity {
         tvSort            = findViewById(R.id.tvSort);
         tvDateValue       = findViewById(R.id.tvDateValue);
         tvPriceValue      = findViewById(R.id.tvPriceValue);
+        tvSocietyValue    = findViewById(R.id.tvSocietyValue);
+        btnSocietyFilter  = findViewById(R.id.btnSocietyFilter);
         chipAll           = findViewById(R.id.chipAll);
         chipSports        = findViewById(R.id.chipSports);
         chipAcademic      = findViewById(R.id.chipAcademic);
@@ -146,6 +152,20 @@ public class SearchActivity extends AppCompatActivity {
             }
             filterAndDisplay(etSearch.getText().toString().trim());
         });
+
+        if (btnSocietyFilter != null) {
+            btnSocietyFilter.setOnClickListener(v -> {
+                if (selectedSocietyId != null) {
+                    // Clear filter
+                    selectedSocietyId = null;
+                    selectedSocietyName = null;
+                    if (tvSocietyValue != null) tvSocietyValue.setText("All Societies");
+                    filterAndDisplay(etSearch.getText().toString().trim());
+                } else {
+                    showSocietyFilterDialog();
+                }
+            });
+        }
 
         navHome.setOnClickListener(v -> {
             startActivity(new Intent(this, StudentHomeActivity.class));
@@ -243,6 +263,12 @@ public class SearchActivity extends AppCompatActivity {
             if (!selectedCategory.equals("All")) {
                 String category = doc.getString("category");
                 if (category == null || !category.equalsIgnoreCase(selectedCategory)) continue;
+            }
+
+            // Society filter
+            if (selectedSocietyId != null) {
+                String sid = doc.getString("societyId");
+                if (!selectedSocietyId.equals(sid)) continue;
             }
 
             // Date range filter
@@ -573,6 +599,35 @@ public class SearchActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", null)
                 .create();
         dialog.show();
+    }
+
+    /** Shows a dialog listing all societies from Firestore for the user to pick one. */
+    private void showSocietyFilterDialog() {
+        db.collection("societies").orderBy("name").get()
+                .addOnSuccessListener(query -> {
+                    List<String> names = new java.util.ArrayList<>();
+                    List<String> ids   = new java.util.ArrayList<>();
+                    names.add("All Societies");
+                    ids.add(null);
+                    for (com.google.firebase.firestore.QueryDocumentSnapshot doc : query) {
+                        String n = doc.getString("name");
+                        if (n != null) { names.add(n); ids.add(doc.getId()); }
+                    }
+                    String[] nameArr = names.toArray(new String[0]);
+                    new androidx.appcompat.app.AlertDialog.Builder(this)
+                            .setTitle("Filter by Society")
+                            .setItems(nameArr, (d, which) -> {
+                                selectedSocietyId   = ids.get(which);
+                                selectedSocietyName = names.get(which);
+                                if (tvSocietyValue != null)
+                                    tvSocietyValue.setText(selectedSocietyId == null ? "All Societies" : selectedSocietyName);
+                                filterAndDisplay(etSearch.getText().toString().trim());
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .show();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not load societies", Toast.LENGTH_SHORT).show());
     }
 
     /** Callback interface for the custom date picker. */

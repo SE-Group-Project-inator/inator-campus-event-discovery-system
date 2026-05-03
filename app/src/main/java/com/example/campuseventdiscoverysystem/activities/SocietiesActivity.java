@@ -27,7 +27,7 @@ import java.util.Set;
 
 /**
  * Shows all societies loaded from the Firestore "societies" collection.
- * Each document has: name, abbr (initials), description.
+ * Each document has: name, description, category, id. Initials derived from name.
  * Each card has a Follow/Unfollow button. Tapping opens SocietyDetailActivity.
  * followOnly=true mode shows only followed societies (used by MySocietiesActivity).
  */
@@ -86,30 +86,47 @@ public class SocietiesActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> fetchSocietiesFromFirestore());
     }
 
-    /** Step 2: read the 'societies' collection and build the Society list. */
+    /** Step 2: read the 'societies' collection and build the Society list.
+     *  DB schema: id (doc field), name, description, category. No abbr field.
+     *  Doc IDs: business, filums, gaming, literary, spades, sports, tech, wellness, etc.
+     */
     private void fetchSocietiesFromFirestore() {
         db.collection("societies")
                 .get()
                 .addOnSuccessListener(query -> {
                     loadedSocieties.clear();
                     for (QueryDocumentSnapshot doc : query) {
-                        String id          = doc.getId();
+                        // "id" field stores same value as doc ID e.g. "business"
+                        String docId       = doc.getId();
                         String name        = doc.getString("name");
-                        String abbr        = doc.getString("abbr");        // initials e.g. "LWIC"
+                        String category    = doc.getString("category");
                         String description = doc.getString("description");
 
-                        if (name == null) name = id;
-                        if (abbr == null) abbr = name.length() >= 2
-                                ? name.substring(0, 2).toUpperCase() : name.toUpperCase();
+                        if (name == null) name = docId;
                         if (description == null) description = "";
 
-                        loadedSocieties.add(new Society(id, name, abbr, description));
+                        // Build initials from name words (e.g. "Business Society" -> "BS")
+                        String[] words = name.split("\\s+");
+                        StringBuilder initials = new StringBuilder();
+                        for (String w : words) {
+                            if (!w.isEmpty()) initials.append(Character.toUpperCase(w.charAt(0)));
+                            if (initials.length() >= 3) break; // max 3 chars
+                        }
+                        String abbr = initials.length() > 0 ? initials.toString()
+                                : name.substring(0, Math.min(2, name.length())).toUpperCase();
+
+                        // Append category as subtitle if description is empty
+                        String displayDesc = description.isEmpty() && category != null
+                                ? category : description;
+
+                        loadedSocieties.add(new Society(docId, name, abbr, displayDesc));
                     }
                     displaySocieties();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Could not load societies", Toast.LENGTH_SHORT).show();
-                    displaySocieties(); // will show empty state
+                    android.util.Log.e("SocietiesActivity", "Load failed: " + e.getMessage(), e);
+                    Toast.makeText(this, "Could not load societies: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    displaySocieties();
                 });
     }
 
