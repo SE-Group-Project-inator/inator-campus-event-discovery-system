@@ -7,6 +7,7 @@
     android:orientation="vertical"
     android:background="@color/bg_event">
 
+    <!-- Top Header Bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -49,6 +50,7 @@
             android:textStyle="bold" />
     </LinearLayout>
 
+    <!-- Scrollable Content -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -63,6 +65,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- Profile Info Card -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -79,14 +82,31 @@
                     android:paddingTop="24dp"
                     android:paddingBottom="24dp">
 
-                    <ImageView
-                        android:id="@+id/imgAvatar"
-                        android:layout_width="90dp"
-                        android:layout_height="90dp"
-                        android:background="@drawable/circle_avatar_bg"
-                        android:contentDescription="Avatar"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_launcher_foreground" />
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/imgAvatar"
+                            android:layout_width="90dp"
+                            android:layout_height="90dp"
+                            android:background="@drawable/circle_avatar_bg"
+                            android:contentDescription="Avatar"
+                            android:scaleType="centerCrop"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:src="@drawable/ic_launcher_foreground" />
+
+                        <!-- Small indicator that image is editable -->
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="bottom|end"
+                            android:background="@drawable/circle_avatar_bg"
+                            android:padding="4dp"
+                            android:src="@android:drawable/ic_menu_camera"
+                            app:tint="@color/btn_eventmgr" />
+                    </FrameLayout>
 
                     <TextView
                         android:id="@+id/tvProfileName"
@@ -126,7 +146,7 @@
                                 android:id="@+id/tvManagedCount"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="X"
+                                android:text="0"
                                 android:textColor="@color/btn_eventmgr"
                                 android:textSize="24sp"
                                 android:textStyle="bold" />
@@ -156,7 +176,7 @@
                                 android:id="@+id/tvThisMonthCount"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="X"
+                                android:text="0"
                                 android:textColor="@color/btn_eventmgr"
                                 android:textSize="24sp"
                                 android:textStyle="bold" />
@@ -186,7 +206,7 @@
                                 android:id="@+id/tvFollowersCount"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="X"
+                                android:text="0"
                                 android:textColor="@color/btn_eventmgr"
                                 android:textSize="24sp"
                                 android:textStyle="bold" />
@@ -212,7 +232,10 @@
                             android:id="@+id/etSocietyName"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Society Name"
+                            android:hint="Society Name (Tap to edit)"
+                            android:inputType="text"
+                            android:imeOptions="actionDone"
+                            android:maxLines="1"
                             android:textColor="@color/text_dark" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -228,6 +251,7 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="10dp" />
 
+            <!-- Create Event Card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/btnQuickCreate"
                 android:layout_width="match_parent"
@@ -266,6 +290,7 @@
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Events History Card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/btnQuickHistory"
                 android:layout_width="match_parent"
@@ -304,49 +329,10 @@
                         app:tint="@color/text_dark" />
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/btnPrivacySettings"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginBottom="10dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp">
-
-                    <ImageView
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:layout_centerVertical="true"
-                        android:src="@android:drawable/ic_menu_preferences"
-                        app:tint="@color/btn_eventmgr" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="44dp"
-                        android:text="Privacy Settings"
-                        android:textColor="@color/text_dark"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_centerVertical="true"
-                        android:layout_alignParentEnd="true"
-                        android:src="@drawable/ic_arrow_forward"
-                        app:tint="@color/text_dark" />
-                </RelativeLayout>
-            </androidx.cardview.widget.CardView>
-
         </LinearLayout>
     </ScrollView>
 
+    <!-- Sign Out Card (Fixed at bottom) -->
     <androidx.cardview.widget.CardView
         android:id="@+id/btnSignOut"
         android:layout_width="match_parent"
@@ -378,16 +364,10 @@
                 android:textColor="@color/red_decline"
                 android:textSize="14sp"
                 android:textStyle="bold" />
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:src="@drawable/ic_arrow_forward"
-                app:tint="@color/red_decline" />
         </RelativeLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- Bottom Navigation Bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -438,7 +418,6 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/navProfile"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"

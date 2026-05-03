@@ -1,53 +1,82 @@
 package com.example.campuseventdiscoverysystem.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.graphics.Color;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
+import android.provider.MediaStore;
+import android.util.Base64;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.campuseventdiscoverysystem.R;
 import com.example.campuseventdiscoverysystem.adapters.ManagerEventAdapter;
 import com.example.campuseventdiscoverysystem.models.Event;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 /**
  * Event Manager Events Activity
- * Screen showing the history of events managed by the current manager
- * Features an "Edit Mode" toggle that allows the user to switch
- * between viewing event analytics and editing event details
+ * Displays a history of all events managed by the current user.
+ * Features dynamic filtering, a Management Bottom Sheet, and the Profile Bottom Sheet.
  */
-public class EventManagerEventsActivity extends AppCompatActivity {
+public class EventManagerEventsActivity extends BaseSessionActivity {
 
     // Firebase instances for database operations
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
-    // UI Components for displaying the list and counters
+    // UI - Main List & State
     private RecyclerView rvMyEvents;
-    private TextView tvTotalManaged, tvThisMonth;
+    private View emptyState;
 
-    // Adapter and data list for the RecyclerView
+    // UI - Statistics Cards
+    private TextView tvTotalCount, tvPendingCount;
+
+    // UI - Filter Chips
+    private TextView filterAll, filterPending, filterApproved, filterRejected;
+
+    // UI - Profile Bottom Sheet
+    private View managerProfileSheet, profileSheetScrim;
+    private boolean sheetVisible = false;
+    private ImageView imgSheetAvatar;
+    private TextView tvSheetManagerName, tvSheetEmail;
+    private EditText etSheetSocietyName;
+
+    // Data lists and Adapter
     private ManagerEventAdapter adapter;
-    private List<Event> myEventsList = new ArrayList<>();
+    private final List<Event> allEventsList = new ArrayList<>();       // Holds ALL fetched events
+    private final List<Event> displayedEventsList = new ArrayList<>(); // Holds currently filtered events
+    private String currentFilter = "all"; // Default filter state
 
-    // Variables for handling the "Edit Mode" functionality
-    private boolean isEditMode = false;
-    private TextView tvHeaderTitle, btnToggleEdit;
-    private View topBar;
+    // Image Picker for Profile Pic
+    private final ActivityResultLauncher<Intent> imagePickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Uri selectedImageUri = result.getData().getData();
+                    uploadProfilePicture(selectedImageUri);
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,14 +91,14 @@ public class EventManagerEventsActivity extends AppCompatActivity {
 
         // Link Java variables to the XML Views using their IDs
         bindViews();
-
-        // Setup components of the screen
-        setupEditModeToggle();
+        setupFilters();
         setupRecyclerView();
+        setupProfileSheet();
         setupNavigation();
 
         // Fetch data from Firestore and calculate statistics
         loadMyEventsAndStats();
+        loadManagerProfile();
     }
 
     /**
@@ -78,40 +107,92 @@ public class EventManagerEventsActivity extends AppCompatActivity {
     private void bindViews() {
 
         rvMyEvents = findViewById(R.id.rvMyEvents);
-        tvTotalManaged = findViewById(R.id.tvTotalManaged);
-        tvThisMonth = findViewById(R.id.tvThisMonth);
-        tvHeaderTitle = findViewById(R.id.tvHeaderTitle);
-        btnToggleEdit = findViewById(R.id.btnToggleEdit);
-        topBar = findViewById(R.id.topBar);
+        emptyState = findViewById(R.id.emptyState);
+
+        tvTotalCount = findViewById(R.id.tvTotalCount);
+        tvPendingCount = findViewById(R.id.tvPendingCount);
+
+        filterAll = findViewById(R.id.filterAll);
+        filterPending = findViewById(R.id.filterPending);
+        filterApproved = findViewById(R.id.filterApproved);
+        filterRejected = findViewById(R.id.filterRejected);
+
+        // Profile Sheet Views
+        profileSheetScrim = findViewById(R.id.profileSheetScrim);
+        managerProfileSheet = findViewById(R.id.managerProfileSheet);
+        imgSheetAvatar = findViewById(R.id.imgSheetAvatar);
+        tvSheetManagerName = findViewById(R.id.tvSheetManagerName);
+        tvSheetEmail = findViewById(R.id.tvSheetEmail);
+        etSheetSocietyName = findViewById(R.id.etSheetSocietyName);
     }
 
     /**
-     * Configures the "Edit" button in the top bar
-     * Handles the visual changes and state when toggling Edit Mode
+     * Sets up click listeners for the filter chips.
      */
-    private void setupEditModeToggle() {
-
-        btnToggleEdit.setOnClickListener(v -> {
-            isEditMode = !isEditMode;
-
-            // Notify the adapter about the state change
-            if (adapter != null) {
-                adapter.setEditMode(isEditMode);
-            }
-
-            // Update the visuals based on the current mode
-            if (isEditMode) {
-                // Edit Mode: Change text and set background to grey color
-                btnToggleEdit.setText("Done");
-                tvHeaderTitle.setText("Tap Event to Manage");
-                topBar.setBackgroundResource(R.color.text_grey);
-            } else {
-                // Normal Mode: Revert to default text and primary theme color
-                btnToggleEdit.setText("Manage");
-                tvHeaderTitle.setText("My Events");
-                topBar.setBackgroundResource(R.color.btn_eventmgr);
-            }
+    private void setupFilters() {
+        filterAll.setOnClickListener(v -> {
+            currentFilter = "all";
+            updateChipUI("all");
+            applyFilter();
         });
+
+        filterPending.setOnClickListener(v -> {
+            currentFilter = "pending_approval";
+            updateChipUI("pending_approval");
+            applyFilter();
+        });
+
+        filterApproved.setOnClickListener(v -> {
+            currentFilter = "active";
+            updateChipUI("active");
+            applyFilter();
+        });
+
+        filterRejected.setOnClickListener(v -> {
+            currentFilter = "rejected";
+            updateChipUI("rejected");
+            applyFilter();
+        });
+    }
+
+    private void updateChipUI(String activeFilter) {
+        setChipState(filterAll, "all".equals(activeFilter));
+        setChipState(filterPending, "pending_approval".equals(activeFilter));
+        setChipState(filterApproved, "active".equals(activeFilter));
+        setChipState(filterRejected, "rejected".equals(activeFilter));
+    }
+
+    private void setChipState(TextView chip, boolean isActive) {
+        if (chip == null) return;
+        if (isActive) {
+            chip.setBackgroundResource(R.drawable.bg_chip_active);
+            chip.setTextColor(getResources().getColor(R.color.white));
+            chip.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.btn_eventmgr)));
+        } else {
+            chip.setBackgroundResource(R.drawable.bg_chip_inactive);
+            chip.setTextColor(getResources().getColor(R.color.text_grey));
+            chip.setBackgroundTintList(null);
+        }
+    }
+
+    private void applyFilter() {
+        displayedEventsList.clear();
+        for (Event event : allEventsList) {
+            if ("all".equals(currentFilter)) {
+                displayedEventsList.add(event);
+            } else if (currentFilter.equals(event.getStatus())) {
+                displayedEventsList.add(event);
+            }
+        }
+        adapter.notifyDataSetChanged();
+
+        if (displayedEventsList.isEmpty()) {
+            emptyState.setVisibility(View.VISIBLE);
+            rvMyEvents.setVisibility(View.GONE);
+        } else {
+            emptyState.setVisibility(View.GONE);
+            rvMyEvents.setVisibility(View.VISIBLE);
+        }
     }
 
     /**
@@ -119,40 +200,73 @@ public class EventManagerEventsActivity extends AppCompatActivity {
      * Defines what happens when an individual event card is clicked
      */
     private void setupRecyclerView() {
-        // The click listener behavior changes on the 'isEditMode' flag
-        adapter = new ManagerEventAdapter(myEventsList, eventId -> {
-            if (isEditMode) {
-                // Edit Mode: Pop up a menu to choose exactly what to manage
-                String[] options = {"Edit Event Details", "Manage Attendees & Waitlist", "View Analytics"};
-                new android.app.AlertDialog.Builder(this)
-                        .setTitle("Manage Event")
-                        .setItems(options, (dialog, which) -> {
-                            if (which == 0) {
-                                Intent intent = new Intent(this, ManageEventActivity.class);
-                                intent.putExtra("EVENT_ID", eventId);
-                                startActivity(intent);
-                            } else if (which == 1) {
-                                Intent intent = new Intent(this, AttendeesRosterActivity.class);
-                                intent.putExtra("EVENT_ID", eventId);
-                                startActivity(intent);
-                            } else if (which == 2) {
-                                Intent intent = new Intent(this, EventAnalyticsActivity.class);
-                                intent.putExtra("EVENT_ID", eventId);
-                                startActivity(intent);
-                            }
-                        }).show();
-            } else {
-                // Normal Mode: Route the user to the EventDisplayActivity
-                Intent intent = new Intent(this, EventDisplayActivity.class);
-                intent.putExtra("EVENT_ID", eventId);
-                intent.putExtra("USER_ROLE", "manager");
-                startActivity(intent);
+        adapter = new ManagerEventAdapter(displayedEventsList, eventId -> {
+            String eventTitle = "Manage Event";
+            for (Event e : displayedEventsList) {
+                if (e.getId().equals(eventId)) {
+                    eventTitle = e.getTitle();
+                    break;
+                }
             }
+            showManagementSheet(eventId, eventTitle);
         });
 
-        // Use a vertical scrolling list and attach the adapter
+        adapter.setShowStatusBadge(true);
         rvMyEvents.setLayoutManager(new LinearLayoutManager(this));
         rvMyEvents.setAdapter(adapter);
+    }
+
+    private void showManagementSheet(String eventId, String title) {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.TransparentBottomSheetDialog);
+        View sheetView = getLayoutInflater().inflate(R.layout.layout_event_manage_sheet, null);
+        bottomSheetDialog.setContentView(sheetView);
+
+        TextView tvTitle = sheetView.findViewById(R.id.tvSheetTitle);
+        tvTitle.setText(title);
+
+        // Find the event to check its status
+        Event selectedEvent = null;
+        for (Event e : displayedEventsList) {
+            if (e.getId().equals(eventId)) {
+                selectedEvent = e;
+                break;
+            }
+        }
+
+        // Hide Attendees and Analytics if not approved
+        if (selectedEvent != null) {
+            String status = selectedEvent.getStatus();
+            if ("pending_approval".equals(status) || "rejected".equals(status)) {
+                sheetView.findViewById(R.id.btnManageAttendees).setVisibility(View.GONE);
+                sheetView.findViewById(R.id.btnViewAnalytics).setVisibility(View.GONE);
+            } else {
+                sheetView.findViewById(R.id.btnManageAttendees).setVisibility(View.VISIBLE);
+                sheetView.findViewById(R.id.btnViewAnalytics).setVisibility(View.VISIBLE);
+            }
+        }
+
+        sheetView.findViewById(R.id.btnEditEvent).setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, ManageEventActivity.class);
+            intent.putExtra("EVENT_ID", eventId);
+            startActivity(intent);
+        });
+
+        sheetView.findViewById(R.id.btnManageAttendees).setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, AttendeesRosterActivity.class);
+            intent.putExtra("EVENT_ID", eventId);
+            startActivity(intent);
+        });
+
+        sheetView.findViewById(R.id.btnViewAnalytics).setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, EventAnalyticsActivity.class);
+            intent.putExtra("EVENT_ID", eventId);
+            startActivity(intent);
+        });
+
+        bottomSheetDialog.show();
     }
 
     /**
@@ -160,65 +274,173 @@ public class EventManagerEventsActivity extends AppCompatActivity {
      * Calculates the "Total Managed" and "This Month" statistics
      */
     private void loadMyEventsAndStats() {
-
-        // Ensure user is logged in
-        if (mAuth.getCurrentUser() == null)
-            return;
+        if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
 
-        // Setup calendar instances to determine if an event falls in the current month
-        Calendar now = Calendar.getInstance();
-        int currentMonth = now.get(Calendar.MONTH);
-        int currentYear = now.get(Calendar.YEAR);
-        Calendar eventCal = Calendar.getInstance();
-
-        // Query database for all events created by this manager, ordered by newest first
         db.collection("events")
                 .whereEqualTo("createdBy", uid)
                 .orderBy("date", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, error) -> {
-                    if (snapshots == null)
+                    if (error != null) {
+                        Toast.makeText(this, "Failed to load events", Toast.LENGTH_SHORT).show();
                         return;
+                    }
+                    if (snapshots == null) return;
 
-                    // Clear the old list
-                    myEventsList.clear();
+                    allEventsList.clear();
+                    int totalCount = 0;
+                    int pendingCount = 0;
 
-                    // Counters for statistics
-                    int activeCount = 0;
-                    int thisMonthCount = 0;
-
-                    // Iterate through the fetched documents
                     for (DocumentSnapshot doc : snapshots) {
                         Event event = doc.toObject(Event.class);
-                        if (event == null)
-                            continue;
+                        if (event == null) continue;
 
-                        // Set the document ID to the event object
                         event.setId(doc.getId());
-                        myEventsList.add(event);
+                        allEventsList.add(event);
+                        totalCount++;
 
-                        // Count approved events for the total managed
-                        if ("active".equals(event.getStatus())) {
-                            activeCount++;
-
-                            // Check if the event's date falls within the current month
-                            if (event.getDate() != null) {
-                                eventCal.setTime(event.getDate().toDate());
-                                if (eventCal.get(Calendar.MONTH) == currentMonth &&
-                                        eventCal.get(Calendar.YEAR) == currentYear) {
-                                    thisMonthCount++;
-                                }
-                            }
+                        if ("pending_approval".equals(event.getStatus())) {
+                            pendingCount++;
                         }
                     }
 
-                    // Notify the adapter
-                    adapter.notifyDataSetChanged();
-
-                    // Update the counters
-                    tvTotalManaged.setText(String.valueOf(activeCount));
-                    tvThisMonth.setText(String.valueOf(thisMonthCount));
+                    tvTotalCount.setText(String.valueOf(totalCount));
+                    tvPendingCount.setText(String.valueOf(pendingCount));
+                    applyFilter();
                 });
+    }
+
+    /**
+     * Loads the manager's profile data (name, email, society, avatar) for the bottom sheet.
+     */
+    private void loadManagerProfile() {
+        if (mAuth.getCurrentUser() == null) return;
+        String uid = mAuth.getCurrentUser().getUid();
+
+        db.collection("users").document(uid).get().addOnSuccessListener(doc -> {
+            if (doc.exists()) {
+                tvSheetManagerName.setText(doc.getString("name"));
+                tvSheetEmail.setText(doc.getString("email"));
+                etSheetSocietyName.setText(doc.getString("societyName"));
+
+                String profilePicBase64 = doc.getString("profilePicture");
+                if (profilePicBase64 != null && profilePicBase64.startsWith("data:image")) {
+                    try {
+                        String cleanBase64 = profilePicBase64.substring(profilePicBase64.indexOf(",") + 1);
+                        byte[] decodedString = Base64.decode(cleanBase64, Base64.DEFAULT);
+                        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                        imgSheetAvatar.setImageBitmap(decodedByte);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Sets up profile sheet UI behaviors (editable fields, avatar clicks, animations).
+     */
+    private void setupProfileSheet() {
+        if (mAuth.getCurrentUser() == null) return;
+        String uid = mAuth.getCurrentUser().getUid();
+
+        profileSheetScrim.setOnClickListener(v -> hideProfileSheet());
+
+        findViewById(R.id.btnSheetLogout).setOnClickListener(v -> {
+            hideProfileSheet();
+            showLogoutDialog();
+        });
+
+        // Edit Profile Picture
+        imgSheetAvatar.setOnClickListener(v -> {
+            Intent pick = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            pick.setType("image/*");
+            imagePickerLauncher.launch(pick);
+        });
+
+        // Edit Society Name
+        etSheetSocietyName.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                String newSocietyName = etSheetSocietyName.getText().toString().trim();
+                db.collection("users").document(uid).update("societyName", newSocietyName)
+                        .addOnSuccessListener(a -> {
+                            Toast.makeText(this, "Society Name Updated!", Toast.LENGTH_SHORT).show();
+                            etSheetSocietyName.clearFocus();
+                        });
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void toggleProfileSheet() {
+        if (sheetVisible) hideProfileSheet();
+        else showProfileSheet();
+    }
+
+    private void showProfileSheet() {
+        sheetVisible = true;
+        profileSheetScrim.setVisibility(View.VISIBLE);
+        profileSheetScrim.setAlpha(0f);
+        profileSheetScrim.animate().alpha(1f).setDuration(200).start();
+
+        managerProfileSheet.setVisibility(View.VISIBLE);
+        managerProfileSheet.post(() -> {
+            float startY = managerProfileSheet.getHeight();
+            managerProfileSheet.setTranslationY(startY);
+            managerProfileSheet.animate()
+                    .translationY(0f)
+                    .setDuration(320)
+                    .setInterpolator(new DecelerateInterpolator(2f))
+                    .start();
+        });
+    }
+
+    private void hideProfileSheet() {
+        sheetVisible = false;
+        profileSheetScrim.animate().alpha(0f).setDuration(200)
+                .withEndAction(() -> profileSheetScrim.setVisibility(View.GONE))
+                .start();
+
+        float endY = managerProfileSheet.getHeight();
+        managerProfileSheet.animate()
+                .translationY(endY)
+                .setDuration(280)
+                .setInterpolator(new DecelerateInterpolator())
+                .withEndAction(() -> managerProfileSheet.setVisibility(View.GONE))
+                .start();
+    }
+
+    private void uploadProfilePicture(Uri imageUri) {
+        if (mAuth.getCurrentUser() == null) return;
+        String uid = mAuth.getCurrentUser().getUid();
+
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(imageUri);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) baos.write(buffer, 0, bytesRead);
+            inputStream.close();
+
+            byte[] imageBytes = baos.toByteArray();
+            if (imageBytes.length > 800_000) {
+                Toast.makeText(this, "Image too large.", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            String base64Image = "data:image/jpeg;base64," + Base64.encodeToString(imageBytes, Base64.DEFAULT);
+
+            db.collection("users").document(uid).update("profilePicture", base64Image)
+                    .addOnSuccessListener(a -> {
+                        Toast.makeText(this, "Profile picture updated!", Toast.LENGTH_SHORT).show();
+                        imgSheetAvatar.setImageURI(imageUri);
+                    });
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Error processing image", Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
@@ -232,10 +454,17 @@ public class EventManagerEventsActivity extends AppCompatActivity {
             finish();
         });
 
-        // Profile Navigation Tab
-        findViewById(R.id.navProfile).setOnClickListener(v -> {
-            startActivity(new Intent(this, EventManagerProfileActivity.class));
-            finish();
-        });
+        // Trigger the profile sheet instead of routing back to the dashboard
+        findViewById(R.id.navProfile).setOnClickListener(v -> toggleProfileSheet());
+    }
+
+    @SuppressLint("GestureBackNavigation")
+    @Override
+    public void onBackPressed() {
+        if (sheetVisible) {
+            hideProfileSheet();
+        } else {
+            super.onBackPressed();
+        }
     }
 }
