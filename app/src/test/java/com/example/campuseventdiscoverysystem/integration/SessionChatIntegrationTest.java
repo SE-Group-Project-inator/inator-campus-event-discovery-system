@@ -1,7 +1,6 @@
 package com.example.campuseventdiscoverysystem.integration;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import androidx.test.core.app.ApplicationProvider;
 
