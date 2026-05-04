@@ -22,12 +22,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.campuseventdiscoverysystem.R;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.util.Base64;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -37,83 +31,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * SignupActivity
- *
- * Handles role-based user registration for:
- * - Student
- * - Event Manager
- * - Admin
- *
- * Features:
- * - Dynamic UI based on selected role
- * - Password strength validation
- * - Firestore user creation
- * - Role-specific fields handling
- * - Email verification flow
- */
 public class SignupActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
-    private String profilePicBase64 = null;
-    private ActivityResultLauncher<String> pickerLauncher;
     private FirebaseFirestore db;
     private String selectedRole;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Load signup screen layout
         setContentView(R.layout.activity_signup);
 
-        // Initialize Firebase services
         mAuth        = FirebaseAuth.getInstance();
         db           = FirebaseFirestore.getInstance();
-
-        // Get role passed from previous screen (student/admin/event_manager)
         selectedRole = getIntent().getStringExtra("role");
         if (selectedRole == null) selectedRole = "student";
 
-        pickerLauncher = registerForActivityResult(
-                new ActivityResultContracts.GetContent(),
-                uri -> {
-                    if (uri == null) return;
-                    try {
-                        android.widget.ImageView img = findViewById(R.id.imgSignupAvatar);
-                        if (img != null) img.setImageURI(uri);
-                        java.io.InputStream is = getContentResolver().openInputStream(uri);
-                        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-                        byte[] buf = new byte[4096]; int n;
-                        while ((n = is.read(buf)) != -1) baos.write(buf, 0, n);
-                        is.close();
-                        byte[] bytes = baos.toByteArray();
-                        if (bytes.length < 800_000) {
-                            profilePicBase64 = "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.DEFAULT);
-                        } else {
-                            android.widget.Toast.makeText(this, "Image too large, please pick a smaller one", android.widget.Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (Exception e) { e.printStackTrace(); }
-                });
-        // Apply role-based UI styling
         applyRoleTheme();
-
-        // Setup password strength meter listener
         setupPasswordStrengthMeter();
-
-        // Initialize dropdowns (school, batch, society, etc.)
         setupDropdowns();
-
-        // Setup button click handlers
         setupClickListeners();
     }
 
     // ─── Theme ────────────────────────────────────────────────────────────────
 
-    /**
-     * Applies different UI themes based on selected user role.
-     * Changes colors, visible sections, and card styling.
-     */
     private void applyRoleTheme() {
         RelativeLayout topBar = findViewById(R.id.topBar);
         TextView tvRoleTitle  = findViewById(R.id.tvRoleTitle);
@@ -122,7 +63,6 @@ public class SignupActivity extends AppCompatActivity {
 
         ScrollView scrollView = findViewById(R.id.scrollView);
 
-        // Switch UI styling depending on role
         switch (selectedRole) {
             case "admin":
                 topBar.setBackgroundColor(getColor(R.color.btn_admin));
@@ -132,7 +72,6 @@ public class SignupActivity extends AppCompatActivity {
                 if (scrollView != null) scrollView.setBackgroundColor(getColor(R.color.bg_admin_login));
                 findViewById(R.id.sectionAdmin).setVisibility(View.VISIBLE);
                 break;
-
             case "event_manager":
                 topBar.setBackgroundColor(getColor(R.color.btn_eventmgr));
                 tvRoleTitle.setText("Event Manager Sign Up");
@@ -140,7 +79,6 @@ public class SignupActivity extends AppCompatActivity {
                 signupCard.setCardBackgroundColor(getColor(R.color.card_event));
                 findViewById(R.id.sectionEventManager).setVisibility(View.VISIBLE);
                 break;
-
             case "student":
             default:
                 topBar.setBackgroundColor(getColor(R.color.btn_student));
@@ -154,57 +92,39 @@ public class SignupActivity extends AppCompatActivity {
 
     // ─── Dropdowns ────────────────────────────────────────────────────────────
 
-    /**
-     * Initializes dropdown menus for:
-     * - School selection (students)
-     * - Batch year selection (students)
-     * - Society selection (event managers from Firestore)
-     * - Society position (event managers)
-     * - Admin department selection
-     */
     private void setupDropdowns() {
-
-        // School picker (student only)
+        // School picker (students only)
         AutoCompleteTextView spinnerSchool = findViewById(R.id.spinnerSchool);
         if (spinnerSchool != null) {
             List<String> schools = Arrays.asList("SDSB", "SSE", "MGHSS", "SHASOL");
             ArrayAdapter<String> schoolAdapter = new ArrayAdapter<>(this,
                     android.R.layout.simple_dropdown_item_1line, schools);
             spinnerSchool.setAdapter(schoolAdapter);
-
-            // Clear focus after selection (UX improvement)
             spinnerSchool.setOnItemClickListener((parent, view, pos, id) ->
                     spinnerSchool.clearFocus());
         }
 
-        // Batch year dropdown (2020–2030)
+        // Batch year 2020-2030
         AutoCompleteTextView spinnerBatch = findViewById(R.id.spinnerBatchYear);
         if (spinnerBatch != null) {
             String[] batches = new String[11];
             for (int i = 0; i <= 10; i++) batches[i] = String.valueOf(2020 + i);
-
             ArrayAdapter<String> batchAdapter = new ArrayAdapter<>(this,
                     android.R.layout.simple_dropdown_item_1line, batches);
             spinnerBatch.setAdapter(batchAdapter);
-
             spinnerBatch.setOnItemClickListener((parent, view, pos, id) ->
                     spinnerBatch.clearFocus());
         }
 
-        // Society dropdown (event manager) — fetched dynamically from Firestore
+        // Society picker (event managers only) — loaded from Firestore
         AutoCompleteTextView spinnerSociety = findViewById(R.id.etSocietyName);
         if (spinnerSociety != null) {
-
             spinnerSociety.setInputType(android.text.InputType.TYPE_NULL);
             spinnerSociety.setHint("Select your Society");
-
-            // Load society list from database
             db.collection("societies").orderBy("name").get()
                     .addOnSuccessListener(query -> {
-
                         List<String> names = new java.util.ArrayList<>();
                         java.util.Map<String, String> nameToId = new java.util.LinkedHashMap<>();
-
                         for (com.google.firebase.firestore.QueryDocumentSnapshot doc : query) {
                             String n = doc.getString("name");
                             if (n != null) {
@@ -212,16 +132,12 @@ public class SignupActivity extends AppCompatActivity {
                                 nameToId.put(n, doc.getId());
                             }
                         }
-
                         ArrayAdapter<String> sAdapter = new ArrayAdapter<>(this,
                                 android.R.layout.simple_dropdown_item_1line, names);
-
                         spinnerSociety.setAdapter(sAdapter);
-
-                        // Store selected societyId in tag for later use
                         spinnerSociety.setOnItemClickListener((parent, view, pos, id) -> {
                             String selected = names.get(pos);
-                            spinnerSociety.setTag(nameToId.get(selected));
+                            spinnerSociety.setTag(nameToId.get(selected)); // store societyId as tag
                             spinnerSociety.clearFocus();
                         });
                     })
@@ -229,7 +145,7 @@ public class SignupActivity extends AppCompatActivity {
                             Toast.makeText(this, "Could not load societies", Toast.LENGTH_SHORT).show());
         }
 
-        // Society position dropdown (event managers)
+        // Society position (event managers only)
         AutoCompleteTextView spinnerPosition = findViewById(R.id.spinnerSocietyPosition);
         if (spinnerPosition != null) {
             List<String> positions = Arrays.asList(
@@ -240,7 +156,7 @@ public class SignupActivity extends AppCompatActivity {
             spinnerPosition.setAdapter(posAdapter);
         }
 
-        // Admin department dropdown
+        // Admin department
         AutoCompleteTextView spinnerAdminDept = findViewById(R.id.spinnerAdminDepartment);
         if (spinnerAdminDept != null) {
             List<String> depts = Arrays.asList(
@@ -252,39 +168,29 @@ public class SignupActivity extends AppCompatActivity {
         }
     }
 
-    // ─── Password Strength ────────────────────────────────────────────────────
+    // ─── Password Strength Meter ──────────────────────────────────────────────
 
-    /**
-     * Shows real-time password strength feedback.
-     * Uses TextWatcher to evaluate password quality.
-     */
     private void setupPasswordStrengthMeter() {
-
         EditText etPassword = findViewById(R.id.etPassword);
         TextView tvStrength = findViewById(R.id.tvPasswordStrength);
-
         if (etPassword == null || tvStrength == null) return;
 
-        // Hidden initially until user starts typing
+        // Start hidden — only shown after user types
         tvStrength.setVisibility(View.GONE);
 
         etPassword.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int i, int c, int a) {}
             @Override public void onTextChanged(CharSequence s, int i, int b, int c) {}
-
             @Override
             public void afterTextChanged(Editable s) {
                 String pwd = s.toString();
-
                 if (pwd.isEmpty()) {
                     tvStrength.setVisibility(View.GONE);
                     return;
                 }
-
                 tvStrength.setVisibility(View.VISIBLE);
 
                 int score = calculatePasswordStrength(pwd);
-
                 if (score <= 25) {
                     tvStrength.setText("Strength: Weak");
                     tvStrength.setTextColor(getColor(android.R.color.holo_red_dark));
@@ -302,10 +208,6 @@ public class SignupActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Simple password scoring system based on:
-     * length, uppercase, numbers, and special characters
-     */
     private int calculatePasswordStrength(String p) {
         int s = 0;
         if (p.length() >= 6)  s += 25;
@@ -316,25 +218,14 @@ public class SignupActivity extends AppCompatActivity {
         return Math.min(s, 100);
     }
 
-    // ─── Click Handlers ───────────────────────────────────────────────────────
+    // ─── Click Listeners ─────────────────────────────────────────────────────
 
-    /**
-     * Handles:
-     * - Form validation
-     * - Role-specific data collection
-     * - Firebase Authentication
-     * - Firestore user creation
-     * - Email verification
-     */
     private void setupClickListeners() {
-
-        // UI references
         ImageButton btnBack  = findViewById(R.id.btnBack);
         Button btnSignUp     = findViewById(R.id.btnSignUp);
         TextView tvGoToLogin = findViewById(R.id.tvLogin);
         CheckBox cbTerms     = findViewById(R.id.cbAgreeTerms);
 
-        // Common fields
         EditText etName            = findViewById(R.id.etFullName);
         EditText etEmail           = findViewById(R.id.etEmail);
         EditText etPassword        = findViewById(R.id.etPassword);
@@ -355,37 +246,23 @@ public class SignupActivity extends AppCompatActivity {
         EditText etEmployeeId                    = findViewById(R.id.etEmployeeId);
         AutoCompleteTextView spinnerAdminDept    = findViewById(R.id.spinnerAdminDepartment);
 
-        // Navigation actions
         btnBack.setOnClickListener(v -> finish());
-
-        // Profile pic picker (student signup)
-        android.widget.ImageView imgAvatar = findViewById(R.id.imgSignupAvatar);
-        android.widget.TextView tvUpload   = findViewById(R.id.tvUploadPhoto);
-        if (imgAvatar != null) imgAvatar.setOnClickListener(v -> pickerLauncher.launch("image/*"));
-        if (tvUpload  != null) tvUpload.setOnClickListener(v  -> pickerLauncher.launch("image/*"));
         tvGoToLogin.setOnClickListener(v -> finish());
 
-        // Signup button logic (main flow)
         btnSignUp.setOnClickListener(v -> {
-
             String name    = etName.getText().toString().trim();
             String email   = etEmail.getText().toString().trim();
             String pwd     = etPassword.getText().toString().trim();
             String confirm = etConfirmPassword.getText().toString().trim();
 
-            // Basic validation checks
             if (TextUtils.isEmpty(name))  { etName.setError("Full name is required"); return; }
             if (TextUtils.isEmpty(email)) { etEmail.setError("Email is required"); return; }
             if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 etEmail.setError("Enter a valid email address"); return;
             }
-
-            // Domain restriction (university email only)
             if (!email.endsWith("@lums.edu.pk")) {
                 etEmail.setError("Must use a LUMS email (@lums.edu.pk)"); return;
             }
-
-            // Password rules
             if (pwd.length() < 8) {
                 etPassword.setError("Password must be at least 8 characters"); return;
             }
@@ -395,19 +272,14 @@ public class SignupActivity extends AppCompatActivity {
             if (!pwd.equals(confirm)) {
                 etConfirmPassword.setError("Passwords do not match"); return;
             }
-
-            // Terms acceptance check
             if (!cbTerms.isChecked()) {
                 Toast.makeText(this, "Please agree to the terms & conditions", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Extra role-based data
             Map<String, Object> extraData = new HashMap<>();
 
-            // ─── STUDENT ─────────────────────────────────────────────
             if ("student".equals(selectedRole)) {
-
                 String sid = etStudentId != null ? etStudentId.getText().toString().trim() : "";
                 if (TextUtils.isEmpty(sid)) { etStudentId.setError("Student ID required"); return; }
 
@@ -415,49 +287,55 @@ public class SignupActivity extends AppCompatActivity {
                 String batch   = spinnerBatch  != null ? spinnerBatch.getText().toString().trim()  : "";
                 String program = etProgram     != null ? etProgram.getText().toString().trim()     : "";
 
+                if (TextUtils.isEmpty(school)) {
+                    Toast.makeText(this, "Please select your school", Toast.LENGTH_SHORT).show(); return;
+                }
+                if (TextUtils.isEmpty(batch)) {
+                    Toast.makeText(this, "Please select your batch year", Toast.LENGTH_SHORT).show(); return;
+                }
+                if (TextUtils.isEmpty(program)) {
+                    etProgram.setError("Program is required"); return;
+                }
+
                 extraData.put("studentId", sid);
-                extraData.put("school", school);
-                extraData.put("batch", batch);
-                extraData.put("program", program);
+                extraData.put("school",    school);
+                extraData.put("batch",     batch);
+                extraData.put("program",   program);
+                extraData.put("department", school + " — " + program); // backward compat
+                // Drives the post-login routing into StudentOnboardingActivity.
+                extraData.put("onboardingComplete", false);
 
-                // ─── EVENT MANAGER ───────────────────────────────────────
             } else if ("event_manager".equals(selectedRole)) {
-
+                String sname = etSocietyName != null ? etSocietyName.getText().toString().trim() : "";
+                if (TextUtils.isEmpty(sname)) { etSocietyName.setError("Please select a society"); return; }
                 String sid = etSocietyName != null && etSocietyName.getTag() != null
                         ? etSocietyName.getTag().toString() : "";
+                if (TextUtils.isEmpty(sid)) { etSocietyName.setError("Please select a society from the list"); return; }
+                extraData.put("societyName", sname);
+                extraData.put("societyId",   sid);
+                extraData.put("position",    spinnerPosition != null ? spinnerPosition.getText().toString() : "");
+                extraData.put("phone",       etPhone != null ? etPhone.getText().toString().trim() : "");
 
-                extraData.put("societyName", etSocietyName.getText().toString().trim());
-                extraData.put("societyId", sid);
-                extraData.put("position", spinnerPosition.getText().toString());
-                extraData.put("phone", etPhone.getText().toString().trim());
-
-                // ─── ADMIN ───────────────────────────────────────────────
             } else if ("admin".equals(selectedRole)) {
-
-                extraData.put("employeeId", etEmployeeId.getText().toString().trim());
-                extraData.put("department", spinnerAdminDept.getText().toString());
+                String eid = etEmployeeId != null ? etEmployeeId.getText().toString().trim() : "";
+                if (TextUtils.isEmpty(eid)) { etEmployeeId.setError("Employee ID required"); return; }
+                extraData.put("employeeId",  eid);
+                extraData.put("department",  spinnerAdminDept != null ? spinnerAdminDept.getText().toString() : "");
             }
 
-            // Disable button to prevent duplicate requests
             btnSignUp.setEnabled(false);
             btnSignUp.setText("Creating account…");
 
-            // Firebase Authentication
             mAuth.createUserWithEmailAndPassword(email, pwd)
                     .addOnSuccessListener(authResult -> {
-
-                        // Send email verification
                         authResult.getUser().sendEmailVerification()
                                 .addOnCompleteListener(emailTask -> {
-
-                                    // User profile data saved in Firestore
                                     Map<String, Object> userMap = new HashMap<>();
                                     userMap.put("name",           name);
                                     userMap.put("email",          email);
                                     userMap.put("role",           selectedRole);
                                     userMap.put("createdAt",      Timestamp.now());
                                     userMap.put("eventsAttended", 0);
-                                    if (profilePicBase64 != null) userMap.put("profilePicture", profilePicBase64);
                                     userMap.put("following",      0);
                                     userMap.putAll(extraData);
 
@@ -465,17 +343,34 @@ public class SignupActivity extends AppCompatActivity {
                                             .document(authResult.getUser().getUid())
                                             .set(userMap)
                                             .addOnSuccessListener(unused -> {
-
                                                 mAuth.signOut();
-
                                                 Toast.makeText(this,
-                                                        "Account created! Verify email before login.",
+                                                        "Account created! 📧 A verification link has been sent to "
+                                                                + email + ". Please verify before logging in.",
                                                         Toast.LENGTH_LONG).show();
-
-                                                startActivity(new Intent(this, LoginActivity.class));
+                                                Intent i = new Intent(this, LoginActivity.class);
+                                                i.putExtra("role", selectedRole);
+                                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                startActivity(i);
                                                 finish();
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                authResult.getUser().delete();
+                                                btnSignUp.setEnabled(true);
+                                                btnSignUp.setText("CREATE ACCOUNT");
+                                                Toast.makeText(this,
+                                                        "Error saving profile: " + e.getMessage(),
+                                                        Toast.LENGTH_LONG).show();
                                             });
                                 });
+                    })
+                    .addOnFailureListener(e -> {
+                        btnSignUp.setEnabled(true);
+                        btnSignUp.setText("CREATE ACCOUNT");
+                        String msg = e.getMessage();
+                        if (msg != null && msg.contains("email address is already in use"))
+                            msg = "An account with this email already exists.";
+                        Toast.makeText(this, "Sign-up failed: " + msg, Toast.LENGTH_LONG).show();
                     });
         });
     }
