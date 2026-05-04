@@ -1905,3 +1905,9 @@ classDiagram
 | **Adapters** | 10 RecyclerView adapters bridging models to UI |
 | **Workers** | `ReminderWorker` — background event reminders |
 | **Backend** | Firebase Auth + Firestore (NoSQL), FronTech Chat SaaS |
+
+
+
+## Coloured UML Diagram:
+![Campus Event System UML](CampusEventDiscoverySystem_UML.svg)
+
