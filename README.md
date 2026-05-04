@@ -1907,5 +1907,7 @@ classDiagram
 | **Backend** | Firebase Auth + Firestore (NoSQL), FronTech Chat SaaS |
 
 
+## Coloured UML Diagram
 
+![UML Diagram](./Luminite_Link_UML.svg)
 
