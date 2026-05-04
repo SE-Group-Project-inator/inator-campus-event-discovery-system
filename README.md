@@ -1155,3 +1155,753 @@ AdminDashboardActivity --> EventsListActivity : view all events
 
 
 # Project Part 4 - Final Checkpoint
+
+#Final UML Diagram:
+# 📐 Campus Event Discovery System — UML Class Diagram
+
+```mermaid
+classDiagram
+    %% ════════════════════════════════════════════════════════
+    %% MODELS
+    %% ════════════════════════════════════════════════════════
+
+    class Event {
+        -String id
+        -String title
+        -String description
+        -String venue
+        -String status
+        -String category
+        -String society
+        -String societyId
+        -String createdBy
+        -String submittedByName
+        -String submittedByEmail
+        -String imageUrl
+        -String startTime
+        -String endTime
+        -String priceDisplay
+        -long capacity
+        -long registeredCount
+        -double price
+        -Timestamp date
+        -Timestamp submittedAt
+        -Timestamp updatedAt
+        +getId() String
+        +getTitle() String
+        +getStatus() String
+        +getCategory() String
+        +getSociety() String
+        +getCapacity() int
+        +getRegisteredCount() int
+        +getPrice() double
+        +getPriceDisplay() String
+        +getDate() Timestamp
+    }
+
+    class Payment {
+        +String STATUS_VERIFICATION_PENDING$
+        +String STATUS_APPROVED$
+        +String STATUS_REJECTED$
+        +String STATUS_PENDING_CASH$
+        +String STATUS_PAID$
+        +String STATUS_REGISTERED$
+        +String METHOD_CASH$
+        +String METHOD_JAZZCASH$
+        +String METHOD_EASYPAISA$
+        -String paymentId
+        -String studentId
+        -String studentName
+        -String studentEmail
+        -String eventId
+        -String eventName
+        -String paymentMethod
+        -String screenshotUrl
+        -String status
+        -String assignedTo
+        -String rejectionReason
+        -double amount
+        -Timestamp timestamp
+        +getPaymentMethodLabel() String
+        +getStatusLabel() String
+    }
+
+    class Registration {
+        -String id
+        -String eventId
+        -String userId
+        -String userName
+        -String userEmail
+        -int seatNumber
+        -boolean confirmed
+        -Timestamp registeredAt
+        +getId() String
+        +getEventId() String
+        +getUserId() String
+        +isConfirmed() boolean
+        +getSeatNumber() int
+    }
+
+    class NotificationItem {
+        -String id
+        -String title
+        -String message
+        -String type
+        -String eventId
+        -String eventName
+        -boolean read
+        -Timestamp timestamp
+        +isUnread() boolean
+        +isRead() boolean
+    }
+
+    class HistoryItem {
+        -String title
+        -String day
+        -String month
+        -String status
+        -String eventId
+        -String venue
+        -String description
+        -int capacity
+        -int registered
+        -long dateMillis
+        +getTitle() String
+        +getStatus() String
+        +getEventId() String
+    }
+
+    %% ════════════════════════════════════════════════════════
+    %% RECOMMENDATIONS PACKAGE
+    %% ════════════════════════════════════════════════════════
+
+    class RecommendationEngine {
+        -FirebaseFirestore db
+        -int limit
+        +getRecommendations(uid, Callback) void
+        +pickTopSociety(List~RsvpAttendance~) String$
+        -loadAttendanceHistory(uid, Consumer, Consumer) void
+        -loadPreferencesAndRecommend(uid, Set, Callback) void
+        -fetchUpcomingBySociety(society, Set, Consumer, Consumer) void
+        -fetchUpcomingByCategories(List, Set, Consumer, Consumer) void
+        -fallbackTrending(Set, Callback) void
+        -mapFilterSort(QuerySnapshot, Set, Comparator) List~Event~
+    }
+
+    class RecommendationCallback {
+        <<interface>>
+        +onRecommendations(List~Event~, String reason) void
+        +onError(Exception) void
+    }
+
+    class RsvpAttendance {
+        +String eventId
+        +String society
+        +long dateMillis
+        +RsvpAttendance(eventId, society, dateMillis)
+    }
+
+    class UserPreferences {
+        -List~String~ categories
+        +getCategories() List~String~
+        +setCategories(List~String~) void
+        +isEmpty() boolean
+    }
+
+    %% ════════════════════════════════════════════════════════
+    %% CHAT PACKAGE
+    %% ════════════════════════════════════════════════════════
+
+    class ChatMessage {
+        +int TYPE_USER$
+        +int TYPE_BOT$
+        +int type
+        +String text
+        +ChatMessage(type, text)
+    }
+
+    class ChatHistoryStore {
+        -String PREF_NAME$
+        -int MAX_PERSISTED$
+        -SharedPreferences prefs
+        -Gson gson
+        -String key
+        +ChatHistoryStore(Context, userId)
+        +load() List~ChatMessage~
+        +save(List~ChatMessage~) void
+        +clear() void
+    }
+
+    class FrontChatRepository {
+        -String BASE_URL$
+        -String AGENT_ID$
+        -OkHttpClient http
+        -Gson gson
+        -List~JsonObject~ history
+        +sendMessage(message, context, withVoice, ChatCallback) void
+        +seedTurn(role, content) void
+        +clearHistory() void
+        -addTurn(role, content) void
+        -playAudioBase64(b64) void
+    }
+
+    class ChatCallback {
+        <<interface>>
+        +onReply(String text) void
+        +onError(String error) void
+    }
+
+    %% ════════════════════════════════════════════════════════
+    %% SESSION MANAGEMENT
+    %% ════════════════════════════════════════════════════════
+
+    class SessionManager {
+        <<Singleton>>
+        -long WARNING_TIMEOUT_MS$
+        -long LOGOUT_TIMEOUT_MS$
+        -SessionManager instance$
+        -SharedPreferences prefs
+        -Context appContext
+        -Handler handler
+        -SessionCallback callback
+        +getInstance(Context) SessionManager$
+        +checkSession(Context) boolean$
+        +startSession() void
+        +resetIdleTimer() void
+        +isSessionValid() boolean
+        +isWarningDue() boolean
+        +logout() void
+        +setCallback(SessionCallback) void
+    }
+
+    class SessionCallback {
+        <<interface>>
+        +onSessionWarning() void
+        +onSessionExpired() void
+    }
+
+    %% ════════════════════════════════════════════════════════
+    %% BASE ACTIVITY
+    %% ════════════════════════════════════════════════════════
+
+    class AppCompatActivity {
+        <<Android Framework>>
+    }
+
+    class BaseSessionActivity {
+        <<abstract>>
+        -AlertDialog warningDialog
+        -CountDownTimer countDownTimer
+        +onResume() void
+        +onUserInteraction() void
+        +onPause() void
+        #showSessionWarningDialog() void
+        #dismissWarningDialog() void
+        #performLogout() void
+        +onSessionWarning() void
+        +onSessionExpired() void
+    }
+
+    %% ════════════════════════════════════════════════════════
+    %% ACTIVITIES — AUTH
+    %% ════════════════════════════════════════════════════════
+
+    class RoleSelectActivity {
+        +goToSignUp(Context, role) void$
+        -navigateTo(Class, role) void
+    }
+
+    class LoginActivity {
+        -FirebaseAuth mAuth
+        -FirebaseFirestore db
+        -String selectedRole
+        -String[] TEST_ACCOUNTS$
+        -performLogin() void
+        -validateRole(uid, role) void
+        -sendVerificationEmail() void
+        -resetPassword() void
+    }
+
+    class SignupActivity {
+        -FirebaseAuth mAuth
+        -FirebaseFirestore db
+        -String selectedRole
+        -applyRoleTheme() void
+        -setupPasswordStrengthMeter() void
+        -setupDropdowns() void
+        -registerUser() void
+    }
+
+    class StudentOnboardingActivity {
+        -FirebaseFirestore db
+        -List~String~ selectedCategories
+        -savePreferences() void
+    }
+
+    %% ════════════════════════════════════════════════════════
+    %% ACTIVITIES — STUDENT
+    %% ════════════════════════════════════════════════════════
+
+    class StudentHomeActivity {
+        -FirebaseFirestore db
+        -FirebaseAuth mAuth
+        -RecommendationEngine recEngine
+        -loadGreeting() void
+        -loadEventsThisWeek() void
+        -loadRegisteredCount() void
+        -loadSavedCount() void
+        -listenToUpcomingEvents() void
+        -loadRecommendationsPreview() void
+    }
+
+    class SearchActivity {
+        -FirebaseFirestore db
+        -List~Event~ allEvents
+        -performSearch(query) void
+        -applyFilters() void
+    }
+
+    class EventDetailActivity {
+        -FirebaseFirestore db
+        -String eventId
+        -loadEventDetails() void
+        -checkRegistrationStatus() void
+        -handleRsvp() void
+    }
+
+    class EventDisplayActivity {
+        -FirebaseFirestore db
+        -List~Event~ eventList
+        -loadEvents() void
+        -filterByCategory() void
+    }
+
+    class EventsListActivity {
+        -FirebaseFirestore db
+        -List~Event~ events
+        -loadAllEvents() void
+    }
+
+    class TrendingEventsActivity {
+        -FirebaseFirestore db
+        -loadTrendingByRegistrations() void
+    }
+
+    class RecommendationsActivity {
+        -RecommendationEngine engine
+        -loadRecommendations() void
+    }
+
+    class RsvpActivity {
+        -FirebaseFirestore db
+        -String eventId
+        -checkCapacity() void
+        -submitRsvp() void
+    }
+
+    class TicketsActivity {
+        -FirebaseFirestore db
+        -loadMyTickets() void
+    }
+
+    class TicketEventDetailsActivity {
+        -String eventId
+        -String paymentId
+        -loadTicketDetails() void
+    }
+
+    class EventHistoryActivity {
+        -FirebaseFirestore db
+        -HistoryAdapter adapter
+        -loadHistory() void
+    }
+
+    class StudentProfileActivity {
+        -FirebaseFirestore db
+        -FirebaseAuth mAuth
+        -loadProfile() void
+        -updateProfile() void
+    }
+
+    class MySocietiesActivity {
+        -FirebaseFirestore db
+        -loadMySocieties() void
+    }
+
+    class SocietiesActivity {
+        -FirebaseFirestore db
+        -loadAllSocieties() void
+    }
+
+    class SocietyDetailActivity {
+        -FirebaseFirestore db
+        -String societyId
+        -loadSocietyEvents() void
+    }
+
+    class NotificationsActivity {
+        -FirebaseFirestore db
+        -markAllRead() void
+        -loadNotifications() void
+    }
+
+    class StudentQRActivity {
+        -FirebaseAuth mAuth
+        -generateQRCode() void
+    }
+
+    class PrivacySettingsActivity {
+        -FirebaseFirestore db
+        -togglePrivacy() void
+    }
+
+    class MyPaymentsActivity {
+        -FirebaseFirestore db
+        -loadPaymentHistory() void
+    }
+
+    class CampusAssistantActivity {
+        -FrontChatRepository chatRepo
+        -ChatHistoryStore historyStore
+        -ChatMessageAdapter adapter
+        -sendMessage() void
+        -loadHistory() void
+    }
+
+    %% ════════════════════════════════════════════════════════
+    %% ACTIVITIES — PAYMENT
+    %% ════════════════════════════════════════════════════════
+
+    class PaymentActivity {
+        +String KEY_EVENT_ID$
+        +String KEY_EVENT_TITLE$
+        +String KEY_TICKET_PRICE$
+        -String JAZZCASH_NUMBER$
+        -String EASYPAISA_NUMBER$
+        -FirebaseFirestore db
+        -FirebaseAuth mAuth
+        -String screenshotBase64
+        -submitPayment() void
+        -uploadScreenshot() void
+        -checkCapacityAndRegister() void
+        -createNotification() void
+    }
+
+    class PaymentStatusActivity {
+        -String paymentId
+        -loadPaymentStatus() void
+    }
+
+    class PaymentVerificationActivity {
+        -FirebaseFirestore db
+        -approvePayment(paymentId) void
+        -rejectPayment(paymentId, reason) void
+    }
+
+    %% ════════════════════════════════════════════════════════
+    %% ACTIVITIES — EVENT MANAGER
+    %% ════════════════════════════════════════════════════════
+
+    class EventManagerDashboardActivity {
+        -FirebaseFirestore db
+        -FirebaseAuth mAuth
+        -ManagerEventAdapter adapter
+        -List~Event~ dateEventsList
+        -loadManagerStats() void
+        -listenToCalendarEvents() void
+        -showProfileSheet() void
+    }
+
+    class EventManagerEventsActivity {
+        -FirebaseFirestore db
+        -List~Event~ myEvents
+        -loadManagerEvents() void
+    }
+
+    class EventManagerProfileActivity {
+        -FirebaseFirestore db
+        -updateManagerProfile() void
+    }
+
+    class ManageEventActivity {
+        -FirebaseFirestore db
+        -String eventId
+        -loadEventData() void
+        -saveEventChanges() void
+        -cancelEvent() void
+    }
+
+    class AttendeeListActivity {
+        -FirebaseFirestore db
+        -String eventId
+        -AttendeeAdapter adapter
+        -loadAttendees() void
+        -confirmAttendance() void
+    }
+
+    class AttendeesRosterActivity {
+        -FirebaseFirestore db
+        -String eventId
+        -loadRoster() void
+    }
+
+    class EventAnalyticsActivity {
+        -FirebaseFirestore db
+        -String eventId
+        -loadAnalytics() void
+    }
+
+    class QRScannerActivity {
+        -FirebaseFirestore db
+        -handleQRResult(result) void
+        -verifyAttendance() void
+    }
+
+    %% ════════════════════════════════════════════════════════
+    %% ACTIVITIES — ADMIN
+    %% ════════════════════════════════════════════════════════
+
+    class AdminDashboardActivity {
+        -FirebaseFirestore db
+        -FirebaseAuth mAuth
+        -PendingEventAdapter adapter
+        -List~Event~ pendingList
+        -List~Event~ allEventsList
+        -String currentFilter
+        -approveEvent(eventId) void
+        -rejectEvent(eventId) void
+        -setupFilters() void
+        -listenToPendingEvents() void
+    }
+
+    %% ════════════════════════════════════════════════════════
+    %% ADAPTERS
+    %% ════════════════════════════════════════════════════════
+
+    class RecyclerViewAdapter {
+        <<Android Framework>>
+    }
+
+    class AttendeeAdapter {
+        -List~Registration~ registrations
+        -OnConfirmListener listener
+        -boolean readOnly
+        +onBindViewHolder() void
+        +getItemCount() int
+    }
+
+    class OnConfirmListener {
+        <<interface>>
+        +onConfirm(Registration, position) void
+    }
+
+    class ChatMessageAdapter {
+        -List~ChatMessage~ messages
+        +addMessage(ChatMessage) void
+        +onBindViewHolder() void
+    }
+
+    class HistoryAdapter {
+        -List~HistoryItem~ items
+        +onBindViewHolder() void
+    }
+
+    class ManagerEventAdapter {
+        -List~Event~ events
+        +onBindViewHolder() void
+    }
+
+    class NotificationAdapter {
+        -List~NotificationItem~ notifications
+        +onBindViewHolder() void
+    }
+
+    class PaymentVerificationAdapter {
+        -List~Payment~ payments
+        +onBindViewHolder() void
+    }
+
+    class PendingEventAdapter {
+        -List~Event~ events
+        +onBindViewHolder() void
+    }
+
+    class RecommendationAdapter {
+        -List~Event~ recommendations
+        +onBindViewHolder() void
+    }
+
+    class StudentPaymentAdapter {
+        -List~Payment~ payments
+        +onBindViewHolder() void
+    }
+
+    class TrendingEventAdapter {
+        -List~Event~ events
+        +onBindViewHolder() void
+    }
+
+    %% ════════════════════════════════════════════════════════
+    %% WORKERS
+    %% ════════════════════════════════════════════════════════
+
+    class ReminderWorker {
+        -FirebaseFirestore db
+        +doWork() Result
+        -sendReminderNotification(Event) void
+    }
+
+    %% ════════════════════════════════════════════════════════
+    %% INHERITANCE RELATIONSHIPS
+    %% ════════════════════════════════════════════════════════
+
+    AppCompatActivity <|-- BaseSessionActivity
+    AppCompatActivity <|-- RoleSelectActivity
+    AppCompatActivity <|-- LoginActivity
+    AppCompatActivity <|-- SignupActivity
+    AppCompatActivity <|-- PaymentActivity
+
+    BaseSessionActivity <|-- StudentHomeActivity
+    BaseSessionActivity <|-- SearchActivity
+    BaseSessionActivity <|-- EventDetailActivity
+    BaseSessionActivity <|-- EventDisplayActivity
+    BaseSessionActivity <|-- EventsListActivity
+    BaseSessionActivity <|-- TrendingEventsActivity
+    BaseSessionActivity <|-- RecommendationsActivity
+    BaseSessionActivity <|-- RsvpActivity
+    BaseSessionActivity <|-- TicketsActivity
+    BaseSessionActivity <|-- TicketEventDetailsActivity
+    BaseSessionActivity <|-- EventHistoryActivity
+    BaseSessionActivity <|-- StudentProfileActivity
+    BaseSessionActivity <|-- MySocietiesActivity
+    BaseSessionActivity <|-- SocietiesActivity
+    BaseSessionActivity <|-- SocietyDetailActivity
+    BaseSessionActivity <|-- NotificationsActivity
+    BaseSessionActivity <|-- StudentQRActivity
+    BaseSessionActivity <|-- PrivacySettingsActivity
+    BaseSessionActivity <|-- MyPaymentsActivity
+    BaseSessionActivity <|-- CampusAssistantActivity
+    BaseSessionActivity <|-- StudentOnboardingActivity
+    BaseSessionActivity <|-- PaymentStatusActivity
+    BaseSessionActivity <|-- PaymentVerificationActivity
+    BaseSessionActivity <|-- EventManagerDashboardActivity
+    BaseSessionActivity <|-- EventManagerEventsActivity
+    BaseSessionActivity <|-- EventManagerProfileActivity
+    BaseSessionActivity <|-- ManageEventActivity
+    BaseSessionActivity <|-- AttendeeListActivity
+    BaseSessionActivity <|-- AttendeesRosterActivity
+    BaseSessionActivity <|-- EventAnalyticsActivity
+    BaseSessionActivity <|-- QRScannerActivity
+    BaseSessionActivity <|-- AdminDashboardActivity
+
+    RecyclerViewAdapter <|-- AttendeeAdapter
+    RecyclerViewAdapter <|-- ChatMessageAdapter
+    RecyclerViewAdapter <|-- HistoryAdapter
+    RecyclerViewAdapter <|-- ManagerEventAdapter
+    RecyclerViewAdapter <|-- NotificationAdapter
+    RecyclerViewAdapter <|-- PaymentVerificationAdapter
+    RecyclerViewAdapter <|-- PendingEventAdapter
+    RecyclerViewAdapter <|-- RecommendationAdapter
+    RecyclerViewAdapter <|-- StudentPaymentAdapter
+    RecyclerViewAdapter <|-- TrendingEventAdapter
+
+    %% ════════════════════════════════════════════════════════
+    %% INTERFACE IMPLEMENTATIONS
+    %% ════════════════════════════════════════════════════════
+
+    SessionCallback <|.. BaseSessionActivity
+    RecommendationCallback <|.. RecommendationsActivity
+    RecommendationCallback <|.. StudentHomeActivity
+    ChatCallback <|.. CampusAssistantActivity
+    OnConfirmListener <|.. AttendeeListActivity
+
+    %% ════════════════════════════════════════════════════════
+    %% ASSOCIATIONS & DEPENDENCIES
+    %% ════════════════════════════════════════════════════════
+
+    %% Session
+    BaseSessionActivity --> SessionManager : uses
+    SessionManager --> SessionCallback : notifies
+
+    %% Recommendation
+    RecommendationEngine --> RecommendationCallback : notifies
+    RecommendationEngine --> RsvpAttendance : processes
+    RecommendationEngine --> UserPreferences : reads
+    RecommendationEngine --> Event : returns
+    StudentHomeActivity --> RecommendationEngine : creates
+    RecommendationsActivity --> RecommendationEngine : creates
+
+    %% Chat
+    CampusAssistantActivity --> FrontChatRepository : uses
+    CampusAssistantActivity --> ChatHistoryStore : uses
+    CampusAssistantActivity --> ChatMessageAdapter : drives
+    FrontChatRepository --> ChatCallback : notifies
+    ChatHistoryStore --> ChatMessage : persists
+    ChatMessageAdapter --> ChatMessage : displays
+
+    %% Adapters ↔ Models
+    AttendeeAdapter --> Registration : displays
+    HistoryAdapter --> HistoryItem : displays
+    ManagerEventAdapter --> Event : displays
+    NotificationAdapter --> NotificationItem : displays
+    PaymentVerificationAdapter --> Payment : displays
+    PendingEventAdapter --> Event : displays
+    RecommendationAdapter --> Event : displays
+    StudentPaymentAdapter --> Payment : displays
+    TrendingEventAdapter --> Event : displays
+
+    %% Activities ↔ Models (key flows)
+    PaymentActivity --> Payment : creates
+    PaymentActivity --> Registration : creates
+    PaymentActivity --> NotificationItem : creates
+    PaymentVerificationActivity --> PaymentVerificationAdapter : drives
+    PaymentVerificationActivity --> Payment : updates
+    AttendeeListActivity --> AttendeeAdapter : drives
+    AdminDashboardActivity --> PendingEventAdapter : drives
+    AdminDashboardActivity --> Event : approves/rejects
+    EventManagerDashboardActivity --> ManagerEventAdapter : drives
+    EventManagerDashboardActivity --> Event : manages
+    ManageEventActivity --> Event : edits
+    EventAnalyticsActivity --> Event : analyzes
+    EventHistoryActivity --> HistoryAdapter : drives
+    EventHistoryActivity --> HistoryItem : creates
+    NotificationsActivity --> NotificationAdapter : drives
+    MyPaymentsActivity --> StudentPaymentAdapter : drives
+    RsvpActivity --> Registration : creates
+    StudentOnboardingActivity --> UserPreferences : saves
+    ReminderWorker --> Event : queries
+    QRScannerActivity --> Registration : verifies
+
+    %% Navigation flows (key)
+    RoleSelectActivity --> LoginActivity : navigates
+    RoleSelectActivity --> SignupActivity : navigates
+    LoginActivity --> StudentHomeActivity : student role
+    LoginActivity --> EventManagerDashboardActivity : manager role
+    LoginActivity --> AdminDashboardActivity : admin role
+    SignupActivity --> StudentOnboardingActivity : post-register
+    StudentHomeActivity --> EventDetailActivity : tap event
+    StudentHomeActivity --> SearchActivity : search nav
+    StudentHomeActivity --> TicketsActivity : tickets nav
+    StudentHomeActivity --> CampusAssistantActivity : assistant card
+    EventDetailActivity --> PaymentActivity : register/pay
+    EventDetailActivity --> RsvpActivity : free event
+    PaymentActivity --> PaymentStatusActivity : on submit
+```
+
+---
+
+## Architecture Overview
+
+| Layer | Components |
+|---|---|
+| **Models** | `Event`, `Payment`, `Registration`, `NotificationItem`, `HistoryItem` |
+| **Recommendations** | `RecommendationEngine`, `RsvpAttendance`, `UserPreferences` |
+| **Chat** | `FrontChatRepository`, `ChatHistoryStore`, `ChatMessage` |
+| **Session** | `SessionManager` (Singleton), `BaseSessionActivity` (abstract base) |
+| **Auth Activities** | `RoleSelectActivity` → `LoginActivity` / `SignupActivity` |
+| **Student Activities** | `StudentHomeActivity`, `SearchActivity`, `EventDetailActivity`, `PaymentActivity`, etc. |
+| **Manager Activities** | `EventManagerDashboardActivity`, `ManageEventActivity`, `EventAnalyticsActivity`, etc. |
+| **Admin Activities** | `AdminDashboardActivity`, `PaymentVerificationActivity` |
+| **Adapters** | 10 RecyclerView adapters bridging models to UI |
+| **Workers** | `ReminderWorker` — background event reminders |
+| **Backend** | Firebase Auth + Firestore (NoSQL), FronTech Chat SaaS |
