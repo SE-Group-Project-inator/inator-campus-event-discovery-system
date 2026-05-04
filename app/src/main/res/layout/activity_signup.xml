@@ -41,13 +41,13 @@
             android:layout_marginTop="36dp"
             android:background="@drawable/bg_auth_logo_circle">
 
-            <ImageView
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:layout_gravity="center"
-                android:contentDescription="Logo"
-                android:scaleType="fitCenter"
-                android:src="@drawable/app_logo"/>
+            <com.google.android.material.imageview.ShapeableImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/app_logo"
+                app:shapeAppearanceOverlay="@style/CircleImage"/>
         </FrameLayout>
 
         <!-- Create Account heading -->
@@ -438,13 +438,13 @@
                             app:boxCornerRadiusBottomStart="12dp"
                             app:boxCornerRadiusBottomEnd="12dp"
                             app:boxBackgroundColor="#FAFBFF"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
-                            <com.google.android.material.textfield.TextInputEditText
+                            <AutoCompleteTextView
                                 android:id="@+id/etSocietyName"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="textCapWords"
+                                android:inputType="none"
                                 android:textSize="15sp"
                                 android:textColor="@color/admin_text_primary"/>
                         </com.google.android.material.textfield.TextInputLayout>
