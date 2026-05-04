@@ -34,8 +34,10 @@ public class PaymentVerificationActivity extends AppCompatActivity {
 
     private RecyclerView rvPayments;
     private ProgressBar progressBar;
-    private TextView tvEmpty, tvPendingBadge;
     private TabLayout tabLayout;
+    private View layoutEmptyVerification;
+    private View badgeContainer;
+    private TextView tvPendingBadge;
 
     private final List<Payment> allPayments     = new ArrayList<>();
     private final List<Payment> filteredPayments = new ArrayList<>();
@@ -62,9 +64,10 @@ public class PaymentVerificationActivity extends AppCompatActivity {
     private void bindViews() {
         rvPayments    = findViewById(R.id.rvVerificationPayments);
         progressBar   = findViewById(R.id.progressBarVerification);
-        tvEmpty       = findViewById(R.id.tvEmptyVerification);
         tvPendingBadge = findViewById(R.id.tvPendingBadge);
         tabLayout     = findViewById(R.id.tabsVerification);
+        layoutEmptyVerification = findViewById(R.id.layoutEmptyVerification);
+        badgeContainer          = findViewById(R.id.badgeContainer);
     }
 
     private void setupTabs() {
@@ -131,9 +134,11 @@ public class PaymentVerificationActivity extends AppCompatActivity {
                     long pendingCount = allPayments.stream()
                             .filter(p -> Payment.STATUS_VERIFICATION_PENDING.equals(p.getStatus()))
                             .count();
-                    if (tvPendingBadge != null) {
+
+                    // FIX: Toggle the badgeContainer instead of just the text!
+                    if (tvPendingBadge != null && badgeContainer != null) {
                         tvPendingBadge.setText(String.valueOf(pendingCount));
-                        tvPendingBadge.setVisibility(pendingCount > 0 ? View.VISIBLE : View.GONE);
+                        badgeContainer.setVisibility(pendingCount > 0 ? View.VISIBLE : View.GONE);
                     }
 
                     applyFilter();
@@ -167,8 +172,12 @@ public class PaymentVerificationActivity extends AppCompatActivity {
         }
 
         adapter.notifyDataSetChanged();
-        if (tvEmpty != null) {
-            tvEmpty.setVisibility(filteredPayments.isEmpty() ? View.VISIBLE : View.GONE);
+
+        // FIX: Replaced 'tvEmpty' with the new 'layoutEmptyVerification' container
+        if (layoutEmptyVerification != null && rvPayments != null) {
+            boolean isEmpty = filteredPayments.isEmpty();
+            layoutEmptyVerification.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+            rvPayments.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
         }
     }
 

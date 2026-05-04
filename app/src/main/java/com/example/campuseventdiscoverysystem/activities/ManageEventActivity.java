@@ -206,7 +206,7 @@ public class ManageEventActivity extends AppCompatActivity {
 
                 // Dynamically update the subtitle based on the status
                 TextView tvSubtitle = findViewById(R.id.tvSubtitle);
-                if ("approved".equals(originalStatus) || "active".equals(originalStatus)) {
+                if ("active".equals(originalStatus) || "active".equals(originalStatus)) {
                     tvSubtitle.setText("Registered students will be notified of changes.");
                 } else if ("rejected".equals(originalStatus) || "declined".equals(originalStatus)) {
                     tvSubtitle.setText("Update the details to resubmit for admin approval.");
@@ -346,7 +346,7 @@ public class ManageEventActivity extends AppCompatActivity {
 
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
                         // Check if venue matches and if the event is an approved event
-                        if (venue.equals(doc.getString("venue")) && "approved".equals(doc.getString("status"))) {
+                        if (venue.equals(doc.getString("venue")) && "active".equals(doc.getString("status"))) {
 
                             // Ignore the current event being edited
                             if (isEditMode && doc.getId().equals(eventID)) {
@@ -491,7 +491,7 @@ public class ManageEventActivity extends AppCompatActivity {
 
                     // Dynamic Success Dialog based on originalStatus
                     String successMsg;
-                    if ("approved".equals(originalStatus) || "active".equals(originalStatus)) {
+                    if ("active".equals(originalStatus) || "active".equals(originalStatus)) {
                         notifyRegisteredStudentsOfUpdate(title);
                         successMsg = "The event is now pending re-approval. Registered students have been notified.";
                     } else {
@@ -516,31 +516,37 @@ public class ManageEventActivity extends AppCompatActivity {
     private void deleteEvent() {
         setLoading(true);
 
-        // Fetch all registrations for this event
-        db.collection("registrations")
+        // Look in the "rsvps" collection, not "registrations"
+        db.collection("rsvps")
                 .whereEqualTo("eventId", eventID)
                 .get()
                 .addOnSuccessListener(regSnapshots -> {
                     WriteBatch batch = db.batch();
                     String eventTitle = etTitle.getText().toString().trim();
 
-                    // Loop through and create deletion notifications + delete the registration documents
+                    // Loop through and create deletion notifications + delete the RSVP documents
                     for (DocumentSnapshot regDoc : regSnapshots.getDocuments()) {
                         String userId = regDoc.getString("userId");
                         if (userId != null) {
                             Map<String, Object> notification = new HashMap<>();
-                            notification.put("title", "Event Cancelled");
+                            notification.put("title", "Event Cancelled ❌");
                             notification.put("message", "\"" + eventTitle + "\" has been cancelled by the organiser.");
-                            notification.put("unread", true);
+                            notification.put("read", false); // Fixed from 'unread' to match your Notification logic
                             notification.put("timestamp", Timestamp.now());
 
+                            // Add notification
                             batch.set(
                                     db.collection("users").document(userId)
                                             .collection("notifications").document(),
                                     notification
                             );
 
+                            // Delete the RSVP document
                             batch.delete(regDoc.getReference());
+
+                            // Delete the student from the event_attendees subcollection
+                            batch.delete(db.collection("event_attendees").document(eventID)
+                                    .collection("attendees").document(userId));
                         }
                     }
 
@@ -553,7 +559,7 @@ public class ManageEventActivity extends AppCompatActivity {
                                 setLoading(false);
 
                                 // Dynamic Delete Success Message based on originalStatus
-                                String successMsg = ("approved".equals(originalStatus) || "active".equals(originalStatus))
+                                String successMsg = ("active".equals(originalStatus) || "active".equals(originalStatus))
                                         ? "Registered students will be notified."
                                         : "The event has been removed from your history.";
 
@@ -566,7 +572,8 @@ public class ManageEventActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     setLoading(false);
-                    Toast.makeText(this, "Could not load registrations to delete event!", Toast.LENGTH_SHORT).show();
+                    // Print the actual error message so you know exactly what went wrong
+                    Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
 
@@ -574,7 +581,8 @@ public class ManageEventActivity extends AppCompatActivity {
      * Writes an update notification to all registered students
      */
     private void notifyRegisteredStudentsOfUpdate(String eventTitle) {
-        db.collection("registrations")
+        // Look in the "rsvps" collection, not "registrations"
+        db.collection("rsvps")
                 .whereEqualTo("eventId", eventID)
                 .get()
                 .addOnSuccessListener(regSnapshots -> {
@@ -583,9 +591,9 @@ public class ManageEventActivity extends AppCompatActivity {
                         String userId = regDoc.getString("userId");
                         if (userId != null) {
                             Map<String, Object> notification = new HashMap<>();
-                            notification.put("title", "Event Updated");
+                            notification.put("title", "Event Updated 🔄");
                             notification.put("message", "\"" + eventTitle + "\" has been updated. Check the latest details.");
-                            notification.put("unread", true);
+                            notification.put("read", false); // Fixed to match your NotificationsActivity
                             notification.put("timestamp", Timestamp.now());
 
                             batch.set(
@@ -616,7 +624,7 @@ public class ManageEventActivity extends AppCompatActivity {
     private void showDeleteConfirmDialog() {
         // Dynamic Delete Confirm Dialog based on originalStatus
         String message;
-        if ("approved".equals(originalStatus) || "active".equals(originalStatus)) {
+        if ("active".equals(originalStatus) || "active".equals(originalStatus)) {
             message = "This cannot be undone. All " + currentRegisteredCount + " registered student(s) will be notified of event cancellation!";
         } else {
             message = "This cannot be undone. Are you sure you want to delete this event?";
