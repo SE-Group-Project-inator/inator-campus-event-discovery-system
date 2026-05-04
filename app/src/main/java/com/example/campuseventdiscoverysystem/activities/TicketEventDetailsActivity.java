@@ -3,6 +3,7 @@ package com.example.campuseventdiscoverysystem.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -37,6 +38,8 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
 
         populateDetails();
         setupButtons();
+
+        applyRoleBasedUI();
     }
 
     private void populateDetails() {
@@ -45,6 +48,7 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
         String title       = in.getStringExtra("eventTitle");
         String description = in.getStringExtra("eventDescription");
         String venue       = in.getStringExtra("eventVenue");
+        String organizer = in.getStringExtra("eventOrganizer");
         int    capacity    = in.getIntExtra("eventCapacity", 0);
         int    registered  = in.getIntExtra("eventRegistered", 0);
         long   dateMillis  = in.getLongExtra("eventDateMillis", 0);
@@ -84,6 +88,12 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tvDescription)).setText(
                 (description != null && !description.isEmpty())
                         ? description : "No description provided.");
+
+        // Set Organizer Name
+        TextView tvOrganizer = findViewById(R.id.tvOrganizer);
+        if (tvOrganizer != null) {
+            tvOrganizer.setText(organizer != null && !organizer.isEmpty() ? organizer : "Campus Society");
+        }
     }
 
     private void setupButtons() {
@@ -96,7 +106,7 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
 
         // Collapsible About section
         LinearLayout aboutToggle = findViewById(R.id.layoutAboutToggle);
-        TextView tvDesc  = findViewById(R.id.tvDescription);
+        TextView tvDesc = findViewById(R.id.tvDescription);
         TextView tvArrow = findViewById(R.id.tvAboutArrow);
         aboutToggle.setOnClickListener(v -> {
             if (aboutExpanded) {
@@ -125,111 +135,178 @@ public class TicketEventDetailsActivity extends AppCompatActivity {
         });
 
         // Cancel RSVP
-        findViewById(R.id.btnCancelRsvp).setOnClickListener(v -> {
-            if (rsvpId == null || eventId == null) {
-                Toast.makeText(this, "Could not find RSVP", Toast.LENGTH_SHORT).show();
-                return;
+        View btnCancel = findViewById(R.id.btnCancelRsvp);
+        if (btnCancel != null) {
+            btnCancel.setOnClickListener(v -> {
+                if (rsvpId == null || eventId == null) {
+                    Toast.makeText(this, "Could not find RSVP", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Prevent double-clicking
+                v.setEnabled(false);
+                Toast.makeText(this, "Processing cancellation...", Toast.LENGTH_SHORT).show();
+
+                String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                db.collection("rsvps").document(rsvpId).get().addOnSuccessListener(rsvpDoc -> {
+                    if (!rsvpDoc.exists()) {
+                        finishFlow();
+                        return;
+                    }
+
+                    // Check status case-insensitively just to be safe
+                    String currentStatus = rsvpDoc.getString("status");
+                    boolean wasWaitlisted = currentStatus != null && currentStatus.toLowerCase().equals("waitlisted");
+
+                    // 1. Delete the RSVP
+                    db.collection("rsvps").document(rsvpId).delete().addOnSuccessListener(unused -> {
+
+                        // 2. Remove user from attendee roster
+                        db.collection("event_attendees").document(eventId)
+                                .collection("attendees").document(currentUserId).delete();
+
+                        if (!wasWaitlisted) {
+                            // 3. Promote Waitlist (Because a confirmed spot opened up!)
+                            db.collection("rsvps")
+                                    .whereEqualTo("eventId", eventId)
+                                    .whereEqualTo("status", "waitlisted")
+                                    .limit(1) // Grab the next person in line
+                                    .get()
+                                    .addOnSuccessListener(querySnapshots -> {
+                                        if (!querySnapshots.isEmpty()) {
+                                            // SOMEONE IS ON WAITLIST -> PROMOTE THEM
+                                            var waitlistDoc = querySnapshots.getDocuments().get(0);
+                                            String promotedRsvpId = waitlistDoc.getId();
+                                            String promotedUserId = waitlistDoc.getString("userId");
+
+                                            // Update their RSVP status
+                                            db.collection("rsvps").document(promotedRsvpId).update("status", "confirmed");
+
+                                            // Add them to attendee roster
+                                            java.util.Map<String, Object> attendee = new java.util.HashMap<>();
+                                            attendee.put("userId", promotedUserId);
+                                            attendee.put("joinedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
+
+                                            db.collection("event_attendees").document(eventId)
+                                                    .collection("attendees").document(promotedUserId).set(attendee);
+
+                                            // Send them a notification!
+                                            java.util.Map<String, Object> notif = new java.util.HashMap<>();
+                                            notif.put("title", "Waitlist Update 🎉");
+                                            notif.put("message", "A spot opened up! You are now confirmed for \"" + title + "\".");
+                                            notif.put("read", false);
+                                            notif.put("timestamp", com.google.firebase.firestore.FieldValue.serverTimestamp());
+
+                                            db.collection("users").document(promotedUserId).collection("notifications").add(notif);
+
+                                            // Finish flow immediately. Total count doesn't change (-1 cancel +1 promote = 0)
+                                            finishFlow();
+
+                                        } else {
+                                            // NO ONE ON WAITLIST -> Drop the capacity count safely
+                                            recalculateRegisteredCount(eventId);
+                                            finishFlow();
+                                        }
+                                    }).addOnFailureListener(e -> {
+                                        recalculateRegisteredCount(eventId);
+                                        finishFlow();
+                                    });
+                        } else {
+                            // The user cancelling was already on the waitlist, so no capacity change needed.
+                            finishFlow();
+                        }
+                    }).addOnFailureListener(e -> {
+                        v.setEnabled(true);
+                        Toast.makeText(this, "Error cancelling RSVP.", Toast.LENGTH_SHORT).show();
+                    });
+                });
+            });
+        }
+    }
+
+        private void finishFlow () {
+            Toast.makeText(this, "RSVP cancelled successfully", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, TicketsActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+        }
+
+        /** Recalculates registeredCount from actual confirmed rsvps, clamped to [0, capacity]. */
+        private void recalculateRegisteredCount (String eventId){
+            if (eventId == null) return;
+            db.collection("rsvps")
+                    .whereEqualTo("eventId", eventId)
+                    .whereEqualTo("status", "confirmed")
+                    .get()
+                    .addOnSuccessListener(snap -> {
+                        int trueCount = snap.size();
+                        db.collection("events").document(eventId).get()
+                                .addOnSuccessListener(evDoc -> {
+                                    Long cap = evDoc.getLong("capacity");
+                                    int clamped = cap != null && cap > 0
+                                            ? Math.min(trueCount, cap.intValue()) : trueCount;
+                                    db.collection("events").document(eventId)
+                                            .update("registeredCount", Math.max(0, clamped));
+                                });
+                    });
+        }
+
+        /**
+         * Dynamically themes the screen based on who is viewing it.
+         * Manager = Purple theme + hidden student controls.
+         * Student = Teal theme + visible student controls.
+         */
+        private void applyRoleBasedUI () {
+            String userRole = getIntent().getStringExtra("USER_ROLE");
+
+            int primaryColor;
+            int bgColor;
+
+            if ("manager".equals(userRole)) {
+                // == MANAGER VIEW (Dynamic Theme) ==
+                primaryColor = getResources().getColor(R.color.btn_eventmgr, getTheme());
+                bgColor = getResources().getColor(R.color.bg_event, getTheme());
+
+                // Hide student-specific controls
+                int[] viewsToHide = {
+                        R.id.btnShowQR, R.id.btnCancelRsvp, R.id.btnConfirmRsvp,
+                        R.id.cardConsent, R.id.cbWaitlist, R.id.cbVisibleName, R.id.cbVisibleRollNo
+                };
+                for (int id : viewsToHide) {
+                    View v = findViewById(id);
+                    if (v != null) v.setVisibility(View.GONE);
+                }
+            } else {
+                // == STUDENT VIEW (Teal Theme) ==
+                primaryColor = android.graphics.Color.parseColor("#0D9488"); // Teal
+                bgColor = android.graphics.Color.parseColor("#EBF8F5");      // Light Teal BG
             }
 
-            String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            // 1. Apply Background Colors
+            View rootLayout = findViewById(R.id.rootLayout);
+            View headerLayout = findViewById(R.id.headerLayout);
+            if (rootLayout != null) rootLayout.setBackgroundColor(bgColor);
+            if (headerLayout != null) headerLayout.setBackgroundColor(primaryColor);
 
-            db.collection("rsvps").document(rsvpId)
-                    .get()
-                    .addOnSuccessListener(rsvpDoc -> {
+            // 2. Apply Back Button Color
+            ImageButton btnBack = findViewById(R.id.btnBack);
+            if (btnBack != null)
+                btnBack.setBackgroundTintList(android.content.res.ColorStateList.valueOf(primaryColor));
 
-                        boolean wasWaitlisted = "waitlisted".equals(rsvpDoc.getString("status"));
+            // 3. Apply Text Colors to Section Headers
+            int[] textViewsToTint = {
+                    R.id.tvLabelEventDetails, R.id.tvAvailabilityLabel, R.id.tvLabelAbout
+            };
+            for (int id : textViewsToTint) {
+                TextView tv = findViewById(id);
+                if (tv != null) tv.setTextColor(primaryColor);
+            }
 
-                        db.collection("rsvps").document(rsvpId)
-                                .delete()
-                                .addOnSuccessListener(unused -> {
-
-                                    // Remove from attendees
-                                    db.collection("event_attendees").document(eventId)
-                                            .collection("attendees").document(currentUserId)
-                                            .delete();
-
-                                    if (!wasWaitlisted) {
-                                        // Check for waitlisted users to promote. Avoid orderBy to
-                                        // prevent requiring a composite Firestore index.
-                                        db.collection("rsvps")
-                                                .whereEqualTo("eventId", eventId)
-                                                .whereEqualTo("status", "waitlisted")
-                                                .limit(1)
-                                                .get()
-                                                .addOnSuccessListener(querySnapshots -> {
-                                                    if (!querySnapshots.isEmpty()) {
-                                                        // Promote the first waitlisted user — count stays same
-                                                        var waitlistDoc = querySnapshots.getDocuments().get(0);
-                                                        String promotedRsvpId = waitlistDoc.getId();
-                                                        String promotedUserId = waitlistDoc.getString("userId");
-
-                                                        db.collection("rsvps").document(promotedRsvpId)
-                                                                .update("status", "confirmed");
-
-                                                        java.util.Map<String, Object> attendee = new java.util.HashMap<>();
-                                                        attendee.put("userId", promotedUserId);
-                                                        attendee.put("joinedAt", com.google.firebase.firestore.FieldValue.serverTimestamp());
-                                                        db.collection("event_attendees").document(eventId)
-                                                                .collection("attendees").document(promotedUserId)
-                                                                .set(attendee);
-
-                                                        java.util.Map<String, Object> notif = new java.util.HashMap<>();
-                                                        notif.put("title", "Waitlist Update 🎉");
-                                                        notif.put("message", "A spot opened up! You are now confirmed for \"" + title + "\".");
-                                                        notif.put("read", false);
-                                                        notif.put("timestamp", com.google.firebase.firestore.FieldValue.serverTimestamp());
-                                                        db.collection("users").document(promotedUserId)
-                                                                .collection("notifications")
-                                                                .add(notif);
-                                                    } else {
-                                                        // No waitlisted users — recalculate from actual rsvps
-                                                        recalculateRegisteredCount(eventId);
-                                                    }
-                                                    finishFlow();
-                                                })
-                                                .addOnFailureListener(e -> {
-                                                    // Waitlist query failed — still recalculate
-                                                    recalculateRegisteredCount(eventId);
-                                                    finishFlow();
-                                                });
-
-                                    } else {
-                                        // Was waitlisted — no count change needed
-                                        finishFlow();
-                                    }
-                                });
-                    })
-                    .addOnFailureListener(e ->
-                            Toast.makeText(this, "Failed to cancel RSVP", Toast.LENGTH_SHORT).show()
-                    );
-        });
-    }
-
-    private void finishFlow() {
-        Toast.makeText(this, "RSVP cancelled successfully", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, TicketsActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-        finish();
-    }
-    /** Recalculates registeredCount from actual confirmed rsvps, clamped to [0, capacity]. */
-    private void recalculateRegisteredCount(String eventId) {
-        if (eventId == null) return;
-        db.collection("rsvps")
-                .whereEqualTo("eventId", eventId)
-                .whereEqualTo("status", "confirmed")
-                .get()
-                .addOnSuccessListener(snap -> {
-                    int trueCount = snap.size();
-                    db.collection("events").document(eventId).get()
-                            .addOnSuccessListener(evDoc -> {
-                                Long cap = evDoc.getLong("capacity");
-                                int clamped = cap != null && cap > 0
-                                        ? Math.min(trueCount, cap.intValue()) : trueCount;
-                                db.collection("events").document(eventId)
-                                        .update("registeredCount", Math.max(0, clamped));
-                            });
-                });
-    }
-
+            // 4. Apply Progress Bar Color
+            ProgressBar pb = findViewById(R.id.progressAvailability);
+            if (pb != null)
+                pb.setProgressTintList(android.content.res.ColorStateList.valueOf(primaryColor));
+        }
 }

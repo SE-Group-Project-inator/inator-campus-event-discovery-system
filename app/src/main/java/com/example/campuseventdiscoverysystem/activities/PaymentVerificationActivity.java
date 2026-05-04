@@ -32,21 +32,24 @@ import java.util.List;
  * - Screenshot preview dialog (Base64 decoding)
  * - Approve / Reject payment workflow
  * - Automatic RSVP + attendance + notification updates
+ * - Idle Session Security (via BaseSessionActivity)
  */
 public class PaymentVerificationActivity extends AppCompatActivity {
 
     // ========================= UI COMPONENTS =========================
     private RecyclerView rvPayments;
     private ProgressBar progressBar;
-    private TextView tvEmpty, tvPendingBadge;
     private TabLayout tabLayout;
+    private View layoutEmptyVerification;
+    private View badgeContainer;
+    private TextView tvPendingBadge;
 
     // ========================= DATA LISTS =========================
     private final List<Payment> allPayments     = new ArrayList<>();
     private final List<Payment> filteredPayments = new ArrayList<>();
     private PaymentVerificationAdapter adapter;
 
-    // ========================= FIREBASE =========================
+    // ========================= FIRESTORE =========================
     private FirebaseFirestore db;
     private ListenerRegistration listener;
 
@@ -75,18 +78,18 @@ public class PaymentVerificationActivity extends AppCompatActivity {
      * Binds XML views to Java variables
      */
     private void bindViews() {
-        rvPayments     = findViewById(R.id.rvVerificationPayments);
-        progressBar    = findViewById(R.id.progressBarVerification);
-        tvEmpty        = findViewById(R.id.tvEmptyVerification);
-        tvPendingBadge = findViewById(R.id.tvPendingBadge);
-        tabLayout      = findViewById(R.id.tabsVerification);
+        rvPayments              = findViewById(R.id.rvVerificationPayments);
+        progressBar             = findViewById(R.id.progressBarVerification);
+        tvPendingBadge          = findViewById(R.id.tvPendingBadge);
+        tabLayout               = findViewById(R.id.tabsVerification);
+        layoutEmptyVerification = findViewById(R.id.layoutEmptyVerification);
+        badgeContainer          = findViewById(R.id.badgeContainer);
     }
 
     /**
      * Sets up tab filtering (Pending / All / Approved / Rejected / Cash)
      */
     private void setupTabs() {
-
         if (tabLayout == null) return;
 
         tabLayout.addTab(tabLayout.newTab().setText("Pending"));
@@ -96,7 +99,6 @@ public class PaymentVerificationActivity extends AppCompatActivity {
         tabLayout.addTab(tabLayout.newTab().setText("Cash"));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 switch (tab.getPosition()) {
@@ -145,17 +147,13 @@ public class PaymentVerificationActivity extends AppCompatActivity {
      * Listens to real-time updates of payments collection
      */
     private void startListener() {
-
-        if (progressBar != null)
-            progressBar.setVisibility(View.VISIBLE);
+        if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
 
         listener = db.collection("payments")
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((query, error) -> {
 
-                    if (progressBar != null)
-                        progressBar.setVisibility(View.GONE);
-
+                    if (progressBar != null) progressBar.setVisibility(View.GONE);
                     if (error != null || query == null) return;
 
                     allPayments.clear();
@@ -173,9 +171,10 @@ public class PaymentVerificationActivity extends AppCompatActivity {
                             .filter(p -> Payment.STATUS_VERIFICATION_PENDING.equals(p.getStatus()))
                             .count();
 
-                    if (tvPendingBadge != null) {
+                    // Toggle the red badge container
+                    if (tvPendingBadge != null && badgeContainer != null) {
                         tvPendingBadge.setText(String.valueOf(pendingCount));
-                        tvPendingBadge.setVisibility(pendingCount > 0 ? View.VISIBLE : View.GONE);
+                        badgeContainer.setVisibility(pendingCount > 0 ? View.VISIBLE : View.GONE);
                     }
 
                     applyFilter();
@@ -186,34 +185,27 @@ public class PaymentVerificationActivity extends AppCompatActivity {
      * Filters payment list based on selected tab
      */
     private void applyFilter() {
-
         filteredPayments.clear();
 
         for (Payment p : allPayments) {
-
             switch (currentFilter) {
-
                 case "pending":
                     if (Payment.STATUS_VERIFICATION_PENDING.equals(p.getStatus()))
                         filteredPayments.add(p);
                     break;
-
                 case "approved":
                     if (Payment.STATUS_APPROVED.equals(p.getStatus()))
                         filteredPayments.add(p);
                     break;
-
                 case "rejected":
                     if (Payment.STATUS_REJECTED.equals(p.getStatus()))
                         filteredPayments.add(p);
                     break;
-
                 case "cash":
                     if (Payment.STATUS_PENDING_CASH.equals(p.getStatus()))
                         filteredPayments.add(p);
                     break;
-
-                default:
+                default: // "all"
                     filteredPayments.add(p);
                     break;
             }
@@ -221,8 +213,11 @@ public class PaymentVerificationActivity extends AppCompatActivity {
 
         adapter.notifyDataSetChanged();
 
-        if (tvEmpty != null) {
-            tvEmpty.setVisibility(filteredPayments.isEmpty() ? View.VISIBLE : View.GONE);
+        // Toggle the premium empty state container
+        if (layoutEmptyVerification != null && rvPayments != null) {
+            boolean isEmpty = filteredPayments.isEmpty();
+            layoutEmptyVerification.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+            rvPayments.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -234,7 +229,6 @@ public class PaymentVerificationActivity extends AppCompatActivity {
      * Shows confirmation dialog before approving payment
      */
     private void showApproveConfirmation(Payment payment) {
-
         new AlertDialog.Builder(this)
                 .setTitle("Approve Payment")
                 .setMessage("Approve payment from " + payment.getStudentName()
@@ -248,7 +242,6 @@ public class PaymentVerificationActivity extends AppCompatActivity {
      * Approves payment and updates Firestore + RSVP + notifications
      */
     private void approvePayment(Payment payment) {
-
         db.collection("payments").document(payment.getPaymentId())
                 .update("status", Payment.STATUS_APPROVED)
                 .addOnSuccessListener(v -> {
@@ -327,7 +320,6 @@ public class PaymentVerificationActivity extends AppCompatActivity {
      * Shows rejection dialog with reason input
      */
     private void showRejectDialog(Payment payment) {
-
         View dialogView = getLayoutInflater()
                 .inflate(R.layout.dialog_reject_payment, null);
 
@@ -350,31 +342,23 @@ public class PaymentVerificationActivity extends AppCompatActivity {
      * Rejects payment and stores rejection reason
      */
     private void rejectPayment(Payment payment, String reason) {
-
         db.collection("payments").document(payment.getPaymentId())
                 .update(
                         "status", Payment.STATUS_REJECTED,
                         "rejectionReason", reason
                 )
                 .addOnSuccessListener(v ->
-                        Toast.makeText(this,
-                                "Payment rejected ❌",
-                                Toast.LENGTH_SHORT).show())
+                        Toast.makeText(this, "Payment rejected ❌", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e ->
-                        Toast.makeText(this,
-                                "Failed: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show());
+                        Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     /**
      * Displays payment screenshot in full-screen dialog (Base64 decode)
      */
     private void showScreenshotDialog(String screenshotData) {
-
         if (screenshotData == null || screenshotData.isEmpty()) {
-            Toast.makeText(this,
-                    "No screenshot available",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No screenshot available", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -397,9 +381,7 @@ public class PaymentVerificationActivity extends AppCompatActivity {
                 ivPreview.setImageBitmap(bitmap);
 
             } catch (Exception e) {
-                Toast.makeText(this,
-                        "Could not load image",
-                        Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Could not load image", Toast.LENGTH_SHORT).show();
                 return;
             }
         }

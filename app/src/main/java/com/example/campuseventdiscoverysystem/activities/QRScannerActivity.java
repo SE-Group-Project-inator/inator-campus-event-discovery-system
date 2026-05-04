@@ -54,7 +54,7 @@ public class QRScannerActivity extends AppCompatActivity {
         options.setCameraId(0);
         options.setBeepEnabled(true);
         options.setBarcodeImageEnabled(false);
-        options.setOrientationLocked(false);
+        options.setOrientationLocked(true);
         scanLauncher.launch(options);
     }
 

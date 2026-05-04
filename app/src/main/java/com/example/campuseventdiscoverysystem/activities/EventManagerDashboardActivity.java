@@ -156,8 +156,11 @@ public class EventManagerDashboardActivity extends BaseSessionActivity {
 
         tvGreeting.setText(greeting);
 
-        btnNotifications.setOnClickListener(v ->
-                Toast.makeText(this, "Routing to Notifications...", Toast.LENGTH_SHORT).show());
+        if (btnNotifications != null) btnNotifications.setOnClickListener(v -> {
+            Intent intent = new Intent(this, NotificationsActivity.class);
+            intent.putExtra("role", "manager");
+            startActivity(intent);
+        });
     }
 
     /**
@@ -279,12 +282,32 @@ public class EventManagerDashboardActivity extends BaseSessionActivity {
      * Sets up the RecyclerView for calendar events.
      */
     private void setupRecyclerView() {
-
-        // Route to the EventDisplayActivity
         adapter = new ManagerEventAdapter(dateEventsList, eventId -> {
-            Intent intent = new Intent(this, EventDisplayActivity.class);
-            intent.putExtra("EVENT_ID", eventId);
-            intent.putExtra("USER_ROLE", "manager");
+
+            // Find the clicked event in the list
+            Event selectedEvent = null;
+            for (Event e : dateEventsList) {
+                if (e.getId().equals(eventId)) {
+                    selectedEvent = e;
+                    break;
+                }
+            }
+
+            // Route to TicketEventDetailsActivity instead of EventDisplayActivity
+            Intent intent = new Intent(this, TicketEventDetailsActivity.class);
+            if (selectedEvent != null) {
+                intent.putExtra("eventId", selectedEvent.getId());
+                intent.putExtra("eventTitle", selectedEvent.getTitle());
+                intent.putExtra("eventDescription", selectedEvent.getDescription());
+                intent.putExtra("eventVenue", selectedEvent.getVenue());
+                intent.putExtra("eventCapacity", selectedEvent.getCapacity());
+                intent.putExtra("eventOrganizer", selectedEvent.getSociety());
+
+                if (selectedEvent.getDate() != null) {
+                    intent.putExtra("eventDateMillis", selectedEvent.getDate().toDate().getTime());
+                }
+            }
+            intent.putExtra("USER_ROLE", "manager"); // Flag to hide student buttons
             startActivity(intent);
         });
 
@@ -466,7 +489,8 @@ public class EventManagerDashboardActivity extends BaseSessionActivity {
         if (sheetVisible) {
             hideProfileSheet();
         } else {
-            super.onBackPressed();
+            // Trigger the logout confirmation dialog instead of closing the app
+            showLogoutDialog();
         }
     }
 }

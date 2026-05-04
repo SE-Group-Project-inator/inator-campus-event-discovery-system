@@ -463,7 +463,9 @@ public class EventManagerEventsActivity extends BaseSessionActivity {
         if (sheetVisible) {
             hideProfileSheet();
         } else {
-            super.onBackPressed();
+            // Return to the Dashboard instead of closing the app
+            startActivity(new Intent(this, EventManagerDashboardActivity.class));
+            finish();
         }
     }
 }

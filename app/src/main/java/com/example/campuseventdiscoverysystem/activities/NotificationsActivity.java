@@ -33,21 +33,13 @@ import java.util.List;
  *
  * FEATURES:
  * - Shows notifications from Firestore subcollection
- * - Supports both student and admin UI themes
+ * - Supports Student, Admin, and Manager UI themes dynamically
  * - Live updates using snapshot listener
  * - Auto-mark notifications as "read"
  * - Handles empty state UI
  *
  * FIRESTORE STRUCTURE:
  * users/{userId}/notifications/{notificationId}
- *
- * NOTIFICATION TYPES:
- * - Event approval/rejection
- * - System updates
- * - Event-related alerts
- *
- * USER ROLE:
- * Student / Admin (UI themed)
  */
 public class NotificationsActivity extends AppCompatActivity {
 
@@ -79,25 +71,22 @@ public class NotificationsActivity extends AppCompatActivity {
 
         // ---------------- ROLE-BASED UI THEME ----------------
         String role = getIntent().getStringExtra("role");
+        View headerLayout = findViewById(R.id.headerLayout);
+        View rootLayout = findViewById(R.id.notificationsRoot);
 
         if ("admin".equals(role)) {
-
-            // Apply admin color scheme to header
-            View headerLayout = findViewById(R.id.headerLayout);
-            if (headerLayout != null) {
-                headerLayout.setBackgroundColor(getColor(R.color.admin_primary));
-            }
-
-            // Apply admin background theme
-            View rootLayout = findViewById(R.id.notificationsRoot);
-            if (rootLayout != null) {
-                rootLayout.setBackgroundColor(getColor(R.color.admin_bg));
-            }
+            // Apply admin color scheme
+            if (headerLayout != null) headerLayout.setBackgroundColor(getColor(R.color.admin_primary));
+            if (rootLayout != null) rootLayout.setBackgroundColor(getColor(R.color.admin_bg));
+        } else if ("manager".equals(role)) {
+            // Apply manager color scheme
+            if (headerLayout != null) headerLayout.setBackgroundColor(getColor(R.color.btn_eventmgr));
+            if (rootLayout != null) rootLayout.setBackgroundColor(getColor(R.color.bg_event));
         }
 
         // UI bindings
         rvNotifications = findViewById(R.id.rvNotifications);
-        tvEmpty         = findViewById(R.id.tvEmptyNotifications);
+        tvEmpty         = findViewById(R.id.tvEmptyNotifications); // Fallback
 
         // Back button closes activity
         ImageButton btnBack = findViewById(R.id.btnBack);
@@ -105,10 +94,8 @@ public class NotificationsActivity extends AppCompatActivity {
 
         // RecyclerView setup
         rvNotifications.setLayoutManager(new LinearLayoutManager(this));
-
         notificationList = new ArrayList<>();
         adapter = new NotificationAdapter(notificationList);
-
         rvNotifications.setAdapter(adapter);
 
         // Start listening to notifications
@@ -121,13 +108,6 @@ public class NotificationsActivity extends AppCompatActivity {
      * ============================================================
      *
      * Loads notifications in real time for current user.
-     *
-     * FLOW:
-     * 1. Get logged-in user
-     * 2. Listen to notifications subcollection
-     * 3. Order by latest timestamp
-     * 4. Update UI dynamically
-     * 5. Mark unread notifications as read
      */
     private void listenForNotifications() {
 
@@ -135,9 +115,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
         // If user not logged in, stop execution
         if (user == null) {
-            Toast.makeText(this,
-                    "Please log in to see notifications.",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please log in to see notifications.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -146,12 +124,13 @@ public class NotificationsActivity extends AppCompatActivity {
                 .document(user.getUid())
                 .collection("notifications")
                 .orderBy("timestamp", Query.Direction.DESCENDING)
-
                 .addSnapshotListener((value, error) -> {
 
                     if (error != null) {
                         // show empty state instead of error on first load
-                        if (notificationList.isEmpty() && tvEmpty != null) tvEmpty.setVisibility(android.view.View.VISIBLE);
+                        if (notificationList.isEmpty()) {
+                            if (tvEmpty != null) tvEmpty.setVisibility(View.VISIBLE);
+                        }
                         return;
                     }
 
@@ -162,9 +141,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
                         // Convert Firestore docs into model objects
                         for (DocumentSnapshot doc : value.getDocuments()) {
-
                             NotificationItem item = doc.toObject(NotificationItem.class);
-
                             if (item != null) {
                                 item.setId(doc.getId());
                                 notificationList.add(item);
@@ -176,21 +153,16 @@ public class NotificationsActivity extends AppCompatActivity {
 
                         // ---------------- AUTO MARK AS READ ----------------
                         for (DocumentSnapshot doc : value.getDocuments()) {
-
                             Boolean read = doc.getBoolean("read");
-
                             if (read == null || !read) {
                                 doc.getReference().update("read", true);
                             }
                         }
 
-                        // Handle empty state UI
+                        // Handle empty state UI (Preferring the premium layout container)
+                        boolean isEmpty = notificationList.isEmpty();
                         if (tvEmpty != null) {
-                            tvEmpty.setVisibility(
-                                    notificationList.isEmpty()
-                                            ? View.VISIBLE
-                                            : View.GONE
-                            );
+                            tvEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
                         }
                     }
                 });

@@ -2,14 +2,16 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#EBF8F5"
     android:fitsSystemWindows="true">
 
-    <!-- Teal Header -->
+    <!-- Header Layout -->
     <LinearLayout
+        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -29,7 +31,14 @@
 
         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="5dp">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📅  " android:textSize="13sp"/>
-            <TextView android:id="@+id/tvHeaderDate" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Date TBD" android:textColor="#B2F0EB" android:textSize="13sp"/>
+
+            <TextView
+                android:id="@+id/tvHeaderDate"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Date TBD"
+                android:textColor="#B2F0EB"
+                android:textSize="13sp" />
         </LinearLayout>
 
         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
@@ -39,44 +48,44 @@
     </LinearLayout>
 
     <!-- Scrollable Content -->
-    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:background="#EBF8F5" android:scrollbars="none">
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:scrollbars="none">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
 
             <!-- Details Card -->
             <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp" app:cardBackgroundColor="#FFFFFF" app:cardCornerRadius="20dp" app:cardElevation="2dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="18dp">
 
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="EVENT DETAILS" android:textSize="11sp" android:textColor="#0D9488" android:letterSpacing="0.1" android:textStyle="bold" android:layout_marginBottom="14dp"/>
+                    <TextView android:id="@+id/tvLabelEventDetails" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="EVENT DETAILS" android:textSize="11sp" android:textColor="#0D9488" android:letterSpacing="0.1" android:textStyle="bold" android:layout_marginBottom="14dp"/>
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="12dp">
-                        <androidx.cardview.widget.CardView android:layout_width="38dp" android:layout_height="38dp" android:layout_marginEnd="12dp" app:cardCornerRadius="10dp" app:cardBackgroundColor="#E0F2FE" app:cardElevation="0dp"><TextView android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:text="📅" android:textSize="17sp"/></androidx.cardview.widget.CardView>
+                        <androidx.cardview.widget.CardView android:layout_width="38dp" android:layout_height="38dp" android:layout_marginEnd="12dp" app:cardCornerRadius="10dp" app:cardBackgroundColor="#F0F0F0" app:cardElevation="0dp"><TextView android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:text="📅" android:textSize="17sp"/></androidx.cardview.widget.CardView>
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Date" android:textSize="11sp" android:textColor="#94A3B8"/>
-                            <TextView android:id="@+id/tvDate" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TBD" android:textColor="#134E4A" android:textSize="13sp" android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Date" android:textSize="11sp" android:textColor="@color/text_grey"/>
+                            <TextView android:id="@+id/tvDate" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TBD" android:textColor="@color/text_dark" android:textSize="13sp" android:textStyle="bold"/>
                         </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="12dp">
-                        <androidx.cardview.widget.CardView android:layout_width="38dp" android:layout_height="38dp" android:layout_marginEnd="12dp" app:cardCornerRadius="10dp" app:cardBackgroundColor="#F0FDF4" app:cardElevation="0dp"><TextView android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:text="⏰" android:textSize="17sp"/></androidx.cardview.widget.CardView>
+                        <androidx.cardview.widget.CardView android:layout_width="38dp" android:layout_height="38dp" android:layout_marginEnd="12dp" app:cardCornerRadius="10dp" app:cardBackgroundColor="#F0F0F0" app:cardElevation="0dp"><TextView android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:text="⏰" android:textSize="17sp"/></androidx.cardview.widget.CardView>
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Time" android:textSize="11sp" android:textColor="#94A3B8"/>
-                            <TextView android:id="@+id/tvTime" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="–" android:textColor="#134E4A" android:textSize="13sp" android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Time" android:textSize="11sp" android:textColor="@color/text_grey"/>
+                            <TextView android:id="@+id/tvTime" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="–" android:textColor="@color/text_dark" android:textSize="13sp" android:textStyle="bold"/>
                         </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="12dp">
-                        <androidx.cardview.widget.CardView android:layout_width="38dp" android:layout_height="38dp" android:layout_marginEnd="12dp" app:cardCornerRadius="10dp" app:cardBackgroundColor="#FEF3C7" app:cardElevation="0dp"><TextView android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:text="📍" android:textSize="17sp"/></androidx.cardview.widget.CardView>
+                        <androidx.cardview.widget.CardView android:layout_width="38dp" android:layout_height="38dp" android:layout_marginEnd="12dp" app:cardCornerRadius="10dp" app:cardBackgroundColor="#F0F0F0" app:cardElevation="0dp"><TextView android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:text="📍" android:textSize="17sp"/></androidx.cardview.widget.CardView>
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Venue" android:textSize="11sp" android:textColor="#94A3B8"/>
-                            <TextView android:id="@+id/tvVenue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TBD" android:textColor="#134E4A" android:textSize="13sp" android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Venue" android:textSize="11sp" android:textColor="@color/text_grey"/>
+                            <TextView android:id="@+id/tvVenue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TBD" android:textColor="@color/text_dark" android:textSize="13sp" android:textStyle="bold"/>
                         </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
-                        <androidx.cardview.widget.CardView android:layout_width="38dp" android:layout_height="38dp" android:layout_marginEnd="12dp" app:cardCornerRadius="10dp" app:cardBackgroundColor="#F0FDF4" app:cardElevation="0dp"><TextView android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:text="👥" android:textSize="17sp"/></androidx.cardview.widget.CardView>
+                        <androidx.cardview.widget.CardView android:layout_width="38dp" android:layout_height="38dp" android:layout_marginEnd="12dp" app:cardCornerRadius="10dp" app:cardBackgroundColor="#F0F0F0" app:cardElevation="0dp"><TextView android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:text="👥" android:textSize="17sp"/></androidx.cardview.widget.CardView>
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Capacity" android:textSize="11sp" android:textColor="#94A3B8"/>
-                            <TextView android:id="@+id/tvCapacity" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0 / 0 spots taken" android:textColor="#134E4A" android:textSize="13sp" android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Capacity" android:textSize="11sp" android:textColor="@color/text_grey"/>
+                            <TextView android:id="@+id/tvCapacity" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0 / 0 spots taken" android:textColor="@color/text_dark" android:textSize="13sp" android:textStyle="bold"/>
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
@@ -86,7 +95,7 @@
             <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp" app:cardBackgroundColor="#FFFFFF" app:cardCornerRadius="20dp" app:cardElevation="2dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="18dp">
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Availability" android:textColor="#134E4A" android:textSize="14sp" android:textStyle="bold"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Availability" android:textColor="@color/text_dark" android:textSize="14sp" android:textStyle="bold"/>
                         <TextView android:id="@+id/tvAvailabilityLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textColor="#0D9488" android:textSize="12sp" android:textStyle="bold"/>
                     </LinearLayout>
                     <ProgressBar android:id="@+id/progressAvailability" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="8dp" android:max="100" android:progress="0" android:progressTint="#0D9488" android:progressBackgroundTint="#E2E8F0" android:layout_marginBottom="6dp"/>
@@ -94,16 +103,67 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Organised By -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardOrganizer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="18dp" android:gravity="center_vertical">
+
+                    <!-- Placeholder Logo (Using a soft grey square with a building emoji) -->
+                    <androidx.cardview.widget.CardView android:layout_width="48dp" android:layout_height="48dp" android:layout_marginEnd="12dp" app:cardCornerRadius="12dp" app:cardElevation="0dp" app:cardBackgroundColor="#F0F0F0">
+                        <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:text="🏛️" android:textSize="24sp"/>
+                    </androidx.cardview.widget.CardView>
+
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Organised by" android:textSize="11sp" android:textColor="@color/text_grey"/>
+                        <TextView android:id="@+id/tvOrganizer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Organiser Name" android:textColor="@color/text_dark" android:textSize="14sp" android:textStyle="bold"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
             <!-- About -->
             <androidx.cardview.widget.CardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="20dp" app:cardBackgroundColor="#FFFFFF" app:cardCornerRadius="20dp" app:cardElevation="2dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="18dp">
                     <LinearLayout android:id="@+id/layoutAboutToggle" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:background="?attr/selectableItemBackground" android:padding="2dp">
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="ABOUT THIS EVENT" android:textSize="11sp" android:textColor="#0D9488" android:letterSpacing="0.1" android:textStyle="bold"/>
-                        <TextView android:id="@+id/tvAboutArrow" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="▲" android:textColor="#94A3B8" android:textSize="12sp"/>
+                        <TextView android:id="@+id/tvLabelAbout" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="ABOUT THIS EVENT" android:textSize="11sp" android:textColor="#0D9488" android:letterSpacing="0.1" android:textStyle="bold"/>
+                        <TextView android:id="@+id/tvAboutArrow" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="▲" android:textColor="@color/text_grey" android:textSize="12sp"/>
                     </LinearLayout>
-                    <TextView android:id="@+id/tvDescription" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="No description provided." android:textColor="#475569" android:textSize="13sp" android:lineSpacingMultiplier="1.5"/>
+                    <TextView android:id="@+id/tvDescription" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="No description provided." android:textColor="@color/text_dark" android:textSize="13sp" android:lineSpacingMultiplier="1.5"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <!-- Consent (Given an ID to hide in Java) -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardConsent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="18dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Privacy Preferences" android:textStyle="bold" android:textColor="@color/text_dark" android:textSize="13sp" android:layout_marginBottom="8dp"/>
+                    <CheckBox android:id="@+id/cbVisibleName" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:textColor="@color/text_grey" android:text="My name being visible to other participants" android:buttonTint="#0D9488"/>
+                    <CheckBox android:id="@+id/cbVisibleRollNo" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:textColor="@color/text_grey" android:text="My roll number being visible to other participants" android:buttonTint="#0D9488"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <CheckBox
+                android:id="@+id/cbWaitlist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:textSize="12sp"
+                android:textColor="#0D9488"
+                android:textStyle="bold"
+                android:buttonTint="#0D9488"
+                android:text="Add me to the waitlist if slots are full"
+                android:visibility="gone"/>
 
         </LinearLayout>
     </ScrollView>
@@ -117,6 +177,19 @@
         android:textColor="@color/white"
         android:textSize="14sp"
         android:textStyle="bold"
+        app:backgroundTint="#0D9488"
+        app:cornerRadius="0dp"/>
+
+    <!-- Confirm RSVP button (Only for RsvpActivity, hidden here) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnConfirmRsvp"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:text="Confirm RSVP"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:visibility="gone"
         app:backgroundTint="#0D9488"
         app:cornerRadius="0dp"/>
 
