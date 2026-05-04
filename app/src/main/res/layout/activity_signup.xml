@@ -36,13 +36,14 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="36dp"
             android:background="@drawable/bg_auth_logo_circle">
-            <ImageView
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:layout_gravity="center"
-                android:contentDescription="Logo"
-                android:scaleType="fitCenter"
-                android:src="@drawable/app_logo"/>
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/app_logo"
+                app:shapeAppearanceOverlay="@style/CircleImage"/>
         </FrameLayout>
 
         <TextView
@@ -413,6 +414,7 @@
                             app:boxCornerRadiusBottomEnd="12dp"
                             app:boxBackgroundColor="#FAFBFF"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
                             <AutoCompleteTextView
                                 android:id="@+id/etSocietyName"
                                 android:layout_width="match_parent"

@@ -24,12 +24,45 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
+/**
+ * ============================================================
+ * EventHistoryActivity
+ * ============================================================
+ *
+ * PURPOSE:
+ * Displays user's past attended events history.
+ *
+ * FEATURES:
+ * - Shows all confirmed RSVP events for current user
+ * - Filters only past events (event date < current date)
+ * - Displays event cards in RecyclerView
+ * - Shows statistics:
+ *      → Total attended events
+ *      → Events attended this month
+ * - Opens EventDisplayActivity on click (read-only mode)
+ *
+ * FIRESTORE STRUCTURE:
+ * - rsvps (user attendance records)
+ * - events (event details lookup)
+ *
+ * USER ROLE:
+ * Student / Attendee
+ */
 public class EventHistoryActivity extends AppCompatActivity {
 
     private RecyclerView rvEventHistory;
+
+    // Adapter for history list RecyclerView
     private HistoryAdapter adapter;
+
+    // Main dataset of past events
     private List<HistoryItem> historyList;
+
+    // UI stats
     private TextView tvTotalAttended, tvThisMonth;
+
+    // Firestore database instance
     private FirebaseFirestore db;
 
     @Override
@@ -37,37 +70,60 @@ public class EventHistoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_history);
 
+        // Initialize Firestore
         db = FirebaseFirestore.getInstance();
 
+        // UI bindings
         rvEventHistory  = findViewById(R.id.rvEventHistory);
         tvTotalAttended = findViewById(R.id.tvTotalAttended);
         tvThisMonth     = findViewById(R.id.tvThisMonth);
 
+        // Back navigation button
         ImageButton btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
+        // RecyclerView setup
         rvEventHistory.setLayoutManager(new LinearLayoutManager(this));
+
         historyList = new ArrayList<>();
         adapter = new HistoryAdapter(historyList);
+
         rvEventHistory.setAdapter(adapter);
 
-        // Tap on a history card → open EventDisplayActivity (read-only details)
+        // ---------------- ITEM CLICK HANDLER ----------------
+        // Opens event details in read-only mode
         adapter.setOnItemClickListener(item -> {
             Intent intent = new Intent(this, EventDisplayActivity.class);
+
             intent.putExtra("eventId",          item.getEventId());
-            intent.putExtra("eventTitle",        item.getTitle());
-            intent.putExtra("eventVenue",        item.getVenue());
-            intent.putExtra("eventDescription",  item.getDescription());
-            intent.putExtra("eventCapacity",     item.getCapacity());
-            intent.putExtra("eventRegistered",   item.getRegistered());
-            intent.putExtra("eventDateMillis",   item.getDateMillis());
+            intent.putExtra("eventTitle",       item.getTitle());
+            intent.putExtra("eventVenue",       item.getVenue());
+            intent.putExtra("eventDescription", item.getDescription());
+            intent.putExtra("eventCapacity",    item.getCapacity());
+            intent.putExtra("eventRegistered",  item.getRegistered());
+            intent.putExtra("eventDateMillis",  item.getDateMillis());
+
             startActivity(intent);
         });
 
+        // Load history data from Firestore
         loadHistoryData();
     }
 
+    /**
+     * ============================================================
+     * DATA LOADING LOGIC
+     * ============================================================
+     *
+     * Steps:
+     * 1. Get current user
+     * 2. Fetch confirmed RSVPs
+     * 3. Fetch corresponding event details
+     * 4. Filter only past events
+     * 5. Build HistoryItem objects
+     */
     private void loadHistoryData() {
+
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) return;
 
@@ -76,9 +132,11 @@ public class EventHistoryActivity extends AppCompatActivity {
                 .whereEqualTo("status", "confirmed")
                 .get()
                 .addOnSuccessListener(rsvpQuery -> {
+
                     historyList.clear();
 
                     List<DocumentSnapshot> rsvpDocs = rsvpQuery.getDocuments();
+
                     if (rsvpDocs.isEmpty()) {
                         adapter.notifyDataSetChanged();
                         updateStats();
@@ -86,9 +144,12 @@ public class EventHistoryActivity extends AppCompatActivity {
                     }
 
                     Date now = new Date();
+
+                    // Tracks async Firestore calls completion
                     AtomicInteger remaining = new AtomicInteger(rsvpDocs.size());
 
                     for (DocumentSnapshot rsvpDoc : rsvpDocs) {
+
                         String eventId = rsvpDoc.getString("eventId");
 
                         if (eventId == null) {
@@ -99,6 +160,7 @@ public class EventHistoryActivity extends AppCompatActivity {
                             continue;
                         }
 
+                        // Fetch event details for each RSVP
                         db.collection("events")
                                 .document(eventId)
                                 .get()
@@ -107,28 +169,39 @@ public class EventHistoryActivity extends AppCompatActivity {
                                     com.google.firebase.Timestamp ts =
                                             eventDoc.getTimestamp("date");
 
-                                    // Only include events whose date has already passed
+                                    // ---------------- FILTER PAST EVENTS ONLY ----------------
                                     if (ts != null && ts.toDate().before(now)) {
 
                                         String title = eventDoc.getString("title");
                                         String venue = eventDoc.getString("venue");
                                         String desc  = eventDoc.getString("description");
+
                                         int cap = eventDoc.getLong("capacity") != null
                                                 ? eventDoc.getLong("capacity").intValue() : 0;
+
                                         int reg = eventDoc.getLong("registeredCount") != null
                                                 ? eventDoc.getLong("registeredCount").intValue() : 0;
+
                                         long millis = ts.toDate().getTime();
 
+                                        // Fallback title if missing
                                         if (title == null) title = rsvpDoc.getString("eventName");
                                         if (title == null) title = "Unknown Event";
+
                                         if (venue == null) venue = "";
 
+                                        // Format date into day/month display
                                         Date d = ts.toDate();
-                                        String day   = new SimpleDateFormat("dd",  Locale.getDefault()).format(d);
+
+                                        String day   = new SimpleDateFormat("dd", Locale.getDefault())
+                                                .format(d);
+
                                         String month = new SimpleDateFormat("MMM", Locale.getDefault())
                                                 .format(d).toUpperCase();
 
+                                        // Build history item
                                         HistoryItem item = new HistoryItem(title, day, month, "Attended");
+
                                         item.setEventId(eventDoc.getId());
                                         item.setVenue(venue);
                                         item.setDescription(desc);
@@ -139,12 +212,15 @@ public class EventHistoryActivity extends AppCompatActivity {
                                         historyList.add(item);
                                     }
 
+                                    // When all async calls finish, update UI
                                     if (remaining.decrementAndGet() == 0) {
                                         adapter.notifyDataSetChanged();
                                         updateStats();
                                     }
                                 })
                                 .addOnFailureListener(e -> {
+
+                                    // Ensure UI still updates even if one event fails
                                     if (remaining.decrementAndGet() == 0) {
                                         adapter.notifyDataSetChanged();
                                         updateStats();
@@ -155,11 +231,18 @@ public class EventHistoryActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> e.printStackTrace());
     }
 
+    /**
+     * Updates statistics:
+     * - Total attended events
+     * - Events attended in current month
+     */
     private void updateStats() {
+
         int thisMonthCount = 0;
 
         String currentMonth = new SimpleDateFormat("MMM", Locale.getDefault())
-                .format(Calendar.getInstance().getTime()).toUpperCase();
+                .format(Calendar.getInstance().getTime())
+                .toUpperCase();
 
         for (HistoryItem item : historyList) {
             if (item.getMonth().equalsIgnoreCase(currentMonth)) {
@@ -167,8 +250,10 @@ public class EventHistoryActivity extends AppCompatActivity {
             }
         }
 
-        // Every item in the list is a past attended event
+        // Total past events attended
         tvTotalAttended.setText(String.valueOf(historyList.size()));
+
+        // Events attended this month
         tvThisMonth.setText(String.valueOf(thisMonthCount));
     }
 }

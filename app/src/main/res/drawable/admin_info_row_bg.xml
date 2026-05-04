@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Info row background — very light warm gray -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#F7F7F7"/>
+    <corners android:radius="12dp"/>
+</shape>

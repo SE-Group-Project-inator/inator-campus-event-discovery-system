@@ -25,19 +25,49 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.google.firebase.Timestamp;
 
 /**
- * US-27: Attendee List — shows who is attending an event.
- * US-32: Seat/Registration Confirmation — event manager can confirm registrations.
- * readOnly=true → student view (Reserve A Spot button visible, confirm buttons hidden)
- * readOnly=false → event manager view (confirm buttons visible per row)
+ * ============================================================
+ * AttendeeListActivity
+ * ============================================================
+ *
+ * PURPOSE:
+ * Displays list of attendees (registrations) for a specific event.
+ *
+ * FEATURES:
+ * - Shows confirmed attendees for an event (Firestore "rsvps")
+ * - Supports search/filter by name or email
+ * - Student mode (readOnly = true):
+ *      -> Can reserve a spot (opens RsvpActivity)
+ * - Event Manager mode (readOnly = false):
+ *      -> Can confirm registrations
+ *
+ * USER STORIES:
+ * US-27: Attendee List viewing for event participants
+ * US-32: Registration confirmation by event manager
+ *
+ * DATA FLOW:
+ * rsvps (event registrations) → users (profile info enrichment)
+ *
+ * PRIVACY HANDLING:
+ * - isNameVisible / isRollNoVisible controls what is shown
+ * - Otherwise fallback to "Anonymous Attendee"
  */
 public class AttendeeListActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
+
+    // Full dataset from Firestore
     private final List<Registration> allRegistrations = new ArrayList<>();
+
+    // Filtered dataset shown in RecyclerView
     private final List<Registration> displayList = new ArrayList<>();
+
     private AttendeeAdapter adapter;
     private TextView tvEmpty;
     private String eventId;
+
+    // Determines UI mode:
+    // true  -> student view (read-only)
+    // false -> event manager view (can confirm attendees)
     private boolean readOnly;
 
     @Override
@@ -45,67 +75,106 @@ public class AttendeeListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attendee_list);
 
+        // Initialize Firestore instance
         db = FirebaseFirestore.getInstance();
 
-        // Accept both "eventId" (from EventDetailActivity) and "EVENT_ID" (from EventManagerDashboard)
+        // Accept eventId from multiple sources for flexibility
         eventId = getIntent().getStringExtra("eventId");
         if (eventId == null) eventId = getIntent().getStringExtra("EVENT_ID");
 
+        // Determine screen mode (student vs manager)
         readOnly = getIntent().getBooleanExtra("readOnly", false);
 
+        // Empty state UI
         tvEmpty = findViewById(R.id.tvEmpty);
 
+        // Setup core UI components
         setupRecyclerView();
         setupSearch();
         setupNavigation();
+
+        // Load attendee data from Firestore
         loadAttendees();
     }
 
+    /**
+     * Initializes RecyclerView and adapter.
+     * Adapter behavior changes based on readOnly mode.
+     */
     private void setupRecyclerView() {
         RecyclerView rv = findViewById(R.id.rvAttendees);
-        adapter = new AttendeeAdapter(displayList,
+
+        adapter = new AttendeeAdapter(
+                displayList,
                 (registration, position) -> confirmRegistration(registration, position),
-                readOnly);
+                readOnly
+        );
+
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
     }
 
+    /**
+     * Sets up search bar to filter attendees dynamically.
+     */
     private void setupSearch() {
         EditText etSearch = findViewById(R.id.etSearch);
+
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
-            @Override public void onTextChanged(CharSequence s, int st, int b, int c) {
+
+            @Override
+            public void onTextChanged(CharSequence s, int st, int b, int c) {
+                // Filter list in real-time as user types
                 filterList(s.toString().trim());
             }
+
             @Override public void afterTextChanged(Editable s) {}
         });
     }
 
+    /**
+     * Filters attendee list based on name or email match.
+     */
     private void filterList(String query) {
         displayList.clear();
+
         if (query.isEmpty()) {
             displayList.addAll(allRegistrations);
         } else {
             String lower = query.toLowerCase();
+
             for (Registration r : allRegistrations) {
                 boolean matchesEmail = r.getUserEmail() != null
                         && r.getUserEmail().toLowerCase().contains(lower);
+
                 boolean matchesName = r.getUserName() != null
                         && r.getUserName().toLowerCase().contains(lower);
-                if (matchesEmail || matchesName) displayList.add(r);
+
+                if (matchesEmail || matchesName) {
+                    displayList.add(r);
+                }
             }
         }
+
         adapter.notifyDataSetChanged();
         updateEmptyState();
     }
 
+    /**
+     * Handles navigation buttons and role-based UI actions.
+     */
     private void setupNavigation() {
+
+        // Back button closes activity
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         MaterialButton btnReserve = findViewById(R.id.btnReserve);
+
         if (readOnly) {
-            // Student view — "Reserve A Spot!" opens RsvpActivity
+            // Student mode: allow RSVP
             btnReserve.setVisibility(View.VISIBLE);
+
             btnReserve.setOnClickListener(v -> {
                 Intent intent = new Intent(this, RsvpActivity.class);
                 intent.putExtra("EVENT_ID", eventId);
@@ -113,25 +182,30 @@ public class AttendeeListActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         } else {
-            // Event manager view — bottom button not needed
+            // Manager mode: hide reservation button
             btnReserve.setVisibility(View.GONE);
         }
     }
 
+    /**
+     * Loads attendees from Firestore:
+     * - Fetches confirmed RSVPs
+     * - Enriches with user profile data
+     * - Applies privacy settings
+     */
     private void loadAttendees() {
+
         if (eventId == null || eventId.isEmpty()) return;
 
-        // Reads from the same `rsvps` collection RsvpActivity / PaymentActivity write to.
-        // Each rsvp doc only stores userId — for display we fan out to users/{uid} to
-        // pick up name + email, then apply the privacy flags (isNameVisible / isRollNoVisible)
-        // captured at RSVP time.
         db.collection("rsvps")
                 .whereEqualTo("eventId", eventId)
                 .whereEqualTo("status", "confirmed")
                 .addSnapshotListener((snapshots, error) -> {
+
                     if (error != null || snapshots == null) return;
 
                     List<DocumentSnapshot> rsvpDocs = snapshots.getDocuments();
+
                     if (rsvpDocs.isEmpty()) {
                         allRegistrations.clear();
                         displayList.clear();
@@ -144,6 +218,7 @@ public class AttendeeListActivity extends AppCompatActivity {
                     AtomicInteger remaining = new AtomicInteger(rsvpDocs.size());
 
                     for (DocumentSnapshot rsvp : rsvpDocs) {
+
                         String userId = rsvp.getString("userId");
                         Boolean nameVisible = rsvp.getBoolean("isNameVisible");
                         Boolean rollVisible = rsvp.getBoolean("isRollNoVisible");
@@ -154,8 +229,10 @@ public class AttendeeListActivity extends AppCompatActivity {
                             continue;
                         }
 
+                        // Fetch user profile data
                         db.collection("users").document(userId).get()
                                 .addOnCompleteListener(task -> {
+
                                     Registration reg = new Registration();
                                     reg.setId(rsvp.getId());
                                     reg.setEventId(eventId);
@@ -164,48 +241,74 @@ public class AttendeeListActivity extends AppCompatActivity {
                                     reg.setConfirmed(true);
 
                                     String name = null, email = null;
+
                                     if (task.isSuccessful() && task.getResult() != null
                                             && task.getResult().exists()) {
                                         name  = task.getResult().getString("name");
                                         email = task.getResult().getString("email");
                                     }
 
+                                    // Apply privacy settings
                                     boolean showName = !Boolean.FALSE.equals(nameVisible);
                                     boolean showRoll = !Boolean.FALSE.equals(rollVisible);
+
                                     reg.setUserName(showName ? name : "Anonymous Attendee");
                                     reg.setUserEmail(showRoll ? email : null);
 
-                                    synchronized (built) { built.add(reg); }
-                                    if (remaining.decrementAndGet() == 0) publishAttendees(built);
+                                    synchronized (built) {
+                                        built.add(reg);
+                                    }
+
+                                    if (remaining.decrementAndGet() == 0) {
+                                        publishAttendees(built);
+                                    }
                                 });
                     }
                 });
     }
 
+    /**
+     * Publishes final attendee list to UI and updates event stats.
+     */
     private void publishAttendees(List<Registration> regs) {
+
         allRegistrations.clear();
         allRegistrations.addAll(regs);
+
         displayList.clear();
         displayList.addAll(regs);
+
         adapter.notifyDataSetChanged();
         updateEmptyState();
-        // Self-heal: write the true confirmed count back to the event document
+
+        // Sync confirmed count back to event document (self-healing update)
         if (eventId != null && !eventId.isEmpty()) {
             int trueCount = regs.size();
+
             db.collection("events").document(eventId).get()
                     .addOnSuccessListener(evDoc -> {
+
                         if (!evDoc.exists()) return;
+
                         Long cap = evDoc.getLong("capacity");
+
                         int clamped = cap != null && cap > 0
-                                ? Math.min(trueCount, cap.intValue()) : trueCount;
+                                ? Math.min(trueCount, cap.intValue())
+                                : trueCount;
+
                         db.collection("events").document(eventId)
                                 .update("registeredCount", Math.max(0, clamped));
                     });
         }
     }
 
+    /**
+     * Shows/hides empty state UI based on list content.
+     */
     private void updateEmptyState() {
+
         RecyclerView rv = findViewById(R.id.rvAttendees);
+
         if (displayList.isEmpty()) {
             rv.setVisibility(View.GONE);
             tvEmpty.setVisibility(View.VISIBLE);
@@ -216,10 +319,15 @@ public class AttendeeListActivity extends AppCompatActivity {
     }
 
     /**
-     * US-32: Confirms a student's registration (sets confirmed = true in Firestore).
-     * Only reachable from event manager view (readOnly=false).
+     * ============================================================
+     * US-32: Confirm Registration
+     * ============================================================
+     *
+     * Marks a registration as confirmed in Firestore.
+     * Only accessible in event manager mode.
      */
     private void confirmRegistration(Registration registration, int position) {
+
         Map<String, Object> updates = new HashMap<>();
         updates.put("confirmed", true);
 
@@ -229,6 +337,7 @@ public class AttendeeListActivity extends AppCompatActivity {
                 .addOnSuccessListener(v -> {
                     registration.setConfirmed(true);
                     adapter.updateItem(position);
+
                     Toast.makeText(this,
                             "Registration confirmed for " + registration.getUserName(),
                             Toast.LENGTH_SHORT).show();

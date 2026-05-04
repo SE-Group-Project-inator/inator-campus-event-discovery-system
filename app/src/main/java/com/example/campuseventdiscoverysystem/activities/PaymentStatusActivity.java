@@ -14,14 +14,29 @@ import com.google.firebase.firestore.*;
 
 import java.text.NumberFormat;
 
+/**
+ * =============================================================================
+ * PaymentStatusActivity
+ * =============================================================================
+ * Shows real-time payment status for a student after submitting payment.
+ *
+ * Features:
+ * - Live Firestore listener for payment updates
+ * - Displays approval / rejection / pending states
+ * - Shows event details and payment method
+ * - Handles navigation (home, tickets, payments)
+ * - Displays rejection reason if payment fails
+ */
 public class PaymentStatusActivity extends AppCompatActivity {
 
+    /** Intent keys used to receive payment data */
     public static final String KEY_PAYMENT_ID = "paymentId";
     public static final String KEY_STATUS     = "status";
     public static final String KEY_METHOD     = "method";
     public static final String KEY_EVENT_NAME = "eventName";
     public static final String KEY_AMOUNT     = "amount";
 
+    // ========================= UI COMPONENTS =========================
     private TextView tvStatusBadge, tvStatusDescription;
     private TextView tvEventName, tvPaymentMethod, tvAmount;
     private CardView cardStatus;
@@ -30,15 +45,23 @@ public class PaymentStatusActivity extends AppCompatActivity {
     private TextView tvRejectionReason;
     private CardView cardRejection;
 
+    // ========================= FIREBASE =========================
     private FirebaseFirestore db;
     private ListenerRegistration statusListener;
+
+    // Payment ID for real-time tracking
     private String paymentId;
 
+    /**
+     * Called when activity is created.
+     * Initializes UI, Firestore, and listeners.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_status);
 
+        // Initialize Firestore
         db = FirebaseFirestore.getInstance();
 
         bindViews();
@@ -47,6 +70,9 @@ public class PaymentStatusActivity extends AppCompatActivity {
         startStatusListener();
     }
 
+    /**
+     * Binds XML views to Java variables
+     */
     private void bindViews() {
         tvStatusBadge       = findViewById(R.id.tvStatusBadge);
         tvStatusDescription = findViewById(R.id.tvStatusDescription);
@@ -62,30 +88,49 @@ public class PaymentStatusActivity extends AppCompatActivity {
         cardRejection       = findViewById(R.id.cardRejection);
     }
 
+    /**
+     * Reads payment details passed via Intent and updates UI
+     */
     private void populateFromIntent() {
         Intent in = getIntent();
+
         paymentId        = in.getStringExtra(KEY_PAYMENT_ID);
         String status    = in.getStringExtra(KEY_STATUS);
         String method    = in.getStringExtra(KEY_METHOD);
         String eventName = in.getStringExtra(KEY_EVENT_NAME);
         double amount    = in.getDoubleExtra(KEY_AMOUNT, 0.0);
 
-        if (tvEventName     != null && eventName != null) tvEventName.setText(eventName);
-        if (tvPaymentMethod != null && method    != null) tvPaymentMethod.setText(getMethodLabel(method));
+        // Set event name
+        if (tvEventName != null && eventName != null)
+            tvEventName.setText(eventName);
+
+        // Set payment method
+        if (tvPaymentMethod != null && method != null)
+            tvPaymentMethod.setText(getMethodLabel(method));
+
+        // Set amount display
         if (tvAmount != null) {
             tvAmount.setText(amount > 0
                     ? "PKR " + NumberFormat.getInstance().format((long) amount)
                     : "Free");
         }
-        if (status != null) applyStatusUI(status, null);
+
+        // Apply initial status UI
+        if (status != null)
+            applyStatusUI(status, null);
     }
 
+    /**
+     * Sets up button click listeners (navigation actions)
+     */
     private void setupButtons() {
         // Export to calendar
         com.google.android.material.button.MaterialButton btnExportCalendar = findViewById(R.id.btnExportCalendar);
         if (btnExportCalendar != null) {
             btnExportCalendar.setOnClickListener(v -> exportToCalendar());
         }
+
+        // go to home screen
         if (btnGoHome != null) {
             btnGoHome.setOnClickListener(v -> {
                 startActivity(new Intent(this, StudentHomeActivity.class)
@@ -93,35 +138,62 @@ public class PaymentStatusActivity extends AppCompatActivity {
                 finish();
             });
         }
+
+        // View all payments
         if (btnViewMyPayments != null) {
             btnViewMyPayments.setOnClickListener(v ->
                     startActivity(new Intent(this, MyPaymentsActivity.class)));
         }
+
+        // View tickets screen
         if (btnViewTickets != null) {
             btnViewTickets.setOnClickListener(v ->
                     startActivity(new Intent(this, TicketsActivity.class)
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)));
         }
+
+        // Back button
         View btnBack = findViewById(R.id.btnStatusBack);
         if (btnBack != null) btnBack.setOnClickListener(v -> finish());
     }
 
+    /**
+     * Starts Firestore listener for real-time payment status updates
+     */
     private void startStatusListener() {
+
         if (paymentId == null || paymentId.isEmpty()) return;
-        if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+
+        if (progressBar != null)
+            progressBar.setVisibility(View.VISIBLE);
 
         statusListener = db.collection("payments").document(paymentId)
                 .addSnapshotListener((snap, error) -> {
-                    if (progressBar != null) progressBar.setVisibility(View.GONE);
-                    if (error != null || snap == null || !snap.exists()) return;
-                    applyStatusUI(snap.getString("status"), snap.getString("rejectionReason"));
+
+                    if (progressBar != null)
+                        progressBar.setVisibility(View.GONE);
+
+                    if (error != null || snap == null || !snap.exists())
+                        return;
+
+                    // Update UI whenever status changes
+                    applyStatusUI(
+                            snap.getString("status"),
+                            snap.getString("rejectionReason")
+                    );
                 });
     }
 
+    /**
+     * Applies UI based on payment status
+     */
     private void applyStatusUI(String status, String rejectionReason) {
+
         if (status == null) return;
+
         // Hide rejection card by default
-        if (cardRejection != null) cardRejection.setVisibility(View.GONE);
+        if (cardRejection != null)
+            cardRejection.setVisibility(View.GONE);
 
         switch (status) {
             case "waitlisted":
@@ -157,9 +229,12 @@ public class PaymentStatusActivity extends AppCompatActivity {
                         "Your payment was not verified. Please contact the Event Manager or try again.",
                         R.color.admin_error, R.color.admin_error_bg);
                 showTicketsButton(false);
+
+                // Show rejection reason if available
                 if (rejectionReason != null && !rejectionReason.isEmpty() && cardRejection != null) {
                     cardRejection.setVisibility(View.VISIBLE);
-                    if (tvRejectionReason != null) tvRejectionReason.setText(rejectionReason);
+                    if (tvRejectionReason != null)
+                        tvRejectionReason.setText(rejectionReason);
                 }
                 break;
 
@@ -176,26 +251,43 @@ public class PaymentStatusActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Shows or hides tickets button
+     */
     private void showTicketsButton(boolean show) {
         if (btnViewTickets != null)
             btnViewTickets.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Updates status badge UI (text, color, background)
+     */
     private void setStatus(String label, String description, int textColorRes, int bgColorRes) {
+
         if (tvStatusBadge != null) {
             tvStatusBadge.setText(label);
-            try { tvStatusBadge.setTextColor(getResources().getColor(textColorRes, getTheme())); }
-            catch (Exception ignored) {}
+
+            try {
+                tvStatusBadge.setTextColor(getResources().getColor(textColorRes, getTheme()));
+            } catch (Exception ignored) {}
         }
-        if (tvStatusDescription != null) tvStatusDescription.setText(description);
+
+        if (tvStatusDescription != null)
+            tvStatusDescription.setText(description);
+
         if (cardStatus != null) {
-            try { cardStatus.setCardBackgroundColor(getResources().getColor(bgColorRes, getTheme())); }
-            catch (Exception ignored) {}
+            try {
+                cardStatus.setCardBackgroundColor(getResources().getColor(bgColorRes, getTheme()));
+            } catch (Exception ignored) {}
         }
     }
 
+    /**
+     * Converts payment method code to readable label
+     */
     private String getMethodLabel(String method) {
         if (method == null) return "Unknown";
+
         switch (method) {
             case Payment.METHOD_JAZZCASH:  return "JazzCash";
             case Payment.METHOD_EASYPAISA: return "Easypaisa";
@@ -215,10 +307,13 @@ public class PaymentStatusActivity extends AppCompatActivity {
         if (intent.resolveActivity(getPackageManager()) != null) startActivity(intent);
         else android.widget.Toast.makeText(this, "No calendar app found", android.widget.Toast.LENGTH_SHORT).show();
     }
-
+    /**
+     * Removes Firestore listener when activity is destroyed
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (statusListener != null) statusListener.remove();
+        if (statusListener != null)
+            statusListener.remove();
     }
 }
