@@ -1911,3 +1911,11 @@ classDiagram
 
 ![UML Diagram](./Luminite_Link_UML.svg)
 
+
+## Updated Figma:
+To watch full interactive one, click here:
+https://www.figma.com/design/fPqTrcr24WudWrgv79GcIx/Screens---Storyboards?node-id=0-1
+<img width="920" height="814" alt="image" src="https://github.com/user-attachments/assets/7b206aed-0edf-4443-9ee9-eaefadd0a0a2" />
+<img width="1008" height="801" alt="image" src="https://github.com/user-attachments/assets/478682d7-8d5d-498a-a51b-499658aa295b" />
+
+
