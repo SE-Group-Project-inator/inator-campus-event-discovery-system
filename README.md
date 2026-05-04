@@ -1908,6 +1908,4 @@ classDiagram
 
 
 
-## Coloured UML Diagram:
-![Campus Event System UML](CampusEventDiscoverySystem_UML.svg)
 
