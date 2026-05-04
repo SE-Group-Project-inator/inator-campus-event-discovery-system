@@ -78,7 +78,8 @@ public class NotificationsActivity extends AppCompatActivity {
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
-                        Toast.makeText(this, "Failed to load notifications", Toast.LENGTH_SHORT).show();
+                        // show empty state instead of error on first load
+                        if (notificationList.isEmpty() && tvEmpty != null) tvEmpty.setVisibility(android.view.View.VISIBLE);
                         return;
                     }
                     if (value != null) {

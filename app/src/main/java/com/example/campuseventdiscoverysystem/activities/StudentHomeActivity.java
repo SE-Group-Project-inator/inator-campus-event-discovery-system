@@ -88,19 +88,9 @@ public class StudentHomeActivity extends BaseSessionActivity {
             cardMyPayments.setOnClickListener(v ->
                     startActivity(new Intent(this, MyPaymentsActivity.class)));
         }
-
-        View cardQuickSearch = findViewById(R.id.cardQuickSearch);
-        if (cardQuickSearch != null) cardQuickSearch.setOnClickListener(v ->
-                startActivity(new Intent(this, SearchActivity.class)));
-
         View cardQuickTrending = findViewById(R.id.cardQuickTrending);
         if (cardQuickTrending != null) cardQuickTrending.setOnClickListener(v ->
                 startActivity(new Intent(this, TrendingEventsActivity.class)));
-
-        View cardQuickProfile = findViewById(R.id.cardQuickProfile);
-        if (cardQuickProfile != null) cardQuickProfile.setOnClickListener(v ->
-                startActivity(new Intent(this, StudentProfileActivity.class)));
-
         View cardQuickSocieties = findViewById(R.id.cardQuickSocieties);
         if (cardQuickSocieties != null) cardQuickSocieties.setOnClickListener(v ->
                 startActivity(new Intent(this, SocietiesActivity.class)));

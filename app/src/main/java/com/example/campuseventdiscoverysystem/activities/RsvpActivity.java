@@ -245,6 +245,33 @@ public class RsvpActivity extends AppCompatActivity {
                                 .update("registeredCount", FieldValue.increment(1));
                     }
 
+                    // If free event, go straight to PaymentStatusActivity
+                    double ticketPrice = getIntent().getDoubleExtra("EVENT_PRICE", 0.0);
+                    if (ticketPrice <= 0) {
+                        // Create a minimal payment doc so PaymentStatusActivity can listen
+                        java.util.Map<String, Object> freePayment = new java.util.HashMap<>();
+                        freePayment.put("userId", studentId);
+                        freePayment.put("eventId", eventId);
+                        freePayment.put("eventName", tvEventTitle.getText().toString());
+                        freePayment.put("method", "free");
+                        freePayment.put("amount", 0.0);
+                        freePayment.put("status", "registered");
+                        freePayment.put("createdAt", FieldValue.serverTimestamp());
+                        db.collection("payments").add(freePayment).addOnSuccessListener(ref -> {
+                            android.content.Intent si = new android.content.Intent(this, PaymentStatusActivity.class);
+                            si.putExtra(PaymentStatusActivity.KEY_PAYMENT_ID, ref.getId());
+                            si.putExtra(PaymentStatusActivity.KEY_STATUS, "registered");
+                            si.putExtra(PaymentStatusActivity.KEY_METHOD, "free");
+                            si.putExtra(PaymentStatusActivity.KEY_EVENT_NAME, tvEventTitle.getText().toString());
+                            si.putExtra(PaymentStatusActivity.KEY_AMOUNT, 0.0);
+                            startActivity(si);
+                            finish();
+                        }).addOnFailureListener(e2 -> {
+                            // fallback: show normal success screen
+                        });
+                        return;
+                    }
+
                     // Populate success layout
                     TextView tvDateSuccess  = findViewById(R.id.tvCardDateSuccess);
                     TextView tvTimeSuccess  = findViewById(R.id.tvCardTimeSuccess);

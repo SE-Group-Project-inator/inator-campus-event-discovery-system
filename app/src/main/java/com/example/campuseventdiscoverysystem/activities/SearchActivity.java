@@ -43,7 +43,7 @@ public class SearchActivity extends AppCompatActivity {
     private TextView tvPriceValue;
     private TextView tvSocietyValue;
     private LinearLayout btnSocietyFilter;
-    private TextView chipAll, chipSports, chipAcademic, chipCultural;
+    private TextView chipAll, chipSports, chipAcademic, chipCultural, chipGaming, chipTech, chipLiterary, chipWellness, chipFilums, chipSpades, chipLumun;
     private LinearLayout btnDateRange, btnPriceRange, btnSort;
     private LinearLayout navHome, navSearch, navTickets, navProfile;
 
@@ -78,6 +78,13 @@ public class SearchActivity extends AppCompatActivity {
         chipSports        = findViewById(R.id.chipSports);
         chipAcademic      = findViewById(R.id.chipAcademic);
         chipCultural      = findViewById(R.id.chipCultural);
+        chipGaming        = findViewById(R.id.chipGaming);
+        chipTech          = findViewById(R.id.chipTech);
+        chipLiterary      = findViewById(R.id.chipLiterary);
+        chipWellness      = findViewById(R.id.chipWellness);
+        chipFilums        = findViewById(R.id.chipFilums);
+        chipSpades        = findViewById(R.id.chipSpades);
+        chipLumun         = findViewById(R.id.chipLumun);
         btnDateRange      = findViewById(R.id.btnDateRange);
         btnPriceRange     = findViewById(R.id.btnPriceRange);
         btnSort           = findViewById(R.id.btnSort);
@@ -120,6 +127,13 @@ public class SearchActivity extends AppCompatActivity {
             updateChipSelection(chipCultural);
             filterAndDisplay(etSearch.getText().toString().trim());
         });
+        if (chipGaming != null) chipGaming.setOnClickListener(v -> { selectedCategory = "Gaming"; updateChipSelection(chipGaming); filterAndDisplay(etSearch.getText().toString().trim()); });
+        if (chipTech != null) chipTech.setOnClickListener(v -> { selectedCategory = "Tech"; updateChipSelection(chipTech); filterAndDisplay(etSearch.getText().toString().trim()); });
+        if (chipLiterary != null) chipLiterary.setOnClickListener(v -> { selectedCategory = "Literary"; updateChipSelection(chipLiterary); filterAndDisplay(etSearch.getText().toString().trim()); });
+        if (chipWellness != null) chipWellness.setOnClickListener(v -> { selectedCategory = "Wellness"; updateChipSelection(chipWellness); filterAndDisplay(etSearch.getText().toString().trim()); });
+        if (chipFilums != null) chipFilums.setOnClickListener(v -> { selectedCategory = "Filums"; updateChipSelection(chipFilums); filterAndDisplay(etSearch.getText().toString().trim()); });
+        if (chipSpades != null) chipSpades.setOnClickListener(v -> { selectedCategory = "Spades"; updateChipSelection(chipSpades); filterAndDisplay(etSearch.getText().toString().trim()); });
+        if (chipLumun != null) chipLumun.setOnClickListener(v -> { selectedCategory = "LUMUN"; updateChipSelection(chipLumun); filterAndDisplay(etSearch.getText().toString().trim()); });
 
         // FIX: tap once to pick a range; tap again while a range is active to clear it
         btnDateRange.setOnClickListener(v -> {
@@ -636,11 +650,11 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void updateChipSelection(TextView selected) {
-        TextView[] chips = {chipAll, chipSports, chipAcademic, chipCultural};
+        TextView[] chips = {chipAll, chipSports, chipAcademic, chipCultural, chipGaming, chipTech, chipLiterary, chipWellness, chipFilums, chipSpades, chipLumun};
         for (TextView chip : chips) {
-            chip.setBackgroundResource(chip == selected
-                    ? R.drawable.chip_active
-                    : R.drawable.chip_inactive);
+            if (chip == null) continue;
+            chip.setBackgroundResource(chip == selected ? R.drawable.chip_active : R.drawable.chip_inactive);
+            chip.setTextColor(chip == selected ? 0xFFFFFFFF : getResources().getColor(R.color.text_dark, getTheme()));
         }
     }
 }

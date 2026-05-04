@@ -128,6 +128,17 @@
                 android:visibility="gone"/>
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExportCalendar"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="📅 Export to Calendar"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="#6366F1"
+                app:cornerRadius="14dp"
+                android:layout_marginBottom="12dp"
+                android:textStyle="bold"/>
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnViewMyPayments"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"

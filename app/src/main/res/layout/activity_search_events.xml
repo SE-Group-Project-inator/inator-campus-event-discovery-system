@@ -88,58 +88,17 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/chipAll"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="All"
-                android:textSize="12sp"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:background="@drawable/chip_active"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:gravity="center"
-                android:layout_marginEnd="8dp"/>
-
-            <TextView
-                android:id="@+id/chipSports"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="Sports"
-                android:textSize="12sp"
-                android:textColor="@color/text_dark"
-                android:background="@drawable/chip_inactive"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:gravity="center"
-                android:layout_marginEnd="8dp"/>
-
-            <TextView
-                android:id="@+id/chipAcademic"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="Academic"
-                android:textSize="12sp"
-                android:textColor="@color/text_dark"
-                android:background="@drawable/chip_inactive"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:gravity="center"
-                android:layout_marginEnd="8dp"/>
-
-            <TextView
-                android:id="@+id/chipCultural"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="Cultural"
-                android:textSize="12sp"
-                android:textColor="@color/text_dark"
-                android:background="@drawable/chip_inactive"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:gravity="center"
-                android:layout_marginEnd="8dp"/>
+            <TextView android:id="@+id/chipAll" android:layout_width="wrap_content" android:layout_height="32dp" android:text="All" android:textSize="12sp" android:textColor="#FFFFFF" android:textStyle="bold" android:background="@drawable/chip_active" android:paddingStart="14dp" android:paddingEnd="14dp" android:gravity="center" android:layout_marginEnd="8dp"/>
+            <TextView android:id="@+id/chipSports" android:layout_width="wrap_content" android:layout_height="32dp" android:text="Sports" android:textSize="12sp" android:textColor="@color/text_dark" android:background="@drawable/chip_inactive" android:paddingStart="14dp" android:paddingEnd="14dp" android:gravity="center" android:layout_marginEnd="8dp"/>
+            <TextView android:id="@+id/chipAcademic" android:layout_width="wrap_content" android:layout_height="32dp" android:text="Academic" android:textSize="12sp" android:textColor="@color/text_dark" android:background="@drawable/chip_inactive" android:paddingStart="14dp" android:paddingEnd="14dp" android:gravity="center" android:layout_marginEnd="8dp"/>
+            <TextView android:id="@+id/chipCultural" android:layout_width="wrap_content" android:layout_height="32dp" android:text="Cultural" android:textSize="12sp" android:textColor="@color/text_dark" android:background="@drawable/chip_inactive" android:paddingStart="14dp" android:paddingEnd="14dp" android:gravity="center" android:layout_marginEnd="8dp"/>
+            <TextView android:id="@+id/chipGaming" android:layout_width="wrap_content" android:layout_height="32dp" android:text="Gaming" android:textSize="12sp" android:textColor="@color/text_dark" android:background="@drawable/chip_inactive" android:paddingStart="14dp" android:paddingEnd="14dp" android:gravity="center" android:layout_marginEnd="8dp"/>
+            <TextView android:id="@+id/chipTech" android:layout_width="wrap_content" android:layout_height="32dp" android:text="Tech" android:textSize="12sp" android:textColor="@color/text_dark" android:background="@drawable/chip_inactive" android:paddingStart="14dp" android:paddingEnd="14dp" android:gravity="center" android:layout_marginEnd="8dp"/>
+            <TextView android:id="@+id/chipLiterary" android:layout_width="wrap_content" android:layout_height="32dp" android:text="Literary" android:textSize="12sp" android:textColor="@color/text_dark" android:background="@drawable/chip_inactive" android:paddingStart="14dp" android:paddingEnd="14dp" android:gravity="center" android:layout_marginEnd="8dp"/>
+            <TextView android:id="@+id/chipWellness" android:layout_width="wrap_content" android:layout_height="32dp" android:text="Wellness" android:textSize="12sp" android:textColor="@color/text_dark" android:background="@drawable/chip_inactive" android:paddingStart="14dp" android:paddingEnd="14dp" android:gravity="center" android:layout_marginEnd="8dp"/>
+            <TextView android:id="@+id/chipFilums" android:layout_width="wrap_content" android:layout_height="32dp" android:text="Film" android:textSize="12sp" android:textColor="@color/text_dark" android:background="@drawable/chip_inactive" android:paddingStart="14dp" android:paddingEnd="14dp" android:gravity="center" android:layout_marginEnd="8dp"/>
+            <TextView android:id="@+id/chipSpades" android:layout_width="wrap_content" android:layout_height="32dp" android:text="Spades" android:textSize="12sp" android:textColor="@color/text_dark" android:background="@drawable/chip_inactive" android:paddingStart="14dp" android:paddingEnd="14dp" android:gravity="center" android:layout_marginEnd="8dp"/>
+            <TextView android:id="@+id/chipLumun" android:layout_width="wrap_content" android:layout_height="32dp" android:text="LUMUN" android:textSize="12sp" android:textColor="@color/text_dark" android:background="@drawable/chip_inactive" android:paddingStart="14dp" android:paddingEnd="14dp" android:gravity="center" android:layout_marginEnd="8dp"/>
 
         </LinearLayout>
     </HorizontalScrollView>

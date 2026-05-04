@@ -81,6 +81,11 @@ public class PaymentStatusActivity extends AppCompatActivity {
     }
 
     private void setupButtons() {
+        // Export to calendar
+        com.google.android.material.button.MaterialButton btnExportCalendar = findViewById(R.id.btnExportCalendar);
+        if (btnExportCalendar != null) {
+            btnExportCalendar.setOnClickListener(v -> exportToCalendar());
+        }
         if (btnGoHome != null) {
             btnGoHome.setOnClickListener(v -> {
                 startActivity(new Intent(this, StudentHomeActivity.class)
@@ -119,6 +124,13 @@ public class PaymentStatusActivity extends AppCompatActivity {
         if (cardRejection != null) cardRejection.setVisibility(View.GONE);
 
         switch (status) {
+            case "waitlisted":
+                setStatus("⏳ You're on the Waitlist",
+                        "You've been added to the waitlist. We'll notify you if a spot opens up!",
+                        R.color.admin_warning, R.color.admin_warning_bg);
+                showTicketsButton(false);
+                break;
+
             case Payment.STATUS_REGISTERED:
                 setStatus("🎉 You're Registered!",
                         "Your registration is confirmed. Please bring your student ID and pay cash at the entrance.",
@@ -190,6 +202,18 @@ public class PaymentStatusActivity extends AppCompatActivity {
             case Payment.METHOD_CASH:      return "Cash on Event";
             default:                       return method;
         }
+    }
+
+    private void exportToCalendar() {
+        String eventName = getIntent().getStringExtra(KEY_EVENT_NAME);
+        if (eventName == null) eventName = "Campus Event";
+        android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_INSERT)
+                .setData(android.provider.CalendarContract.Events.CONTENT_URI)
+                .putExtra(android.provider.CalendarContract.Events.TITLE, eventName)
+                .putExtra(android.provider.CalendarContract.EXTRA_EVENT_BEGIN_TIME, System.currentTimeMillis() + 3600000)
+                .putExtra(android.provider.CalendarContract.EXTRA_EVENT_END_TIME, System.currentTimeMillis() + 7200000);
+        if (intent.resolveActivity(getPackageManager()) != null) startActivity(intent);
+        else android.widget.Toast.makeText(this, "No calendar app found", android.widget.Toast.LENGTH_SHORT).show();
     }
 
     @Override

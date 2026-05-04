@@ -22,6 +22,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.campuseventdiscoverysystem.R;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.util.Base64;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -34,6 +40,8 @@ import java.util.Map;
 public class SignupActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
+    private String profilePicBase64 = null;
+    private ActivityResultLauncher<String> pickerLauncher;
     private FirebaseFirestore db;
     private String selectedRole;
 
@@ -47,6 +55,26 @@ public class SignupActivity extends AppCompatActivity {
         selectedRole = getIntent().getStringExtra("role");
         if (selectedRole == null) selectedRole = "student";
 
+        pickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+                    if (uri == null) return;
+                    try {
+                        android.widget.ImageView img = findViewById(R.id.imgSignupAvatar);
+                        if (img != null) img.setImageURI(uri);
+                        java.io.InputStream is = getContentResolver().openInputStream(uri);
+                        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+                        byte[] buf = new byte[4096]; int n;
+                        while ((n = is.read(buf)) != -1) baos.write(buf, 0, n);
+                        is.close();
+                        byte[] bytes = baos.toByteArray();
+                        if (bytes.length < 800_000) {
+                            profilePicBase64 = "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.DEFAULT);
+                        } else {
+                            android.widget.Toast.makeText(this, "Image too large, please pick a smaller one", android.widget.Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) { e.printStackTrace(); }
+                });
         applyRoleTheme();
         setupPasswordStrengthMeter();
         setupDropdowns();
@@ -247,6 +275,12 @@ public class SignupActivity extends AppCompatActivity {
         AutoCompleteTextView spinnerAdminDept    = findViewById(R.id.spinnerAdminDepartment);
 
         btnBack.setOnClickListener(v -> finish());
+
+        // Profile pic picker (student signup)
+        android.widget.ImageView imgAvatar = findViewById(R.id.imgSignupAvatar);
+        android.widget.TextView tvUpload   = findViewById(R.id.tvUploadPhoto);
+        if (imgAvatar != null) imgAvatar.setOnClickListener(v -> pickerLauncher.launch("image/*"));
+        if (tvUpload  != null) tvUpload.setOnClickListener(v  -> pickerLauncher.launch("image/*"));
         tvGoToLogin.setOnClickListener(v -> finish());
 
         btnSignUp.setOnClickListener(v -> {
@@ -336,6 +370,7 @@ public class SignupActivity extends AppCompatActivity {
                                     userMap.put("role",           selectedRole);
                                     userMap.put("createdAt",      Timestamp.now());
                                     userMap.put("eventsAttended", 0);
+                                    if (profilePicBase64 != null) userMap.put("profilePicture", profilePicBase64);
                                     userMap.put("following",      0);
                                     userMap.putAll(extraData);
 

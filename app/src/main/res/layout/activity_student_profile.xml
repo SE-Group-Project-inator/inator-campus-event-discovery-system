@@ -94,7 +94,16 @@
                         android:src="@drawable/ic_launcher_foreground"
                         android:background="@drawable/circle_avatar_bg"
                         android:padding="8dp"
-                        android:contentDescription="Avatar"/>
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:contentDescription="Tap to change photo"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="✏️ Edit Photo"
+                        android:textColor="#0D9488"
+                        android:textSize="11sp"
+                        android:layout_marginTop="4dp"/>
 
                     <TextView
                         android:id="@+id/tvStudentName"
@@ -174,15 +183,6 @@
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- QR Check In -->
-            <androidx.cardview.widget.CardView android:id="@+id/btnQRCheckIn" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginBottom="10dp" app:cardBackgroundColor="@color/white" app:cardCornerRadius="14dp" app:cardElevation="2dp">
-                <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent" android:paddingStart="16dp" android:paddingEnd="16dp">
-                    <ImageView android:layout_width="28dp" android:layout_height="28dp" android:layout_centerVertical="true" android:src="@android:drawable/ic_menu_camera" android:contentDescription="QR Code" app:tint="#0D9488"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginStart="44dp" android:text="QR Check-In" android:textColor="@color/text_dark" android:textSize="14sp" android:textStyle="bold"/>
-                    <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_centerVertical="true" android:layout_alignParentEnd="true" android:src="@drawable/ic_arrow_forward" android:contentDescription="Go" app:tint="#94A3B8"/>
-                </RelativeLayout>
-            </androidx.cardview.widget.CardView>
-
             <!-- My Payments -->
             <androidx.cardview.widget.CardView android:id="@+id/btnMyPayments" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginBottom="10dp" app:cardBackgroundColor="@color/white" app:cardCornerRadius="14dp" app:cardElevation="2dp">
                 <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent" android:paddingStart="16dp" android:paddingEnd="16dp">
@@ -194,25 +194,6 @@
 
         </LinearLayout>
     </ScrollView>
-
-    <!-- Privacy Settings fixed above navbar -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/btnPrivacySettings"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="4dp"
-        app:cardBackgroundColor="@color/white"
-        app:cardCornerRadius="14dp"
-        app:cardElevation="2dp">
-        <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent" android:paddingStart="16dp" android:paddingEnd="16dp">
-            <ImageView android:layout_width="28dp" android:layout_height="28dp" android:layout_centerVertical="true" android:src="@android:drawable/ic_menu_preferences" android:contentDescription="Privacy" app:tint="#0D9488"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true" android:layout_marginStart="44dp" android:text="Privacy Settings" android:textColor="@color/text_dark" android:textSize="14sp" android:textStyle="bold"/>
-            <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_centerVertical="true" android:layout_alignParentEnd="true" android:src="@drawable/ic_arrow_forward" android:contentDescription="Go" app:tint="#94A3B8"/>
-        </RelativeLayout>
-    </androidx.cardview.widget.CardView>
 
     <!-- Sign Out -->
     <androidx.cardview.widget.CardView
