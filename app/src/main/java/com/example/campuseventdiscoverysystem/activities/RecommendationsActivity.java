@@ -22,45 +22,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ============================================================
- * RecommendationsActivity (US-22: Personalized Recommendations)
- * ============================================================
+ * US-22 Personalised Recommendations — full-list screen.
  *
- * PURPOSE:
- * Displays AI-driven personalized event recommendations for students.
- *
- * ENTRY POINT:
- * - Accessed from "Picked for You" section in StudentHomeActivity
- *
- * FEATURES:
- * - Uses RecommendationEngine (core logic layer)
- * - Shows reason for recommendation (e.g. interests, follows, trending)
- * - Handles empty state UI
- * - Real-time Firestore-based recommendation generation
- *
- * USER ROLE:
- * Student
+ * Reachable from the "Picked for You" entry on StudentHomeActivity.
  */
 public class RecommendationsActivity extends AppCompatActivity {
 
-    /**
-     * Maximum number of recommendations displayed on screen.
-     */
     private static final int RECS_LIMIT = 10;
 
-    // RecyclerView for recommendation cards
     private RecyclerView rv;
-
-    // Text showing why recommendations were generated
-    private TextView tvReason;
-
-    // Empty state message (when no recommendations exist)
-    private TextView tvEmpty;
-
-    // Adapter binding Event data to RecyclerView
+    private TextView tvReason, tvEmpty;
     private RecommendationAdapter adapter;
-
-    // Local dataset for recommendations
     private final List<Event> events = new ArrayList<>();
 
     @Override
@@ -68,90 +40,99 @@ public class RecommendationsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recommendations);
 
-        // ---------------- UI BINDING ----------------
         rv = findViewById(R.id.rvRecommendations);
         tvReason = findViewById(R.id.tvReason);
         tvEmpty = findViewById(R.id.tvEmpty);
 
-        // Back button closes activity
         ImageButton btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
-        // RecyclerView setup
         adapter = new RecommendationAdapter(events);
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
 
-        // Load recommendations from engine
         loadRecommendations();
     }
 
-    /**
-     * ============================================================
-     * LOAD RECOMMENDATIONS
-     * ============================================================
-     *
-     * Flow:
-     * 1. Check if user is logged in
-     * 2. Initialize RecommendationEngine
-     * 3. Fetch personalized recommendations
-     * 4. Update UI accordingly
-     */
     private void loadRecommendations() {
-
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-        // If user not logged in, show message and stop execution
         if (user == null) {
             tvReason.setText("Please sign in to see recommendations.");
             return;
         }
 
-        // Initialize recommendation engine with Firestore + limit
-        RecommendationEngine engine = new RecommendationEngine(
-                FirebaseFirestore.getInstance(), RECS_LIMIT);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // Request recommendations asynchronously
-        engine.getRecommendations(user.getUid(),
-                new RecommendationEngine.Callback() {
-
-                    /**
-                     * Called when recommendations are successfully generated.
-                     */
-                    @Override
-                    public void onRecommendations(List<Event> recs, String reason) {
-
-                        // Show explanation of recommendation source
-                        tvReason.setText(reason);
-
-                        // Update dataset
-                        events.clear();
-                        events.addAll(recs);
-
-                        // Refresh RecyclerView
-                        adapter.notifyDataSetChanged();
-
-                        // Handle empty state UI
-                        boolean empty = recs.isEmpty();
-
-                        tvEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
-                        rv.setVisibility(empty ? View.GONE : View.VISIBLE);
+        // Step 1: get societies the user follows
+        db.collection("societyFollows")
+                .whereEqualTo("userId", user.getUid())
+                .get()
+                .addOnSuccessListener(followSnap -> {
+                    List<String> societyIds = new ArrayList<>();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : followSnap.getDocuments()) {
+                        String sid = doc.getString("societyId");
+                        if (sid != null) societyIds.add(sid);
                     }
 
-                    /**
-                     * Called when recommendation engine fails.
-                     */
-                    @Override
-                    public void onError(Exception e) {
-
-                        // Show fallback message
-                        tvReason.setText("Couldn't load recommendations.");
-
-                        // Debug error message (toast)
-                        Toast.makeText(RecommendationsActivity.this,
-                                e.getMessage(),
-                                Toast.LENGTH_LONG).show();
+                    if (societyIds.isEmpty()) {
+                        // Fallback to engine if not following anyone
+                        loadViaEngine(user.getUid(), db);
+                        return;
                     }
-                });
+
+                    // Step 2: fetch active upcoming events from those societies
+                    // whereIn supports up to 30 values
+                    List<String> ids = societyIds.size() > 10 ? societyIds.subList(0, 10) : societyIds;
+                    com.google.firebase.Timestamp now = new com.google.firebase.Timestamp(new java.util.Date());
+
+                    db.collection("events")
+                            .whereEqualTo("status", "active")
+                            .whereIn("societyId", ids)
+                            .get()
+                            .addOnSuccessListener(eventsSnap -> {
+                                events.clear();
+                                for (com.google.firebase.firestore.QueryDocumentSnapshot doc : eventsSnap) {
+                                    com.google.firebase.Timestamp date = doc.getTimestamp("date");
+                                    if (date == null || date.compareTo(now) < 0) continue;
+                                    Event e = doc.toObject(Event.class);
+                                    if (e != null) { e.setId(doc.getId()); events.add(e); }
+                                }
+                                // Sort by date
+                                events.sort((a, b) -> {
+                                    if (a.getDate() == null || b.getDate() == null) return 0;
+                                    return a.getDate().compareTo(b.getDate());
+                                });
+
+                                tvReason.setText("From societies you follow");
+                                adapter.notifyDataSetChanged();
+                                boolean empty = events.isEmpty();
+                                tvEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
+                                rv.setVisibility(empty ? View.GONE : View.VISIBLE);
+                            })
+                            .addOnFailureListener(e -> loadViaEngine(user.getUid(), db));
+                })
+                .addOnFailureListener(e -> loadViaEngine(user.getUid(), db));
+    }
+
+    private void loadViaEngine(String uid, FirebaseFirestore db) {
+        RecommendationEngine engine = new RecommendationEngine(db, RECS_LIMIT);
+        engine.getRecommendations(uid, new RecommendationEngine.Callback() {
+            @Override
+            public void onRecommendations(List<Event> recs, String reason) {
+                tvReason.setText(reason);
+                events.clear();
+                events.addAll(recs);
+                adapter.notifyDataSetChanged();
+                boolean empty = recs.isEmpty();
+                tvEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
+                rv.setVisibility(empty ? View.GONE : View.VISIBLE);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                tvReason.setText("Couldn't load recommendations.");
+                Toast.makeText(RecommendationsActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

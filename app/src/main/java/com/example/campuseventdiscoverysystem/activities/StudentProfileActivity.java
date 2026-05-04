@@ -10,12 +10,6 @@ import android.widget.Toast;
 import androidx.cardview.widget.CardView;
 
 import com.example.campuseventdiscoverysystem.R;
-import android.graphics.Bitmap;
-import android.net.Uri;
-import android.util.Base64;
-import android.widget.ImageView;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -33,13 +27,11 @@ public class StudentProfileActivity extends BaseSessionActivity {
     private TextView tvStudentName, tvStudentEmail;
     private TextView tvEventsAttended, tvThisMonth, tvFollowing;
     private CardView btnAttendanceHistory, btnMySocieties, btnMyPayments;
-    private CardView btnSignOut;
+    private CardView btnQRCheckIn, btnSignOut, btnPrivacySettings;
     private ImageButton btnNotification;
     private LinearLayout navHome, navSearch, navTickets, navProfile;
 
     private FirebaseAuth mAuth;
-    private ImageView imgAvatar;
-    private ActivityResultLauncher<String> pickerLauncher;
     private FirebaseFirestore db;
 
     @Override
@@ -48,12 +40,6 @@ public class StudentProfileActivity extends BaseSessionActivity {
         setContentView(R.layout.activity_student_profile);
 
         mAuth = FirebaseAuth.getInstance();
-        pickerLauncher = registerForActivityResult(
-                new ActivityResultContracts.GetContent(),
-                uri -> {
-                    if (uri == null) return;
-                    uploadProfilePic(uri);
-                });
         db    = FirebaseFirestore.getInstance();
 
         tvStudentName        = findViewById(R.id.tvStudentName);
@@ -71,8 +57,6 @@ public class StudentProfileActivity extends BaseSessionActivity {
         navTickets           = findViewById(R.id.navTickets);
         navProfile           = findViewById(R.id.navProfile);
 
-        imgAvatar = findViewById(R.id.imgAvatar);
-        if (imgAvatar != null) imgAvatar.setOnClickListener(v -> pickerLauncher.launch("image/*"));
         loadStudentProfile();
         loadAttendedCount();
         loadThisMonthCount();
@@ -135,15 +119,6 @@ public class StudentProfileActivity extends BaseSessionActivity {
                         String email = doc.getString("email");
                         if (name  != null) tvStudentName.setText(name);
                         if (email != null) tvStudentEmail.setText(email);
-                        String pic = doc.getString("profilePicture");
-                        if (pic != null && pic.startsWith("data:image") && imgAvatar != null) {
-                            try {
-                                String clean = pic.substring(pic.indexOf(",") + 1);
-                                byte[] decoded = Base64.decode(clean, Base64.DEFAULT);
-                                android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
-                                imgAvatar.setImageBitmap(bmp);
-                            } catch (Exception ignored) {}
-                        }
                     }
                 })
                 .addOnFailureListener(e ->
@@ -156,26 +131,6 @@ public class StudentProfileActivity extends BaseSessionActivity {
      * Counts confirmed RSVPs where the event date has already passed.
      * Matches EventHistoryActivity's definition of "attended" exactly.
      */
-    private void uploadProfilePic(Uri uri) {
-        com.google.firebase.auth.FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) return;
-        try {
-            java.io.InputStream is = getContentResolver().openInputStream(uri);
-            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-            byte[] buf = new byte[4096]; int n;
-            while ((n = is.read(buf)) != -1) baos.write(buf, 0, n);
-            is.close();
-            byte[] bytes = baos.toByteArray();
-            if (bytes.length > 800_000) { Toast.makeText(this, "Image too large", Toast.LENGTH_SHORT).show(); return; }
-            String b64 = "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.DEFAULT);
-            db.collection("users").document(user.getUid()).update("profilePicture", b64)
-                    .addOnSuccessListener(a -> {
-                        Toast.makeText(this, "Profile picture updated!", Toast.LENGTH_SHORT).show();
-                        if (imgAvatar != null) imgAvatar.setImageURI(uri);
-                    });
-        } catch (Exception e) { Toast.makeText(this, "Error processing image", Toast.LENGTH_SHORT).show(); }
-    }
-
     private void loadAttendedCount() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) return;
@@ -277,6 +232,12 @@ public class StudentProfileActivity extends BaseSessionActivity {
     }
 
     private void loadFollowingCount() {
-        tvFollowing.setText("0");
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) { tvFollowing.setText("0"); return; }
+        db.collection("societyFollows")
+                .whereEqualTo("userId", user.getUid())
+                .get()
+                .addOnSuccessListener(query -> tvFollowing.setText(String.valueOf(query.size())))
+                .addOnFailureListener(e -> tvFollowing.setText("0"));
     }
 }
